@@ -83,10 +83,10 @@ export const TOOLS = [
         minSeverity: { type: 'number', minimum: 0, maximum: 10, description: 'Keep only signals with severity_score >= this (0-10).' },
         escalating: { type: 'boolean', description: 'Keep only signals whose escalation_trend is "escalating".' },
         sort: { type: 'string', enum: ['severity', 'recent', 'sources'], description: "Result ordering. Omit for the feed's default ranking." },
-        updatedSince: { type: 'string', description: 'Differential fetch: only signals (re)enriched at/after this ISO 8601 timestamp. Ignores the date window.' },
+        updatedSince: { type: 'string', description: 'Differential fetch: only signals (re)enriched at/after this ISO 8601 timestamp. Ignores the date window. Response signals carry last_updated_at.' },
         createdSince: { type: 'string', description: 'Differential fetch: only signals first enriched at/after this ISO 8601 timestamp.' },
-        observability: { type: 'string', enum: ['observable', 'not-observable'], description: 'Keep only signals with this satellite observability (intelligence.satellite_observability).' },
-        openData: { type: 'string', enum: ['sufficient', 'commercial-recommended', 'not-applicable'], description: 'Keep only signals with this open-data sufficiency (intelligence.open_data_sufficiency).' },
+        observability: { type: 'string', enum: ['observable', 'not-observable'], description: 'Keep only signals with this satellite observability — whether a physical mark is imageable at all (intelligence.satellite_observability).' },
+        openData: { type: 'string', enum: ['sufficient', 'commercial-recommended', 'not-applicable'], description: 'Keep only signals with this open-data sufficiency — free imagery is enough vs commercial tasking recommended (intelligence.open_data_sufficiency).' },
         minInformationGain: { type: 'number', minimum: 0, maximum: 1, description: 'Keep only signals whose intelligence.expected_information_gain >= this (0-1).' },
         responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-signal field detail. "concise" (default) returns key decision + GEOINT fields; "detailed" returns the full Signal object.' },
       },
@@ -125,7 +125,7 @@ export const TOOLS = [
         categories: { type: 'array', items: { type: 'string', enum: [...DELTA_CATEGORIES] }, description: 'Restrict to these categories. Omit for all.' },
         precision: { type: 'number', minimum: 0.1, maximum: 5, description: 'Grid cell size in decimal degrees. Defaults to 1.' },
         minSeverity: { type: 'number', minimum: 0, maximum: 10, description: 'Keep only points with severity_score >= this.' },
-        limit: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_LIMIT, description: 'Max source points to bin. Defaults to 500.' },
+        limit: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_LIMIT, description: 'Max source points sampled before grid-binning — NOT the number of cells returned. Defaults to 500 (the max). Lower values sample fewer events and fragment clusters (each cell trends toward count 1), so leave at the default for a representative density map.' },
       },
     },
   },
@@ -149,7 +149,8 @@ export const TOOLS = [
     description:
       "Check the calling key's remaining token balance and plan capabilities — monthly allocation, " +
       'tokens used this period, tokens remaining, and whether the plan includes AI tools over the API ' +
-      '(assess_signal / ask_analyst). Use this to pre-flight a metered call. Free of token charges.',
+      '(assess_signal / ask_analyst). Use this to pre-flight a metered call: decide whether enough ' +
+      'balance is left before spending. Free of token charges.',
     inputSchema: { type: 'object', properties: {} },
   },
   {
@@ -213,9 +214,10 @@ export const TOOLS = [
 
 export const RESOURCES = [
   { uri: 'brief://latest', name: 'Daily World Brief (latest)', description: 'The most recent AI-synthesized Daily World Brief (JSON). Free.', mimeType: 'application/json' },
-  { uri: 'signals://schema', name: 'Signal object schema', description: 'JSON Schema of the public Signal shape returned by query_signals.', mimeType: 'application/json' },
+  { uri: 'signals://schema', name: 'Signal object schema', description: 'JSON Schema of the public Signal shape returned by query_signals / /api/v1/signals.', mimeType: 'application/json' },
   { uri: 'usage://current', name: 'API usage & quota', description: 'Remaining token balance and plan capabilities for the calling key. Free.', mimeType: 'application/json' },
   { uri: 'imagery://collections', name: 'Imagery collections', description: 'The satellite catalog collections searchable via search_imagery. Free.', mimeType: 'application/json' },
+  { uri: 'status://current', name: 'Data freshness & pipeline status', description: 'How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free.', mimeType: 'application/json' },
 ] as const;
 
 export const RESOURCE_TEMPLATES = [
@@ -230,7 +232,7 @@ export const PROMPTS = [
   },
   {
     name: 'assess-top-signal',
-    description: 'Find the highest-severity recent signal in an area/category and run an RS assessment (Pro).',
+    description: 'Find the highest-severity recent signal in an area/category and run an RS assessment.',
     arguments: [
       { name: 'bbox', description: 'Bounding box "minLon,minLat,maxLon,maxLat" (optional).', required: false },
       { name: 'category', description: 'Category filter (optional).', required: false },
