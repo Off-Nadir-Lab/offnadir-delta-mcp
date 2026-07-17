@@ -182,7 +182,10 @@ export const TOOLS = [
       'Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, ' +
       'recommended sensors, and a collection window. `eventId` is the `id` from query_signals. ' +
       "Costs 5 (quick) or 15 (deep) tokens, charged to the key owner's balance. A prior assessment for " +
-      'the same signal is cached (no re-charge). The exact charge and remaining balance are in meta.tokens.',
+      'the same signal is cached (no re-charge). The exact charge and remaining balance are in meta.tokens. ' +
+      'Signals that are not satellite-observable (observability:"not-observable" — e.g. political statements ' +
+      'or broad-area events with no imageable physical mark) are rejected BEFORE any charge, so pre-filter ' +
+      'with query_signals observability:"observable" to spend only where imagery helps.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -198,14 +201,17 @@ export const TOOLS = [
     description:
       'Ask the Delta Analyst an OSINT/GEOINT question. Runs an agentic multi-step analysis over the ' +
       'signal corpus and returns a structured brief (summary, findings with collection recommendations, ' +
-      'assessment, citations). Costs 5–45 tokens (usage-based; the exact charge and remaining balance are ' +
-      'in meta.tokens). Synchronous — may take up to ~120s. Not cached — each call is charged.',
+      'assessment, citations). Costs 5–45 tokens (usage-based, metered by the compute the question actually ' +
+      'uses; charged ONCE, when the run completes; the exact charge and remaining balance are in meta.tokens). ' +
+      'Hybrid async: waits up to ~95s and returns the brief; a longer run returns {status:"processing", job_id} ' +
+      'while finishing in the background — call again with the SAME idempotencyKey to fetch the finished brief ' +
+      'without a second charge.',
     inputSchema: {
       type: 'object',
       properties: {
         question: { type: 'string', description: 'The analytic question (≤ 500 chars).' },
         bbox: { ...BBOX, description: 'Optional focus bounding box [minLon, minLat, maxLon, maxLat] (WGS84).' },
-        idempotencyKey: { type: 'string', description: 'Optional at-most-once key. Retry with the SAME key after a timeout to avoid a second charge; use a fresh key to ask again.' },
+        idempotencyKey: { type: 'string', description: 'Optional at-most-once key. Re-sending the SAME key resolves to the SAME run: if it finished you get the brief with NO second charge; if it is still running you get its processing status. Strongly recommended — it makes a timeout recoverable. Use a fresh key to ask again.' },
       },
       required: ['question'],
     },
