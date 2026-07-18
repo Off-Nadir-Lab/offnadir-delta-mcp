@@ -82,7 +82,7 @@ export const TOOLS = [
         cursor: { type: 'string', description: "Opaque pagination cursor from a previous response's meta.next_cursor." },
         minSeverity: { type: 'number', minimum: 0, maximum: 10, description: 'Keep only signals with severity_score >= this (0-10).' },
         escalating: { type: 'boolean', description: 'Keep only signals whose escalation_trend is "escalating".' },
-        sort: { type: 'string', enum: ['severity', 'recent', 'sources'], description: "Result ordering. Omit for the feed's default ranking." },
+        sort: { type: 'string', enum: ['severity', 'recent', 'sources', 'geoint'], description: "Result ordering. Omit for the feed's default ranking. \"geoint\" ranks by GEOINT spatial-collection value so imageable, high-value events rise and non-observable news noise sinks." },
         updatedSince: { type: 'string', description: 'Differential fetch: only signals (re)enriched at/after this ISO 8601 timestamp. Ignores the date window. Response signals carry last_updated_at.' },
         createdSince: { type: 'string', description: 'Differential fetch: only signals first enriched at/after this ISO 8601 timestamp.' },
         observability: { type: 'string', enum: ['observable', 'not-observable'], description: 'Keep only signals with this satellite observability — whether a physical mark is imageable at all (intelligence.satellite_observability).' },
