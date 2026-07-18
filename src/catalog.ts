@@ -203,9 +203,10 @@ export const TOOLS = [
       'signal corpus and returns a structured brief (summary, findings with collection recommendations, ' +
       'assessment, citations). Costs 5–45 tokens (usage-based, metered by the compute the question actually ' +
       'uses; charged ONCE, when the run completes; the exact charge and remaining balance are in meta.tokens). ' +
-      'Hybrid async: waits up to ~95s and returns the brief; a longer run returns {status:"processing", job_id} ' +
-      'while finishing in the background — call again with the SAME idempotencyKey to fetch the finished brief ' +
-      'without a second charge.',
+      'Durable async: the run is ENQUEUED and returns {status:"processing", job_id} immediately, then completes ' +
+      'in a background worker (typically within a couple of minutes) — so it is never lost to a client timeout. ' +
+      'Fetch the finished brief by calling get_analyst_job with the job_id, or ask_analyst again with the SAME ' +
+      'idempotencyKey (no second charge).',
     inputSchema: {
       type: 'object',
       properties: {
@@ -214,6 +215,22 @@ export const TOOLS = [
         idempotencyKey: { type: 'string', description: 'Optional at-most-once key. Re-sending the SAME key resolves to the SAME run: if it finished you get the brief with NO second charge; if it is still running you get its processing status. Strongly recommended — it makes a timeout recoverable. Use a fresh key to ask again.' },
       },
       required: ['question'],
+    },
+  },
+  {
+    name: 'get_analyst_job',
+    annotations: { readOnlyHint: true },
+    description:
+      'Fetch the status and result of an ask_analyst run by job_id. Returns status "processing" (still ' +
+      'running — poll again in ~10-20s), "done" (with the finished brief and meta.tokens), or "error". ' +
+      'Free of token charges — the run itself is charged once on completion. A job is visible only to the ' +
+      'API key owner that created it. Use this to retrieve the brief after ask_analyst returned a job_id.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        job_id: { type: 'string', description: 'The job_id returned by ask_analyst.' },
+      },
+      required: ['job_id'],
     },
   },
 ] as const;
