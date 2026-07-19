@@ -88,6 +88,7 @@ export const TOOLS = [
         observability: { type: 'string', enum: ['observable', 'not-observable'], description: 'Keep only signals with this satellite observability — whether a physical mark is imageable at all (intelligence.satellite_observability).' },
         openData: { type: 'string', enum: ['sufficient', 'commercial-recommended', 'not-applicable'], description: 'Keep only signals with this open-data sufficiency — free imagery is enough vs commercial tasking recommended (intelligence.open_data_sufficiency).' },
         minInformationGain: { type: 'number', minimum: 0, maximum: 1, description: 'Keep only signals whose intelligence.expected_information_gain >= this (0-1).' },
+        taskableOnly: { type: 'boolean', description: 'Keep only signals whose coordinate is search_ready (taskable) — drops country centroids, ADM1 mismatches, reporting-dateline fallbacks and unresolved fixes (intelligence.geo_validation.search_ready). Use when the results feed automated imagery tasking.' },
         responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-signal field detail. "concise" (default) returns key decision + GEOINT fields (incl. collection_priority, the corrected 0-100 ranking value); "detailed" returns the full Signal object.' },
       },
     },
@@ -98,7 +99,9 @@ export const TOOLS = [
     description:
       'Aggregate statistics over the signal corpus — total event count plus per-category and per-day ' +
       'breakdown (trend) for a bounding box and date window. Cheaper than query_signals (returns ' +
-      'roll-ups, not rows). Costs 1 token(s) per call.',
+      'roll-ups, not rows). NOTE the unit: `total` counts article-deduped events (meta.population = ' +
+      'article_deduped_events), which is NOT cluster-collapsed, so it is >= the query_signals count ' +
+      'for the same window. Costs 1 token(s) per call.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -114,8 +117,11 @@ export const TOOLS = [
     annotations: { readOnlyHint: true },
     description:
       'Geographic hotspots — signal density grid-binned into cells, ranked by event count, each with ' +
-      'peak severity and the categories present. Use to find WHERE activity is concentrating. ' +
-      'Costs 1 token(s) per call.',
+      'peak severity, the categories present, and up to 5 representative event_ids (trace a cell back ' +
+      'to its signals). Use to find WHERE activity is concentrating. NOTE the unit: cells count ' +
+      'satellite-observable points (meta.population = rs_observable_points); meta reports ' +
+      'source_point_count and dropped_by_geo_count / dropped_by_severity_count so point_count is fully ' +
+      'accountable. Costs 1 token(s) per call.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -159,8 +165,9 @@ export const TOOLS = [
     description:
       'Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and ' +
       'date window — the natural follow-up to a signal (find imagery over the event location). Returns ' +
-      'minimal scene metadata (id, datetime, footprint, cloud cover, platform, preview) — no imagery ' +
-      'bytes. Costs 2 token(s) per call.',
+      'scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog ' +
+      'link) — no imagery bytes. Pass eventDate to classify each scene pre/post/same-day and get ' +
+      'pre/post bracketing + SAR change-pair readiness in meta. Costs 2 token(s) per call.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -168,9 +175,10 @@ export const TOOLS = [
         collection: { type: 'string', enum: [...IMAGERY_COLLECTIONS], description: 'Catalog collection. Defaults to sentinel-2-l2a.' },
         date: { type: 'string', description: 'Window end date, YYYY-MM-DD (UTC). Defaults to today.' },
         days: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_DAYS, description: 'Window length in days. Defaults to 7.' },
+        eventDate: { type: 'string', description: 'Event date, YYYY-MM-DD (UTC). When set, each scene is tagged timing=pre/post/same_day and meta reports has_pre_baseline / has_post / bracketing_available; for sentinel-1-grd it also reports sar_change_pair_ready + orbit_note (a valid change pair needs a pre and post scene on the same relative orbit).' },
         cloudCoverMax: { type: 'number', minimum: 0, maximum: 100, description: 'Sentinel-2 only: max cloud cover %.' },
         limit: { type: 'integer', minimum: 1, maximum: 100, description: 'Max scenes to return. Defaults to 25.' },
-        responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-scene field detail. "concise" (default) or "detailed" (adds footprint, constellation, polarizations).' },
+        responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-scene field detail. "concise" (default) returns id, collection, datetime, timing, cloud_cover, platform, orbit_state, relative_orbit, instrument_mode, product_type, coverage_ratio, stac_item_url, preview. "detailed" adds footprint bbox/geometry, constellation, polarizations, absolute_orbit, incidence_angle, and non-signed asset hrefs.' },
       },
       required: ['bbox'],
     },
@@ -181,6 +189,10 @@ export const TOOLS = [
     description:
       'Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, ' +
       'recommended sensors, and a collection window. `eventId` is the `id` from query_signals. ' +
+      'The result also carries a deterministic `context` block (event id/date, normalized target, AOI ' +
+      'bbox, observability + quality verdict, and an `imagery_handoff` giving the exact bbox + event_date ' +
+      'to pass to search_imagery for REAL pre/post scene candidates) — turning the assessment into an ' +
+      'actionable collection plan. ' +
       "Costs 5 (quick) or 15 (deep) tokens, charged to the key owner's balance. A prior assessment for " +
       'the same signal is cached (no re-charge). The exact charge and remaining balance are in meta.tokens. ' +
       'Signals that are not satellite-observable (observability:"not-observable" — e.g. political statements ' +
