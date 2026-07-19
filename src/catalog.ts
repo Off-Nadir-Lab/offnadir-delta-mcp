@@ -167,8 +167,12 @@ export const TOOLS = [
       'Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and ' +
       'date window — the natural follow-up to a signal (find imagery over the event location). Returns ' +
       'scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog ' +
-      'link) — no imagery bytes. Pass eventDate to classify each scene pre/post/same-day and get ' +
-      'pre/post bracketing + SAR change-pair readiness in meta. Costs 2 token(s) per call.',
+      'link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown ' +
+      '(a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post ' +
+      'bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi ' +
+      '[minLon,minLat,maxLon,maxLat] to get each scene\'s target_relation (covers_event_point / ' +
+      'intersects_event_aoi / usable_for_event) — so a scene that only clips the wide bbox is not mistaken ' +
+      'for covering the event. Costs 2 token(s) per call.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -176,10 +180,13 @@ export const TOOLS = [
         collection: { type: 'string', enum: [...IMAGERY_COLLECTIONS], description: 'Catalog collection. Defaults to sentinel-2-l2a.' },
         date: { type: 'string', description: 'Window end date, YYYY-MM-DD (UTC). Defaults to today.' },
         days: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_DAYS, description: 'Window length in days. Defaults to 7.' },
-        eventDate: { type: 'string', description: 'Event date, YYYY-MM-DD (UTC). When set, each scene is tagged timing=pre/post/same_day and meta reports has_pre_baseline / has_post / bracketing_available; for sentinel-1-grd it also reports sar_change_pair_ready + orbit_note (a valid change pair needs a pre and post scene on the same relative orbit).' },
+        eventDate: { type: 'string', description: 'Event date, YYYY-MM-DD (UTC). When set, each scene is tagged timing=pre/post/same_day_unknown and the search window is widened to the canonical pre/post span, so meta reports has_pre_baseline / has_post / bracketing_available / window_status; for sentinel-1-grd it also reports sar_pair_status (ready | not_ready | indeterminate_event_time) + orbit_note.' },
+        eventPoint: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 2, description: 'Event point [lon, lat] (WGS84). When set, each scene reports target_relation.covers_event_point / usable_for_event so a scene that only clips the wide bbox is not presented as covering the event.' },
+        eventAoi: { type: 'array', items: { type: 'number' }, minItems: 4, maxItems: 4, description: 'Event AOI bbox [minLon, minLat, maxLon, maxLat] (WGS84). Drives target_relation.intersects_event_aoi / event_aoi_coverage_ratio.' },
+        eventTimestamp: { type: 'string', description: 'Full event timestamp (ISO 8601) when known — promotes same-day scenes from same_day_unknown to pre/post by time.' },
         cloudCoverMax: { type: 'number', minimum: 0, maximum: 100, description: 'Sentinel-2 only: max cloud cover %.' },
         limit: { type: 'integer', minimum: 1, maximum: 100, description: 'Max scenes to return. Defaults to 25.' },
-        responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-scene field detail. "concise" (default) returns id, collection, datetime, timing, cloud_cover, platform, orbit_state, relative_orbit, instrument_mode, product_type, coverage_ratio, stac_item_url, preview. "detailed" adds footprint bbox/geometry, constellation, polarizations, absolute_orbit, incidence_angle, and non-signed asset hrefs.' },
+        responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-scene field detail. "concise" (default) returns id, collection, datetime, timing, cloud_cover, platform, orbit_state, relative_orbit, instrument_mode, product_type, coverage_ratio, covers_event_point, usable_for_event, stac_item_url, preview. "detailed" adds the full footprint bbox/geometry, the complete target_relation, constellation, polarizations, absolute_orbit, incidence_angle, and non-signed asset hrefs.' },
       },
       required: ['bbox'],
     },
