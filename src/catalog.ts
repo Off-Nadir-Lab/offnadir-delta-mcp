@@ -222,7 +222,7 @@ export const TOOLS = [
     description:
       'Ask the Delta Analyst an OSINT/GEOINT question. Runs an agentic multi-step analysis over the ' +
       'signal corpus and returns a structured brief (summary, findings with collection recommendations, ' +
-      'assessment, citations). Costs 5–45 tokens (usage-based, metered by the compute the question actually ' +
+      'assessment, citations). Costs 5–123 tokens (usage-based, metered by the compute the question actually ' +
       'uses; charged ONCE, when the run completes; the exact charge and remaining balance are in meta.tokens). ' +
       'Durable async: the run is ENQUEUED and returns {status:"processing", job_id} immediately, then completes ' +
       'in a background worker — so it is never lost to a client timeout. Timing: most questions finish in ~30–90s; ' +

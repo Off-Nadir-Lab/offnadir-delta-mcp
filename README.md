@@ -19,7 +19,7 @@ It exposes the same tool surface as the hosted server and **forwards every call*
 | `get_world_brief` | **free** | The AI-synthesized Daily World Brief. |
 | `get_usage` | **free** | Your remaining token balance and plan capabilities. |
 | `assess_signal` | 5 / 15 | AI remote-sensing assessment for one signal (quick / deep). |
-| `ask_analyst` | 5–45 | Agentic OSINT/GEOINT Q&A returning a structured, cited brief. |
+| `ask_analyst` | 5–123 | Agentic OSINT/GEOINT Q&A returning a structured, cited brief. |
 
 Plus resources (`brief://latest`, `brief://{date}`, `signals://schema`, `usage://current`, `imagery://collections`) and prompts (`daily-situation-briefing`, `assess-top-signal`, `aoi-watch`, `market-exposure-check`).
 
