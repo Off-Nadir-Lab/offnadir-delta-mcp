@@ -58,7 +58,30 @@ const BBOX = {
 export const TOOLS = [
   {
     name: 'query_signals',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "signals": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "meta",
+        "signals"
+      ]
+    },
     description:
       'Query geolocated world event signals (Delta Signals: geopolitical, security, disaster, and ' +
       'infrastructure events distilled from global news media, AI-enriched with severity/GEOINT scores ' +
@@ -97,7 +120,27 @@ export const TOOLS = [
   },
   {
     name: 'query_stats',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "stats": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "meta",
+        "stats"
+      ]
+    },
     description:
       'Aggregate statistics over the signal corpus — total event count plus per-category and per-day ' +
       'breakdown (trend) for a bounding box and date window. Cheaper than query_signals (returns ' +
@@ -116,7 +159,30 @@ export const TOOLS = [
   },
   {
     name: 'query_hotspots',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "hotspots": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "meta",
+        "hotspots"
+      ]
+    },
     description:
       'Geographic hotspots — signal density grid-binned into cells, ranked by event count, each with ' +
       'peak severity, the categories present, and up to 5 representative event_ids (trace a cell back ' +
@@ -139,7 +205,22 @@ export const TOOLS = [
   },
   {
     name: 'get_world_brief',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":true,"openWorldHint":false,"destructiveHint":false},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "brief": {
+          "type": "object"
+        },
+        "freshness": {
+          "type": "object",
+          "description": "Freshness of the returned brief: brief_date, generated_at, age_hours, freshness (operational|delayed|degraded), is_stale, note."
+        }
+      },
+      "required": [
+        "brief"
+      ]
+    },
     description:
       "Fetch the Daily World Brief — an AI-synthesized OSINT/GEOINT digest of the previous UTC day's " +
       'worldwide event signals (headline, executive summary, top developments with why-it-matters and ' +
@@ -153,7 +234,50 @@ export const TOOLS = [
   },
   {
     name: 'get_usage',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":true,"openWorldHint":false,"destructiveHint":false},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "tokens": {
+          "type": "object",
+          "properties": {
+            "allocation": {
+              "type": "number",
+              "description": "Monthly token allocation for the plan."
+            },
+            "used": {
+              "type": "number",
+              "description": "Tokens used in the current period."
+            },
+            "remaining": {
+              "type": "number",
+              "description": "Tokens remaining this period."
+            }
+          },
+          "required": [
+            "allocation",
+            "used",
+            "remaining"
+          ]
+        },
+        "plan": {
+          "type": "object",
+          "properties": {
+            "api_llm_access": {
+              "type": "boolean",
+              "description": "Whether AI tools over the API are enabled."
+            }
+          },
+          "required": [
+            "api_llm_access"
+          ]
+        }
+      },
+      "required": [
+        "tokens",
+        "plan"
+      ]
+    },
     description:
       "Check the calling key's remaining token balance and plan capabilities — monthly allocation, " +
       'tokens used this period, tokens remaining, and whether the plan includes AI tools over the API ' +
@@ -163,7 +287,30 @@ export const TOOLS = [
   },
   {
     name: 'search_imagery',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "scenes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "meta",
+        "scenes"
+      ]
+    },
     description:
       'Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and ' +
       'date window — the natural follow-up to a signal (find imagery over the event location). Returns ' +
@@ -171,9 +318,10 @@ export const TOOLS = [
       'link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown ' +
       '(a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post ' +
       'bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi ' +
-      '[minLon,minLat,maxLon,maxLat] to get each scene\'s target_relation (covers_event_point / ' +
-      'intersects_event_aoi / usable_for_event) — so a scene that only clips the wide bbox is not mistaken ' +
-      'for covering the event. Costs 2 token(s) per call.',
+      '[minLon,minLat,maxLon,maxLat] to get each scene\'s target_relation (covers_event_geometry = pure ' +
+      'geometry gate; usable_for_analysis additionally requires acceptable cloud for optical, so a ' +
+      '99%-cloud scene is geometry-covering but not analysis-usable) — so a scene that only clips the wide ' +
+      'bbox is not mistaken for covering the event. Costs 2 token(s) per call.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -194,7 +342,33 @@ export const TOOLS = [
   },
   {
     name: 'assess_signal',
-    annotations: { readOnlyHint: true, idempotentHint: true },
+    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true,"idempotentHint":true},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "cached": {
+          "type": "boolean"
+        },
+        "model": {
+          "type": "string"
+        },
+        "content": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        }
+      },
+      "required": [
+        "kind",
+        "content",
+        "meta"
+      ]
+    },
     description:
       'Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, ' +
       'recommended sensors, and a collection window. `eventId` is the `id` from query_signals. ' +
@@ -218,7 +392,30 @@ export const TOOLS = [
   },
   {
     name: 'ask_analyst',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "brief": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "status": {
+          "type": "string",
+          "description": "\"processing\" when the run is still going (poll get_analyst_job or re-send the same idempotencyKey)."
+        },
+        "job_id": {
+          "type": "string",
+          "description": "Id of the analyst run — pass to get_analyst_job (also at GET /api/v1/analyst/{job_id})."
+        },
+        "message": {
+          "type": "string"
+        }
+      }
+    },
     description:
       'Ask the Delta Analyst an OSINT/GEOINT question. Runs an agentic multi-step analysis over the ' +
       'signal corpus and returns a structured brief (summary, findings with collection recommendations, ' +
@@ -241,7 +438,39 @@ export const TOOLS = [
   },
   {
     name: 'get_analyst_job',
-    annotations: { readOnlyHint: true },
+    annotations: {"readOnlyHint":true,"openWorldHint":false,"destructiveHint":false},
+    outputSchema: {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "description": "\"processing\" | \"done\" | \"error\"."
+        },
+        "brief": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "error": {
+          "type": "string",
+          "description": "Failure reason when status is \"error\"."
+        },
+        "message": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      }
+    },
     description:
       'Fetch the status and result of an ask_analyst run by job_id. Returns status "processing" (still ' +
       'running — poll again in ~10-20s), "done" (with the finished brief and meta.tokens), or "error". ' +
