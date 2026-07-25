@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.4.0.
+// Generated for Off-Nadir Delta MCP 1.5.0.
 
 export const TOOLS = [
   {
@@ -1136,6 +1136,162 @@ export const TOOLS = [
       "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
+    }
+  },
+  {
+    "name": "create_standing_order",
+    "description": "Put an area under CONTINUOUS watch: save a question plus a bounding box and Delta re-answers it on a schedule, notifying only when the answer actually changed. Creating one is FREE. Each time it fires it runs ask_analyst and is metered like any Analyst question, so the cost is per CHANGE, not per check: a deterministic pass over the corpus decides whether anything new crossed the reporting bar, and quiet periods never invoke the model or charge anything. Returns projected_monthly_tokens_max — the ceiling if every single check fired — so the cost is visible before committing. Cadence and how many orders you may hold are set by your plan; the error says which limit you hit. Use it when the question is \"tell me when this changes\" rather than \"what is happening right now\".",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Area to watch, [west, south, east, north] in WGS84. Required — a global standing order would fire on everything."
+        },
+        "question": {
+          "type": "string",
+          "description": "The question to re-answer each time something changes. Omit for \"what changed in this area, and what does it mean?\"."
+        },
+        "name": {
+          "type": "string",
+          "description": "Label for the order (default \"Standing order\")."
+        },
+        "cadence": {
+          "type": "string",
+          "enum": [
+            "daily",
+            "weekly",
+            "monthly"
+          ],
+          "description": "How often to CHECK (checking is free; only a fired check costs tokens). Default weekly. Faster cadences may require a higher plan."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Restrict the watch to these Delta categories (kinetic, armed_conflict, maritime, natural_disaster, infrastructure, aviation, humanitarian, protest, diplomacy)."
+        },
+        "min_geoint_score": {
+          "type": "number",
+          "description": "Reporting bar (0-10, default 6). Raise it to be told only about major developments."
+        },
+        "min_new_events": {
+          "type": "number",
+          "description": "How many new qualifying events must appear before a run is triggered (default 1)."
+        },
+        "notify_email": {
+          "type": "boolean",
+          "description": "Email the result when it fires (default true). Results are readable via list_standing_orders either way."
+        }
+      },
+      "required": [
+        "bbox"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "order": {
+          "type": "object"
+        },
+        "projected_monthly_tokens_max": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "order"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "list_standing_orders",
+    "description": "List the standing orders on this key, with each one’s cadence, watched area, when it last checked, when it last actually fired, and how many consecutive checks found nothing (quiet_checks — a high number means the watch is not earning its place). Also returns how many orders the plan allows and how many remain. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "limits": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "orders"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "delete_standing_order",
+    "description": "Delete a standing order by id, or pause/resume it instead by passing active=false/true. Pausing keeps the order and its history; deleting removes both. Neither costs tokens. A paused order still counts against the plan limit, so delete rather than pause when you want the slot back.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "description": "The id returned by create_standing_order or list_standing_orders."
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Omit to DELETE. Pass false to pause and true to resume, keeping the order."
+        }
+      },
+      "required": [
+        "order_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "deleted": {
+          "type": "string"
+        },
+        "order": {
+          "type": "object"
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true,
+      "idempotentHint": true
     }
   }
 ] as const;
