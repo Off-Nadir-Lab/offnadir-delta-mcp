@@ -1,6 +1,10 @@
 /**
  * Static introspection catalog for the Off-Nadir Delta stdio MCP proxy.
  *
+ * AUTO-GENERATED from the Off-Nadir Delta contract registry
+ * (src/lib/api/toolRegistry.ts + src/lib/api/mcpResources.ts) by
+ * scripts/gen-contract-artifacts.mjs — DO NOT EDIT BY HAND.
+ *
  * These tool / resource / prompt definitions mirror the live remote MCP server
  * (https://offnadir-delta.com/api/v1/mcp) so that `tools/list`, `resources/list`,
  * and `prompts/list` answer instantly and WITHOUT credentials — this is what
@@ -8,58 +12,162 @@
  *
  * Actual `tools/call` / `resources/read` / `prompts/get` requests are forwarded
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
- *
- * Keep in sync with the source of truth: src/app/api/v1/mcp/route.ts in the
- * Off-Nadir Delta app. Token costs and enums are inlined from that surface.
  */
 
-const DELTA_CATEGORIES = [
-  'kinetic',
-  'armed_conflict',
-  'maritime',
-  'natural_disaster',
-  'infrastructure',
-  'aviation',
-  'humanitarian',
-  'protest',
-  'diplomacy',
-  'other',
-] as const;
-
-const MARKET_IMPACTS = [
-  'oil',
-  'natural_gas',
-  'grain',
-  'shipping',
-  'defense',
-  'metals',
-  'semiconductors',
-  'fx',
-  'equities',
-] as const;
-
-const IMAGERY_COLLECTIONS = [
-  'sentinel-1-grd',
-  'sentinel-1-rtc',
-  'sentinel-2-l2a',
-  'OPERA_L2_RTC-S1_V1',
-] as const;
-
-const SIGNALS_MAX_DAYS = 30;
-const SIGNALS_MAX_LIMIT = 500;
-
-const BBOX = {
-  type: 'array',
-  items: { type: 'number' },
-  minItems: 4,
-  maxItems: 4,
-} as const;
+// Generated for Off-Nadir Delta MCP 1.3.28.
 
 export const TOOLS = [
   {
-    name: 'query_signals',
-    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
-    outputSchema: {
+    "name": "query_signals",
+    "description": "Query geolocated world event signals (Delta Signals: geopolitical, security, disaster, and infrastructure events distilled from global news media, AI-enriched with severity/GEOINT scores and satellite-collection recommendations). Filter by bounding box, date window, and category. Costs 3 token(s) per call, charged to the API key owner's balance.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide."
+        },
+        "date": {
+          "type": "string",
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+        },
+        "days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Window length in days ending on `date`. Defaults to 1."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "kinetic",
+              "armed_conflict",
+              "maritime",
+              "natural_disaster",
+              "infrastructure",
+              "aviation",
+              "humanitarian",
+              "protest",
+              "diplomacy",
+              "other"
+            ]
+          },
+          "description": "Restrict to these categories. Omit for all."
+        },
+        "markets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "oil",
+              "natural_gas",
+              "grain",
+              "shipping",
+              "defense",
+              "metals",
+              "semiconductors",
+              "fx",
+              "equities"
+            ]
+          },
+          "description": "Restrict to signals AI-tagged as exposing these financial markets via a direct physical/supply channel (informational only, not investment advice). Omit for all."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Maximum rows per page. Defaults to 100."
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Opaque pagination cursor from a previous response's meta.next_cursor."
+        },
+        "minSeverity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Keep only signals with severity_score >= this (0-10)."
+        },
+        "escalating": {
+          "type": "boolean",
+          "description": "Keep only signals whose escalation_trend is \"escalating\"."
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "severity",
+            "recent",
+            "sources",
+            "geoint"
+          ],
+          "description": "Result ordering. Omit for the feed's default ranking. \"geoint\" ranks by the continuous GEOINT collection priority (intelligence.collection_priority) — an imageability gate times tasking value (severity, urgency, information gain, corroboration, escalation, market) — so imageable, decision-relevant events (e.g. a high-severity escalating strike) rise and non-observable news noise sinks. This is NOT the saturated geoint_score."
+        },
+        "updatedSince": {
+          "type": "string",
+          "description": "Differential fetch: only signals (re)enriched at/after this ISO 8601 timestamp. Ignores the date window. Response signals carry last_updated_at."
+        },
+        "createdSince": {
+          "type": "string",
+          "description": "Differential fetch: only signals first enriched at/after this ISO 8601 timestamp."
+        },
+        "observability": {
+          "type": "string",
+          "enum": [
+            "observable",
+            "not-observable"
+          ],
+          "description": "Keep only signals with this satellite observability — whether a physical mark is imageable at all (intelligence.satellite_observability)."
+        },
+        "observabilityStatus": {
+          "type": "string",
+          "enum": [
+            "observable",
+            "not_observable",
+            "insufficient_detail"
+          ],
+          "description": "3-state observability filter. Unlike `observability` (binary), this exposes `insufficient_detail` — signals where imageability is unknown (no RS enrichment yet, unresolved location, or an Impossible verdict rescued because the event reads kinetic). `not_observable` = a considered \"nothing to image\"; neither bucket leaks insufficient_detail."
+        },
+        "openData": {
+          "type": "string",
+          "enum": [
+            "sufficient",
+            "commercial-recommended",
+            "not-applicable"
+          ],
+          "description": "Keep only signals with this open-data sufficiency — free imagery is enough vs commercial tasking recommended (intelligence.open_data_sufficiency)."
+        },
+        "minInformationGain": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Keep only signals whose intelligence.expected_information_gain >= this (0-1)."
+        },
+        "taskableOnly": {
+          "type": "boolean",
+          "description": "Keep only signals whose coordinate is search_ready — GEO-READY ONLY: drops country centroids, ADM1 mismatches, reporting-dateline fallbacks and unresolved fixes (intelligence.geo_validation.search_ready). It does NOT imply observable or quality-passed, so not-observable / insufficient-detail / quality-failed signals can still appear. For automated imagery tasking use collectionReadyOnly (or combine with observability:\"observable\")."
+        },
+        "collectionReadyOnly": {
+          "type": "boolean",
+          "description": "STRICT tasking-candidate filter: search_ready AND observability=observable AND quality.status!=failed AND a concrete collection plan (rs_target + rs_reason present) AND an event coordinate. The safe input set for automated imagery tasking — a superset of every gate taskableOnly alone does not check."
+        },
+        "responseFormat": {
+          "type": "string",
+          "enum": [
+            "concise",
+            "detailed"
+          ],
+          "description": "Per-signal field detail. \"concise\" (default) returns the key decision + GEOINT fields (id, date, category, title, location, lat/lng, severity/geoint scores, collection_priority, escalation, market, rs_level/rs_sensor, observability, observability_status, verification_status, geo_status, search_ready, article_count, independent_source_count, information_gain) — cheaper to scan. \"detailed\" returns the full Signal object (shape per the signals://schema resource)."
+        }
+      }
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "meta": {
@@ -82,46 +190,59 @@ export const TOOLS = [
         "signals"
       ]
     },
-    description:
-      'Query geolocated world event signals (Delta Signals: geopolitical, security, disaster, and ' +
-      'infrastructure events distilled from global news media, AI-enriched with severity/GEOINT scores ' +
-      'and satellite-collection recommendations). Filter by bounding box, date window, and category. ' +
-      "Costs 3 token(s) per call, charged to the API key owner's balance.",
-    inputSchema: {
-      type: 'object',
-      properties: {
-        bbox: { ...BBOX, description: 'Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide.' },
-        date: { type: 'string', description: 'Window end date, YYYY-MM-DD (UTC). Defaults to today.' },
-        days: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_DAYS, description: 'Window length in days ending on `date`. Defaults to 1.' },
-        categories: { type: 'array', items: { type: 'string', enum: [...DELTA_CATEGORIES] }, description: 'Restrict to these categories. Omit for all.' },
-        markets: {
-          type: 'array',
-          items: { type: 'string', enum: [...MARKET_IMPACTS] },
-          description:
-            'Restrict to signals AI-tagged as exposing these financial markets via a direct ' +
-            'physical/supply channel (informational only, not investment advice). Omit for all.',
-        },
-        limit: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_LIMIT, description: 'Maximum rows per page. Defaults to 100.' },
-        cursor: { type: 'string', description: "Opaque pagination cursor from a previous response's meta.next_cursor." },
-        minSeverity: { type: 'number', minimum: 0, maximum: 10, description: 'Keep only signals with severity_score >= this (0-10).' },
-        escalating: { type: 'boolean', description: 'Keep only signals whose escalation_trend is "escalating".' },
-        sort: { type: 'string', enum: ['severity', 'recent', 'sources', 'geoint'], description: "Result ordering. Omit for the feed's default ranking. \"geoint\" ranks by the continuous GEOINT collection priority (intelligence.collection_priority) — an imageability gate times tasking value (severity, urgency, information gain, corroboration, escalation, market) — so imageable, decision-relevant events (e.g. a high-severity escalating strike) rise and non-observable news noise sinks. This is NOT the saturated geoint_score." },
-        updatedSince: { type: 'string', description: 'Differential fetch: only signals (re)enriched at/after this ISO 8601 timestamp. Ignores the date window. Response signals carry last_updated_at.' },
-        createdSince: { type: 'string', description: 'Differential fetch: only signals first enriched at/after this ISO 8601 timestamp.' },
-        observability: { type: 'string', enum: ['observable', 'not-observable'], description: 'Keep only signals with this satellite observability — whether a physical mark is imageable at all (intelligence.satellite_observability).' },
-        observabilityStatus: { type: 'string', enum: ['observable', 'not_observable', 'insufficient_detail'], description: '3-state observability filter. Unlike `observability` (binary), this exposes `insufficient_detail` — signals where imageability is unknown (no RS enrichment yet, unresolved location, or an Impossible verdict rescued because the event reads kinetic). `not_observable` = a considered "nothing to image"; neither bucket leaks insufficient_detail.' },
-        openData: { type: 'string', enum: ['sufficient', 'commercial-recommended', 'not-applicable'], description: 'Keep only signals with this open-data sufficiency — free imagery is enough vs commercial tasking recommended (intelligence.open_data_sufficiency).' },
-        minInformationGain: { type: 'number', minimum: 0, maximum: 1, description: 'Keep only signals whose intelligence.expected_information_gain >= this (0-1).' },
-        taskableOnly: { type: 'boolean', description: 'Keep only signals whose coordinate is search_ready — GEO-READY ONLY: drops country centroids, ADM1 mismatches, reporting-dateline fallbacks and unresolved fixes (intelligence.geo_validation.search_ready). It does NOT imply observable or quality-passed, so not-observable / insufficient-detail / quality-failed signals can still appear. For automated imagery tasking use collectionReadyOnly (or combine with observability:"observable").' },
-        collectionReadyOnly: { type: 'boolean', description: 'STRICT tasking-candidate filter: search_ready AND observability=observable AND quality.status!=failed AND a concrete collection plan (rs_target + rs_reason present) AND an event coordinate. The safe input set for automated imagery tasking — a superset of every gate taskableOnly alone does not check.' },
-        responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-signal field detail. "concise" (default) returns key decision + GEOINT fields (incl. collection_priority, the corrected 0-100 ranking value); "detailed" returns the full Signal object.' },
-      },
-    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
   },
   {
-    name: 'query_stats',
-    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
-    outputSchema: {
+    "name": "query_stats",
+    "description": "Aggregate statistics over the signal corpus — total event count plus per-category and per-day breakdown (trend) for a bounding box and date window. Cheaper than query_signals (returns roll-ups, not rows). NOTE the unit: `total` counts article-deduped events (meta.population = article_deduped_events), which is NOT cluster-collapsed, so it is >= the query_signals count for the same window. Costs 1 token(s) per call.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide."
+        },
+        "date": {
+          "type": "string",
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+        },
+        "days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Window length in days. Defaults to 1."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "kinetic",
+              "armed_conflict",
+              "maritime",
+              "natural_disaster",
+              "infrastructure",
+              "aviation",
+              "humanitarian",
+              "protest",
+              "diplomacy",
+              "other"
+            ]
+          },
+          "description": "Restrict to these categories. Omit for all."
+        }
+      }
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "meta": {
@@ -141,26 +262,77 @@ export const TOOLS = [
         "stats"
       ]
     },
-    description:
-      'Aggregate statistics over the signal corpus — total event count plus per-category and per-day ' +
-      'breakdown (trend) for a bounding box and date window. Cheaper than query_signals (returns ' +
-      'roll-ups, not rows). NOTE the unit: `total` counts article-deduped events (meta.population = ' +
-      'article_deduped_events), which is NOT cluster-collapsed, so it is >= the query_signals count ' +
-      'for the same window. Costs 1 token(s) per call.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        bbox: { ...BBOX, description: 'Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide.' },
-        date: { type: 'string', description: 'Window end date, YYYY-MM-DD (UTC). Defaults to today.' },
-        days: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_DAYS, description: 'Window length in days. Defaults to 1.' },
-        categories: { type: 'array', items: { type: 'string', enum: [...DELTA_CATEGORIES] }, description: 'Restrict to these categories. Omit for all.' },
-      },
-    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
   },
   {
-    name: 'query_hotspots',
-    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
-    outputSchema: {
+    "name": "query_hotspots",
+    "description": "Geographic hotspots — signal density grid-binned into cells, ranked by event count, each with peak severity, the categories present, and up to 5 representative event_ids (trace a cell back to its signals). Use to find WHERE activity is concentrating. NOTE the unit: cells count satellite-observable points (meta.population = rs_observable_points); meta reports source_point_count and dropped_by_geo_count / dropped_by_severity_count so point_count is fully accountable. Costs 1 token(s) per call.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide."
+        },
+        "date": {
+          "type": "string",
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+        },
+        "days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Window length in days. Defaults to 1."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "kinetic",
+              "armed_conflict",
+              "maritime",
+              "natural_disaster",
+              "infrastructure",
+              "aviation",
+              "humanitarian",
+              "protest",
+              "diplomacy",
+              "other"
+            ]
+          },
+          "description": "Restrict to these categories. Omit for all."
+        },
+        "precision": {
+          "type": "number",
+          "minimum": 0.1,
+          "maximum": 5,
+          "description": "Grid cell size in decimal degrees. Defaults to 1."
+        },
+        "minSeverity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Keep only points with severity_score >= this."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Max source points sampled before grid-binning — NOT the number of cells returned. Defaults to 500 (the max). Lower values sample fewer events and fragment clusters (each cell trends toward count 1), so leave at the default for a representative density map."
+        }
+      }
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "meta": {
@@ -183,30 +355,25 @@ export const TOOLS = [
         "hotspots"
       ]
     },
-    description:
-      'Geographic hotspots — signal density grid-binned into cells, ranked by event count, each with ' +
-      'peak severity, the categories present, and up to 5 representative event_ids (trace a cell back ' +
-      'to its signals). Use to find WHERE activity is concentrating. NOTE the unit: cells count ' +
-      'satellite-observable points (meta.population = rs_observable_points); meta reports ' +
-      'source_point_count and dropped_by_geo_count / dropped_by_severity_count so point_count is fully ' +
-      'accountable. Costs 1 token(s) per call.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        bbox: { ...BBOX, description: 'Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide.' },
-        date: { type: 'string', description: 'Window end date, YYYY-MM-DD (UTC). Defaults to today.' },
-        days: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_DAYS, description: 'Window length in days. Defaults to 1.' },
-        categories: { type: 'array', items: { type: 'string', enum: [...DELTA_CATEGORIES] }, description: 'Restrict to these categories. Omit for all.' },
-        precision: { type: 'number', minimum: 0.1, maximum: 5, description: 'Grid cell size in decimal degrees. Defaults to 1.' },
-        minSeverity: { type: 'number', minimum: 0, maximum: 10, description: 'Keep only points with severity_score >= this.' },
-        limit: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_LIMIT, description: 'Max source points sampled before grid-binning — NOT the number of cells returned. Defaults to 500 (the max). Lower values sample fewer events and fragment clusters (each cell trends toward count 1), so leave at the default for a representative density map.' },
-      },
-    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
   },
   {
-    name: 'get_world_brief',
-    annotations: {"readOnlyHint":true,"openWorldHint":false,"destructiveHint":false},
-    outputSchema: {
+    "name": "get_world_brief",
+    "description": "Fetch the Daily World Brief — an AI-synthesized OSINT/GEOINT digest of the previous UTC day's worldwide event signals (headline, executive summary, top developments with why-it-matters and what-to-watch, per-theme roll-up, ranked signals). Free of token charges. The result includes a freshness object (brief_date, age_hours, is_stale) — if is_stale is true this is the latest published brief and a newer day is not yet available, so relay it as possibly out of date.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "Brief date, YYYY-MM-DD (UTC). Defaults to the latest available."
+        }
+      }
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "brief": {
@@ -221,21 +388,20 @@ export const TOOLS = [
         "brief"
       ]
     },
-    description:
-      "Fetch the Daily World Brief — an AI-synthesized OSINT/GEOINT digest of the previous UTC day's " +
-      'worldwide event signals (headline, executive summary, top developments with why-it-matters and ' +
-      'what-to-watch, per-theme roll-up, ranked signals). Free of token charges.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        date: { type: 'string', description: 'Brief date, YYYY-MM-DD (UTC). Defaults to the latest available.' },
-      },
-    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
   },
   {
-    name: 'get_usage',
-    annotations: {"readOnlyHint":true,"openWorldHint":false,"destructiveHint":false},
-    outputSchema: {
+    "name": "get_usage",
+    "description": "Check the calling key's remaining token balance and plan capabilities — monthly allocation, tokens used this period, tokens remaining, and whether the plan includes AI tools over the API (assess_signal / ask_analyst). Use this to pre-flight a metered call: decide whether enough balance is left before spending. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {}
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "tokens": {
@@ -278,17 +444,99 @@ export const TOOLS = [
         "plan"
       ]
     },
-    description:
-      "Check the calling key's remaining token balance and plan capabilities — monthly allocation, " +
-      'tokens used this period, tokens remaining, and whether the plan includes AI tools over the API ' +
-      '(assess_signal / ask_analyst). Use this to pre-flight a metered call: decide whether enough ' +
-      'balance is left before spending. Free of token charges.',
-    inputSchema: { type: 'object', properties: {} },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
   },
   {
-    name: 'search_imagery',
-    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
-    outputSchema: {
+    "name": "search_imagery",
+    "description": "Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and date window — the natural follow-up to a signal (find imagery over the event location). Returns scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown (a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi [minLon,minLat,maxLon,maxLat] to get each scene's target_relation (covers_event_geometry = pure geometry gate; usable_for_analysis additionally requires acceptable cloud for optical, so a 99%-cloud scene is geometry-covering but not analysis-usable) — so a scene that only clips the wide bbox is not mistaken for covering the event. Costs 2 token(s) per call.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Required."
+        },
+        "collection": {
+          "type": "string",
+          "enum": [
+            "sentinel-1-grd",
+            "sentinel-1-rtc",
+            "sentinel-2-l2a",
+            "OPERA_L2_RTC-S1_V1"
+          ],
+          "description": "Catalog collection. Defaults to sentinel-2-l2a."
+        },
+        "date": {
+          "type": "string",
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+        },
+        "days": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Window length in days. Defaults to 7."
+        },
+        "eventDate": {
+          "type": "string",
+          "description": "Event date, YYYY-MM-DD (UTC). When set, each scene is tagged timing=pre/post/same_day_unknown and the search window is widened to the canonical pre/post span, so meta reports has_pre_baseline / has_post / bracketing_available / window_status; for sentinel-1-grd it also reports sar_pair_status (ready | not_ready | indeterminate_event_time) + orbit_note."
+        },
+        "eventPoint": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Event point [lon, lat] (WGS84). When set, each scene reports target_relation.covers_event_point / usable_for_event so a scene that only clips the wide bbox is not presented as covering the event."
+        },
+        "eventAoi": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Event AOI bbox [minLon, minLat, maxLon, maxLat] (WGS84). Drives target_relation.intersects_event_aoi / event_aoi_coverage_ratio."
+        },
+        "eventTimestamp": {
+          "type": "string",
+          "description": "Full event timestamp (ISO 8601) when known — promotes same-day scenes from same_day_unknown to pre/post by time."
+        },
+        "cloudCoverMax": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Sentinel-2 only: max cloud cover %."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Max scenes to return. Defaults to 25."
+        },
+        "responseFormat": {
+          "type": "string",
+          "enum": [
+            "concise",
+            "detailed"
+          ],
+          "description": "Per-scene field detail. \"concise\" (default) returns id, collection, datetime, timing, cloud_cover, platform, orbit_state, relative_orbit, instrument_mode, product_type, coverage_ratio, covers_event_point, usable_for_event, stac_item_url, preview. \"detailed\" adds the full footprint bbox/geometry, the complete target_relation, constellation, polarizations, absolute_orbit, incidence_angle, and non-signed asset hrefs."
+        }
+      },
+      "required": [
+        "bbox"
+      ]
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "meta": {
@@ -311,39 +559,36 @@ export const TOOLS = [
         "scenes"
       ]
     },
-    description:
-      'Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and ' +
-      'date window — the natural follow-up to a signal (find imagery over the event location). Returns ' +
-      'scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog ' +
-      'link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown ' +
-      '(a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post ' +
-      'bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi ' +
-      '[minLon,minLat,maxLon,maxLat] to get each scene\'s target_relation (covers_event_geometry = pure ' +
-      'geometry gate; usable_for_analysis additionally requires acceptable cloud for optical, so a ' +
-      '99%-cloud scene is geometry-covering but not analysis-usable) — so a scene that only clips the wide ' +
-      'bbox is not mistaken for covering the event. Costs 2 token(s) per call.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        bbox: { ...BBOX, description: 'Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Required.' },
-        collection: { type: 'string', enum: [...IMAGERY_COLLECTIONS], description: 'Catalog collection. Defaults to sentinel-2-l2a.' },
-        date: { type: 'string', description: 'Window end date, YYYY-MM-DD (UTC). Defaults to today.' },
-        days: { type: 'integer', minimum: 1, maximum: SIGNALS_MAX_DAYS, description: 'Window length in days. Defaults to 7.' },
-        eventDate: { type: 'string', description: 'Event date, YYYY-MM-DD (UTC). When set, each scene is tagged timing=pre/post/same_day_unknown and the search window is widened to the canonical pre/post span, so meta reports has_pre_baseline / has_post / bracketing_available / window_status; for sentinel-1-grd it also reports sar_pair_status (ready | not_ready | indeterminate_event_time) + orbit_note.' },
-        eventPoint: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 2, description: 'Event point [lon, lat] (WGS84). When set, each scene reports target_relation.covers_event_point / usable_for_event so a scene that only clips the wide bbox is not presented as covering the event.' },
-        eventAoi: { type: 'array', items: { type: 'number' }, minItems: 4, maxItems: 4, description: 'Event AOI bbox [minLon, minLat, maxLon, maxLat] (WGS84). Drives target_relation.intersects_event_aoi / event_aoi_coverage_ratio.' },
-        eventTimestamp: { type: 'string', description: 'Full event timestamp (ISO 8601) when known — promotes same-day scenes from same_day_unknown to pre/post by time.' },
-        cloudCoverMax: { type: 'number', minimum: 0, maximum: 100, description: 'Sentinel-2 only: max cloud cover %.' },
-        limit: { type: 'integer', minimum: 1, maximum: 100, description: 'Max scenes to return. Defaults to 25.' },
-        responseFormat: { type: 'string', enum: ['concise', 'detailed'], description: 'Per-scene field detail. "concise" (default) returns id, collection, datetime, timing, cloud_cover, platform, orbit_state, relative_orbit, instrument_mode, product_type, coverage_ratio, covers_event_point, usable_for_event, stac_item_url, preview. "detailed" adds the full footprint bbox/geometry, the complete target_relation, constellation, polarizations, absolute_orbit, incidence_angle, and non-signed asset hrefs.' },
-      },
-      required: ['bbox'],
-    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
   },
   {
-    name: 'assess_signal',
-    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true,"idempotentHint":true},
-    outputSchema: {
+    "name": "assess_signal",
+    "description": "Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, recommended sensors, and a collection window. `eventId` is the `id` from query_signals. The result also carries a deterministic `context` block (event id/date, normalized target, AOI bbox, observability + quality verdict, and an `imagery_handoff` giving the exact bbox + event_date to pass to search_imagery for REAL pre/post scene candidates) — turning the assessment into an actionable collection plan. Costs 5 (quick) or 15 (deep) tokens, charged to the key owner's balance. A prior assessment for the same signal is cached (no re-charge). The exact charge and remaining balance are in the result meta.tokens. Signals that are not satellite-observable (observability:\"not-observable\" — e.g. political statements or broad-area events with no imageable physical mark) are rejected BEFORE any charge, so pre-filter with query_signals observability:\"observable\" to spend only where imagery helps.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "eventId": {
+          "type": "integer",
+          "description": "Signal id (global_event_id) from query_signals."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "quick",
+            "deep"
+          ],
+          "description": "Assessment depth. Defaults to quick."
+        }
+      },
+      "required": [
+        "eventId"
+      ]
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "kind": {
@@ -369,31 +614,42 @@ export const TOOLS = [
         "meta"
       ]
     },
-    description:
-      'Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, ' +
-      'recommended sensors, and a collection window. `eventId` is the `id` from query_signals. ' +
-      'The result also carries a deterministic `context` block (event id/date, normalized target, AOI ' +
-      'bbox, observability + quality verdict, and an `imagery_handoff` giving the exact bbox + event_date ' +
-      'to pass to search_imagery for REAL pre/post scene candidates) — turning the assessment into an ' +
-      'actionable collection plan. ' +
-      "Costs 5 (quick) or 15 (deep) tokens, charged to the key owner's balance. A prior assessment for " +
-      'the same signal is cached (no re-charge). The exact charge and remaining balance are in meta.tokens. ' +
-      'Signals that are not satellite-observable (observability:"not-observable" — e.g. political statements ' +
-      'or broad-area events with no imageable physical mark) are rejected BEFORE any charge, so pre-filter ' +
-      'with query_signals observability:"observable" to spend only where imagery helps.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        eventId: { type: 'integer', description: 'Signal id (global_event_id) from query_signals.' },
-        kind: { type: 'string', enum: ['quick', 'deep'], description: 'Assessment depth. Defaults to quick.' },
-      },
-      required: ['eventId'],
-    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true,
+      "idempotentHint": true
+    }
   },
   {
-    name: 'ask_analyst',
-    annotations: {"readOnlyHint":false,"openWorldHint":false,"destructiveHint":true},
-    outputSchema: {
+    "name": "ask_analyst",
+    "description": "Ask the Delta Analyst an OSINT/GEOINT question. Runs an agentic multi-step analysis over the signal corpus and returns a structured brief (summary, findings with collection recommendations, assessment, citations). Costs 5–123 tokens (usage-based, metered by the compute the question actually uses; charged ONCE, when the run completes; the exact charge and remaining balance are in the result meta.tokens). Durable async: the run is ENQUEUED and returns {status:\"processing\", job_id} immediately, then completes in a background worker — so it is never lost to a client timeout. Timing: most questions finish in ~30–90s; a complex brief (satellite-imagery lookups or many sources) can take 2–3 minutes. Fetch the finished brief by calling get_analyst_job with the job_id (poll every ~10–20s), or ask_analyst again with the SAME idempotencyKey (no second charge).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The analytic question (≤ 500 chars)."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Optional focus bounding box [minLon, minLat, maxLon, maxLat] (WGS84)."
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "description": "Optional at-most-once key. Re-sending the SAME key resolves to the SAME run: if it finished you get the brief with NO second charge; if it is still running you get its processing status. Strongly recommended — it makes a timeout recoverable. Use a fresh key to ask again."
+        }
+      },
+      "required": [
+        "question"
+      ]
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "brief": {
@@ -411,35 +667,95 @@ export const TOOLS = [
           "type": "string",
           "description": "Id of the analyst run — pass to get_analyst_job (also at GET /api/v1/analyst/{job_id})."
         },
+        "progress": {
+          "type": "object",
+          "description": "Pipeline progress while the job is processing. completed_steps reaches total_steps ONLY when status is \"done\".",
+          "properties": {
+            "stage": {
+              "type": "string",
+              "enum": [
+                "queued",
+                "retrieval",
+                "imagery_reconciliation",
+                "synthesis",
+                "final_validation",
+                "persistence",
+                "complete"
+              ],
+              "description": "Current pipeline stage."
+            },
+            "completed_steps": {
+              "type": "integer",
+              "description": "Completed pipeline steps (0-6)."
+            },
+            "total_steps": {
+              "type": "integer",
+              "description": "Always 6."
+            },
+            "agent_progress": {
+              "type": "object",
+              "description": "The model's internal step counter (an upper bound on the steps a run may take), or null.",
+              "properties": {
+                "completed_steps": {
+                  "type": "integer"
+                },
+                "total_steps": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "required": [
+            "stage",
+            "completed_steps",
+            "total_steps"
+          ]
+        },
+        "estimated_charge": {
+          "type": "object",
+          "description": "The charge ceiling quoted for THIS run, fixed at enqueue (統合改善指示書 P1-1). The completed run reports the actual charge in meta.tokens.charged and echoes this ceiling as meta.tokens.maximum_promised; actual never exceeds it.",
+          "properties": {
+            "minimum": {
+              "type": "integer",
+              "description": "Floor charge for any completed run."
+            },
+            "maximum": {
+              "type": "integer",
+              "description": "Ceiling this run may be charged."
+            }
+          },
+          "required": [
+            "minimum",
+            "maximum"
+          ]
+        },
         "message": {
           "type": "string"
         }
       }
     },
-    description:
-      'Ask the Delta Analyst an OSINT/GEOINT question. Runs an agentic multi-step analysis over the ' +
-      'signal corpus and returns a structured brief (summary, findings with collection recommendations, ' +
-      'assessment, citations). Costs 5–123 tokens (usage-based, metered by the compute the question actually ' +
-      'uses; charged ONCE, when the run completes; the exact charge and remaining balance are in meta.tokens). ' +
-      'Durable async: the run is ENQUEUED and returns {status:"processing", job_id} immediately, then completes ' +
-      'in a background worker — so it is never lost to a client timeout. Timing: most questions finish in ~30–90s; ' +
-      'a complex brief (satellite-imagery lookups or many sources) can take 2–3 minutes. Fetch the finished brief ' +
-      'by calling get_analyst_job with the job_id (poll every ~10–20s), or ask_analyst again with the SAME ' +
-      'idempotencyKey (no second charge).',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        question: { type: 'string', description: 'The analytic question (≤ 500 chars).' },
-        bbox: { ...BBOX, description: 'Optional focus bounding box [minLon, minLat, maxLon, maxLat] (WGS84).' },
-        idempotencyKey: { type: 'string', description: 'Optional at-most-once key. Re-sending the SAME key resolves to the SAME run: if it finished you get the brief with NO second charge; if it is still running you get its processing status. Strongly recommended — it makes a timeout recoverable. Use a fresh key to ask again.' },
-      },
-      required: ['question'],
-    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
   },
   {
-    name: 'get_analyst_job',
-    annotations: {"readOnlyHint":true,"openWorldHint":false,"destructiveHint":false},
-    outputSchema: {
+    "name": "get_analyst_job",
+    "description": "Fetch the status and result of an ask_analyst run by job_id. Job status is ONLY \"processing\" (still running — poll again in ~10-20s), \"done\" (with the finished brief and meta.tokens), or \"error\". When done, result_quality.status (\"complete\" | \"partial\", with any issues[]) reports whether the structured output is fully populated — this is SEPARATE from the job status (a done job can carry a partial result). Free of token charges — the run itself is charged once on completion. A job is visible only to the API key owner that created it.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "The job_id returned by ask_analyst."
+        }
+      },
+      "required": [
+        "job_id"
+      ]
+    },
+    "outputSchema": {
       "type": "object",
       "properties": {
         "job_id": {
@@ -448,6 +764,50 @@ export const TOOLS = [
         "status": {
           "type": "string",
           "description": "\"processing\" | \"done\" | \"error\"."
+        },
+        "progress": {
+          "type": "object",
+          "description": "Pipeline progress while the job is processing. completed_steps reaches total_steps ONLY when status is \"done\".",
+          "properties": {
+            "stage": {
+              "type": "string",
+              "enum": [
+                "queued",
+                "retrieval",
+                "imagery_reconciliation",
+                "synthesis",
+                "final_validation",
+                "persistence",
+                "complete"
+              ],
+              "description": "Current pipeline stage."
+            },
+            "completed_steps": {
+              "type": "integer",
+              "description": "Completed pipeline steps (0-6)."
+            },
+            "total_steps": {
+              "type": "integer",
+              "description": "Always 6."
+            },
+            "agent_progress": {
+              "type": "object",
+              "description": "The model's internal step counter (an upper bound on the steps a run may take), or null.",
+              "properties": {
+                "completed_steps": {
+                  "type": "integer"
+                },
+                "total_steps": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "required": [
+            "stage",
+            "completed_steps",
+            "total_steps"
+          ]
         },
         "brief": {
           "type": "object"
@@ -471,59 +831,109 @@ export const TOOLS = [
         }
       }
     },
-    description:
-      'Fetch the status and result of an ask_analyst run by job_id. Returns status "processing" (still ' +
-      'running — poll again in ~10-20s), "done" (with the finished brief and meta.tokens), or "error". ' +
-      'Free of token charges — the run itself is charged once on completion. A job is visible only to the ' +
-      'API key owner that created it. Use this to retrieve the brief after ask_analyst returned a job_id.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        job_id: { type: 'string', description: 'The job_id returned by ask_analyst.' },
-      },
-      required: ['job_id'],
-    },
-  },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  }
 ] as const;
 
 export const RESOURCES = [
-  { uri: 'brief://latest', name: 'Daily World Brief (latest)', description: 'The most recent AI-synthesized Daily World Brief (JSON). Free.', mimeType: 'application/json' },
-  { uri: 'signals://schema', name: 'Signal object schema', description: 'JSON Schema of the public Signal shape returned by query_signals / /api/v1/signals.', mimeType: 'application/json' },
-  { uri: 'usage://current', name: 'API usage & quota', description: 'Remaining token balance and plan capabilities for the calling key. Free.', mimeType: 'application/json' },
-  { uri: 'imagery://collections', name: 'Imagery collections', description: 'The satellite catalog collections searchable via search_imagery. Free.', mimeType: 'application/json' },
-  { uri: 'status://current', name: 'Data freshness & pipeline status', description: 'How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free.', mimeType: 'application/json' },
+  {
+    "uri": "brief://latest",
+    "name": "Daily World Brief (latest)",
+    "description": "The most recent AI-synthesized Daily World Brief (JSON). Free.",
+    "mimeType": "application/json"
+  },
+  {
+    "uri": "signals://schema",
+    "name": "Signal object schema",
+    "description": "JSON Schema of the public Signal shape returned by query_signals / /api/v1/signals.",
+    "mimeType": "application/json"
+  },
+  {
+    "uri": "usage://current",
+    "name": "API usage & quota",
+    "description": "Remaining token balance and plan capabilities for the calling key. Free.",
+    "mimeType": "application/json"
+  },
+  {
+    "uri": "imagery://collections",
+    "name": "Imagery collections",
+    "description": "The satellite catalog collections searchable via search_imagery. Free.",
+    "mimeType": "application/json"
+  },
+  {
+    "uri": "status://current",
+    "name": "Data freshness & pipeline status",
+    "description": "How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free.",
+    "mimeType": "application/json"
+  }
 ] as const;
 
 export const RESOURCE_TEMPLATES = [
-  { uriTemplate: 'brief://{date}', name: 'Daily World Brief by date', description: 'The Daily World Brief for a specific UTC date (YYYY-MM-DD). Free.', mimeType: 'application/json' },
+  {
+    "uriTemplate": "brief://{date}",
+    "name": "Daily World Brief by date",
+    "description": "The Daily World Brief for a specific UTC date (YYYY-MM-DD). Free.",
+    "mimeType": "application/json"
+  }
 ] as const;
 
 export const PROMPTS = [
   {
-    name: 'daily-situation-briefing',
-    description: 'Summarize the current world situation from the Daily World Brief.',
-    arguments: [{ name: 'date', description: 'UTC date YYYY-MM-DD (optional; defaults to latest).', required: false }],
+    "name": "daily-situation-briefing",
+    "description": "Summarize the current world situation from the Daily World Brief.",
+    "arguments": [
+      {
+        "name": "date",
+        "description": "UTC date YYYY-MM-DD (optional; defaults to latest).",
+        "required": false
+      }
+    ]
   },
   {
-    name: 'assess-top-signal',
-    description: 'Find the highest-severity recent signal in an area/category and run an RS assessment.',
-    arguments: [
-      { name: 'bbox', description: 'Bounding box "minLon,minLat,maxLon,maxLat" (optional).', required: false },
-      { name: 'category', description: 'Category filter (optional).', required: false },
-    ],
+    "name": "assess-top-signal",
+    "description": "Find the highest-severity recent signal in an area/category and run an RS assessment.",
+    "arguments": [
+      {
+        "name": "bbox",
+        "description": "Bounding box \"minLon,minLat,maxLon,maxLat\" (optional).",
+        "required": false
+      },
+      {
+        "name": "category",
+        "description": "Category filter (optional).",
+        "required": false
+      }
+    ]
   },
   {
-    name: 'aoi-watch',
-    description: 'Scan an area of interest for recent escalations and recommend collection.',
-    arguments: [{ name: 'bbox', description: 'Bounding box "minLon,minLat,maxLon,maxLat".', required: true }],
+    "name": "aoi-watch",
+    "description": "Scan an area of interest for recent escalations and recommend collection.",
+    "arguments": [
+      {
+        "name": "bbox",
+        "description": "Bounding box \"minLon,minLat,maxLon,maxLat\".",
+        "required": true
+      }
+    ]
   },
   {
-    name: 'market-exposure-check',
-    description:
-      'Find recent events that could plausibly move a given market (oil, grain, shipping, ...) and explain each transmission channel. Informational only — not investment advice.',
-    arguments: [
-      { name: 'market', description: `Market to check: ${MARKET_IMPACTS.join(', ')}.`, required: true },
-      { name: 'days', description: 'Lookback window in days (optional; default 3).', required: false },
-    ],
-  },
+    "name": "market-exposure-check",
+    "description": "Find recent events that could plausibly move a given market (oil, grain, shipping, ...) and explain each transmission channel. Informational only — not investment advice.",
+    "arguments": [
+      {
+        "name": "market",
+        "description": "Market to check: oil, natural_gas, grain, shipping, defense, metals, semiconductors, fx, equities.",
+        "required": true
+      },
+      {
+        "name": "days",
+        "description": "Lookback window in days (optional; default 3).",
+        "required": false
+      }
+    ]
+  }
 ] as const;
