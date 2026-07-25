@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.3.28.
+// Generated for Off-Nadir Delta MCP 1.4.0.
 
 export const TOOLS = [
   {
@@ -566,6 +566,299 @@ export const TOOLS = [
     }
   },
   {
+    "name": "plan_event_imagery",
+    "description": "Plan the imagery evidence for ONE event in a single call, instead of guessing collections one at a time. Give the event_id and what you are trying to establish (damage_assessment | flood_mapping | wildfire_assessment) and the SERVER runs the deterministic plan for that goal: it always checks BOTH in-app sensors — sentinel-1-grd (SAR: all-weather, the only look that survives cloud and night) and sentinel-2-l2a (optical, human-legible) — exactly once each, against the event’s own footprint and a pre/post window around its date. The result carries, per search, why it was made, how many scenes came back, how many actually COVER the event and are usable (cloud-obscured optical does not count), the SAR pair status, and whether a pre/post bracket exists. It also states screening / detection / identification capability: Sentinel-1/2 screen and detect at facility scale, and only object-level identification needs commercial VHR — a VHR recommendation NEVER invalidates what the free catalog already showed. Prefer this over several search_imagery calls for the same event: it cannot miss the SAR look and cannot repeat a search. An event with no resolvable footprint is refused rather than planned against a guess. Costs 4 token(s) per call (it deliberately issues two catalog searches).",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "integer",
+          "description": "The `id` from query_signals. The server resolves its authoritative point + AOI."
+        },
+        "analysis_goal": {
+          "type": "string",
+          "enum": [
+            "damage_assessment",
+            "flood_mapping",
+            "wildfire_assessment"
+          ],
+          "description": "What the imagery must establish — decides which collection leads and how cloud is gated."
+        },
+        "event_date": {
+          "type": "string",
+          "description": "Event date YYYY-MM-DD. Optional — the event row supplies it when known."
+        }
+      },
+      "required": [
+        "event_id",
+        "analysis_goal"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "plan": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "meta",
+        "plan"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "rank_imaging_priority",
+    "description": "WHERE — and with what class (and therefore cost) of satellite — is observation most worthwhile right now? Crosses each event’s composite IMPORTANCE (severity × source breadth × market relevance) with the SPEC CLASS its required resolution demands: coarse (≤100 m), hr (≤10 m, Sentinel-class free data) or vhr (sub-metre, commercial tasking). Returns how many imageable events fall in each class with their mean importance, plus the top targets with importance, required class and AOI. Use it to triage a theatre before spending on imagery: a high-importance event that only needs hr is answerable with free Sentinel data, while a vhr one is what a paid order is for. Deterministic — no LLM, no per-event cost. Costs 1 token(s) per call.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Area [west, south, east, north] in WGS84. Omit for a global survey."
+        },
+        "start_date": {
+          "type": "string",
+          "description": "Inclusive start date YYYY-MM-DD. Defaults to today; clamped to your plan history floor."
+        },
+        "end_date": {
+          "type": "string",
+          "description": "Inclusive end date YYYY-MM-DD. Defaults to today. The window is capped at 30 days."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Restrict to these Delta categories (kinetic, armed_conflict, maritime, natural_disaster, infrastructure, aviation, humanitarian, protest, diplomacy)."
+        },
+        "min_geoint_score": {
+          "type": "number",
+          "description": "Drop events below this GEOINT score before ranking."
+        },
+        "top_n": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "How many top targets to return (default 12)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "priority": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "meta",
+        "priority"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "survey_observable_events",
+    "description": "Which events in a window can a given in-app sensor actually RESOLVE? Evaluates the FULL set (not just the top few) against each event’s precomputed required resolution, and returns how many are observable vs not, the breakdown by required resolution, and the top observable events with the ready-made imaging rationale. Observability here is resolvability — whether the physical mark is large enough for the sensor: Sentinel-2 is ~10 m optical (needs daylight and clear sky), Sentinel-1 is SAR (all-weather, day or night). Prefer this over asking about events one at a time: it is exhaustive AND cheap, and it is the honest way to answer \"what can we actually see\" before committing collection effort. Deterministic — no LLM. Costs 1 token(s) per call.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "sensor": {
+          "type": "string",
+          "enum": [
+            "sentinel-2",
+            "sentinel-1"
+          ],
+          "description": "Which in-app sensor to evaluate against. sentinel-2 = ~10 m optical (daylight, clear sky); sentinel-1 = SAR (all-weather, day/night). Default sentinel-2."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Area [west, south, east, north] in WGS84. Omit for a global survey."
+        },
+        "start_date": {
+          "type": "string",
+          "description": "Inclusive start date YYYY-MM-DD. Defaults to today; clamped to your plan history floor."
+        },
+        "end_date": {
+          "type": "string",
+          "description": "Inclusive end date YYYY-MM-DD. Defaults to today. The window is capped at 30 days."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Restrict to these Delta categories."
+        },
+        "min_geoint_score": {
+          "type": "number",
+          "description": "Drop events below this GEOINT score before surveying."
+        },
+        "top_n": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 50,
+          "description": "How many observable events to return (default 20)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "survey": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "meta",
+        "survey"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "predict_satellite_passes",
+    "description": "WHEN can this place next be imaged, and by WHAT — the timing half of collection planning. Propagates current orbital elements (SGP4 over day-cached CelesTrak two-line elements) for seven families and returns the access windows over a target: Sentinel-1 (SAR), Sentinel-2 and Landsat (free, SYSTEMATIC — scheduled acquisitions you will get), plus WorldView, ICEYE, Capella and SkySat (commercial, AGILE — taskable ACCESS opportunities that require a paid order and are NOT guaranteed collects). Each pass carries acquisition/loss times, the closest-approach instant, peak elevation, OFF-NADIR angle, ground distance, ascending/descending, solar elevation and whether the target is sunlit (optical needs light; SAR does not), and the age of the element set it was computed from. Use it to answer \"when is the next chance to see this\", to choose between waiting for a free systematic pass and paying to task an agile one, and to time a pre/post change-detection pair. Give lat/lon, or a bbox whose centre is used. Horizon is capped at 7 days. If elements cannot be retrieved the result says so (retrieval_ok:false) — that means timing is UNAVAILABLE, never \"no passes\". Costs 2 token(s) per call.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Target latitude (-90..90; positive = North). Required unless bbox is given."
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Target longitude (-180..180; positive = East). Required unless bbox is given."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Area [west, south, east, north] in WGS84. The CENTRE is used as the target when lat/lon are omitted."
+        },
+        "start_date": {
+          "type": "string",
+          "description": "Inclusive start date YYYY-MM-DD (UTC). Defaults to today."
+        },
+        "end_date": {
+          "type": "string",
+          "description": "Inclusive end date YYYY-MM-DD (UTC). Defaults to start+2 days; the window is capped to a 7-day horizon."
+        },
+        "satellites": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "sentinel-1",
+              "sentinel-2",
+              "landsat",
+              "worldview",
+              "iceye",
+              "capella",
+              "skysat"
+            ]
+          },
+          "description": "Families to consider. Omit for all seven. Use this to compare \"free systematic only\" against \"what could I task\"."
+        },
+        "max_passes": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Maximum passes to return, soonest first (default 40)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "passes": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "freshness": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "meta",
+        "passes"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
     "name": "assess_signal",
     "description": "Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, recommended sensors, and a collection window. `eventId` is the `id` from query_signals. The result also carries a deterministic `context` block (event id/date, normalized target, AOI bbox, observability + quality verdict, and an `imagery_handoff` giving the exact bbox + event_date to pass to search_imagery for REAL pre/post scene candidates) — turning the assessment into an actionable collection plan. Costs 5 (quick) or 15 (deep) tokens, charged to the key owner's balance. A prior assessment for the same signal is cached (no re-charge). The exact charge and remaining balance are in the result meta.tokens. Signals that are not satellite-observable (observability:\"not-observable\" — e.g. political statements or broad-area events with no imageable physical mark) are rejected BEFORE any charge, so pre-filter with query_signals observability:\"observable\" to spend only where imagery helps.",
     "inputSchema": {
@@ -639,6 +932,14 @@ export const TOOLS = [
           "minItems": 4,
           "maxItems": 4,
           "description": "Optional focus bounding box [minLon, minLat, maxLon, maxLat] (WGS84)."
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "fast",
+            "deep"
+          ],
+          "description": "fast (default) or deep. Deep enables extended reasoning and wider evidence-gathering budgets — for forecasting, collection trade-offs and market-implication questions where step-by-step reasoning materially helps. It is slower and the ceiling rises from 123 to 415 tokens; charging stays metered by what the run actually consumes, so a light deep question does not cost the ceiling."
         },
         "idempotencyKey": {
           "type": "string",
