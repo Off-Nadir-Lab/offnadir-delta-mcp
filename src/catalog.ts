@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.5.0.
+// Generated for Off-Nadir Delta MCP 1.6.0.
 
 export const TOOLS = [
   {
@@ -1131,6 +1131,72 @@ export const TOOLS = [
           "type": "string"
         }
       }
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "query_claims",
+    "description": "Read the LEDGER of claims this key has been given — every factual assertion the Analyst made, with its evidence class (CONFIRMED / REPORTED / PARTY_CLAIM / ASSESSMENT), how many INDEPENDENT source families backed it, and the publishers. The point is the time axis: when a later answer restated the same assertion, the claim carries the link and says which way the evidence moved — restated_only surfaces those chains, and downgraded_only isolates the cases where a later answer was LESS sure than an earlier one, which is where this product contradicted itself. Use it to audit what you were told before acting on it, or to check whether an assertion has since weakened. Scoped to your own key; no other caller’s claims are visible. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "since": {
+          "type": "string",
+          "description": "Only claims asserted on or after this date (YYYY-MM-DD or ISO 8601)."
+        },
+        "evidence_class": {
+          "type": "string",
+          "enum": [
+            "CONFIRMED",
+            "REPORTED",
+            "PARTY_CLAIM",
+            "DISPUTED",
+            "ASSESSMENT",
+            "UNKNOWN"
+          ],
+          "description": "Restrict to one evidence class."
+        },
+        "restated_only": {
+          "type": "boolean",
+          "description": "Only claims that sit in a restatement chain."
+        },
+        "downgraded_only": {
+          "type": "boolean",
+          "description": "Only claims a later answer restated with WEAKER evidence — read these first."
+        },
+        "limit": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "How many claims to return (default 50)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "counts": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "claims"
+      ]
     },
     "annotations": {
       "readOnlyHint": true,
