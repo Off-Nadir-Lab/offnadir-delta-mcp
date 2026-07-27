@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.6.0.
+// Generated for Off-Nadir Delta MCP 1.7.0.
 
 export const TOOLS = [
   {
@@ -691,7 +691,7 @@ export const TOOLS = [
   },
   {
     "name": "survey_observable_events",
-    "description": "Which events in a window can a given in-app sensor actually RESOLVE? Evaluates the FULL set (not just the top few) against each event’s precomputed required resolution, and returns how many are observable vs not, the breakdown by required resolution, and the top observable events with the ready-made imaging rationale. Observability here is resolvability — whether the physical mark is large enough for the sensor: Sentinel-2 is ~10 m optical (needs daylight and clear sky), Sentinel-1 is SAR (all-weather, day or night). Prefer this over asking about events one at a time: it is exhaustive AND cheap, and it is the honest way to answer \"what can we actually see\" before committing collection effort. Deterministic — no LLM. Costs 1 token(s) per call.",
+    "description": "Which events in a window can a given in-app sensor actually RESOLVE? Evaluates the FULL set (not just the top few) against each event’s precomputed required resolution, and returns how many are observable vs not, the breakdown by required resolution, and the top observable events with the ready-made imaging rationale. Observability here is resolvability — whether the physical mark is large enough for the sensor: Sentinel-2 is ~10 m optical (needs daylight and clear sky), Sentinel-1 is SAR (all-weather, day or night). Prefer this over asking about events one at a time: it is exhaustive AND cheap, and it is the honest way to answer \"what can we actually see\" before committing collection effort. The population is deliberately UNGATED by tasking readiness — it answers \"what could this sensor resolve\", not \"what may we task\" — so its total sits above rank_imaging_priority and counts a different unit from query_signals' clusters; see population_detail, and read collection_ready per event for taskability. Deterministic — no LLM. Costs 1 token(s) per call.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -768,7 +768,7 @@ export const TOOLS = [
   },
   {
     "name": "predict_satellite_passes",
-    "description": "WHEN can this place next be imaged, and by WHAT — the timing half of collection planning. Propagates current orbital elements (SGP4 over day-cached CelesTrak two-line elements) for seven families and returns the access windows over a target: Sentinel-1 (SAR), Sentinel-2 and Landsat (free, SYSTEMATIC — scheduled acquisitions you will get), plus WorldView, ICEYE, Capella and SkySat (commercial, AGILE — taskable ACCESS opportunities that require a paid order and are NOT guaranteed collects). Each pass carries acquisition/loss times, the closest-approach instant, peak elevation, OFF-NADIR angle, ground distance, ascending/descending, solar elevation and whether the target is sunlit (optical needs light; SAR does not), and the age of the element set it was computed from. Use it to answer \"when is the next chance to see this\", to choose between waiting for a free systematic pass and paying to task an agile one, and to time a pre/post change-detection pair. Give lat/lon, or a bbox whose centre is used. Horizon is capped at 7 days. If elements cannot be retrieved the result says so (retrieval_ok:false) — that means timing is UNAVAILABLE, never \"no passes\". Costs 2 token(s) per call.",
+    "description": "WHEN can this place next be imaged, and by WHAT — the timing half of collection planning. Propagates current orbital elements (SGP4 over day-cached CelesTrak two-line elements) for seven families and returns the access windows over a target: Sentinel-1 (SAR), Sentinel-2 and Landsat (free, SYSTEMATIC — routinely collected, so near-certain), plus WorldView, ICEYE, Capella and SkySat (commercial, AGILE — taskable ACCESS opportunities that require a paid order and are NOT guaranteed collects). Each pass carries acquisition/loss times, the closest-approach instant, peak elevation, OFF-NADIR angle, ground distance, ascending/descending, solar elevation and whether the target is sunlit (optical needs light; SAR does not), and the age of the element set it was computed from. Use it to answer \"when is the next chance to see this\", to choose between waiting for a free systematic pass and paying to task an agile one, and to time a pre/post change-detection pair. Give lat/lon, or a bbox whose centre is used. Horizon is capped at 7 days. If elements cannot be retrieved the result says so (retrieval_ok:false) — that means timing is UNAVAILABLE, never \"no passes\". Every pass is a GEOMETRIC access opportunity computed from orbital elements and swath width (geometry_only:true, acquisition_plan_verified:false): no operator collection plan is consulted, so this is when a sensor COULD see the target, never a confirmed acquisition schedule. With no start_date the window begins NOW, so the first pass listed is always still ahead. Costs 2 token(s) per call.",
     "inputSchema": {
       "type": "object",
       "properties": {
