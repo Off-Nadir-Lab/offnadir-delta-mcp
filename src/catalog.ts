@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.7.0.
+// Generated for Off-Nadir Delta MCP 1.7.1.
 
 export const TOOLS = [
   {
@@ -944,6 +944,14 @@ export const TOOLS = [
         "idempotencyKey": {
           "type": "string",
           "description": "Optional at-most-once key. Re-sending the SAME key resolves to the SAME run: if it finished you get the brief with NO second charge; if it is still running you get its processing status. Strongly recommended — it makes a timeout recoverable. Use a fresh key to ask again."
+        },
+        "response_format": {
+          "type": "string",
+          "enum": [
+            "full",
+            "compact"
+          ],
+          "description": "\"full\" (default) returns the prose brief alongside the structured result. \"compact\" omits the prose brief and returns only the structured result — which still carries the assembled structured_summary — so a completed run costs materially fewer context tokens."
         }
       },
       "required": [
@@ -1050,6 +1058,14 @@ export const TOOLS = [
         "job_id": {
           "type": "string",
           "description": "The job_id returned by ask_analyst."
+        },
+        "response_format": {
+          "type": "string",
+          "enum": [
+            "full",
+            "compact"
+          ],
+          "description": "\"full\" (default) returns the prose brief alongside the structured result. \"compact\" omits the prose brief and returns only the structured result — which still carries the assembled structured_summary — so a re-fetch costs materially fewer context tokens."
         }
       },
       "required": [
