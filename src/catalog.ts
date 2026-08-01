@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.7.1.
+// Generated for Off-Nadir Delta MCP 1.8.0.
 
 export const TOOLS = [
   {
@@ -1374,6 +1374,140 @@ export const TOOLS = [
       "openWorldHint": false,
       "destructiveHint": true,
       "idempotentHint": true
+    }
+  },
+  {
+    "name": "list_monitored_areas",
+    "description": "List the places under continuous satellite measurement on this key (Delta Monitor), with each area’s metric, most recent value, change since the previous measurement, whether that value was flagged anomalous, and coverage — how many acquisitions were measured versus how many exist. Coverage window_total is null when the catalog total is UNKNOWN; null never means zero. Also returns how many areas the plan allows and how many remain. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "areas": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "limits": {
+          "type": "object"
+        },
+        "metering": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "areas"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_monitored_area",
+    "description": "Fetch one monitored area with its full measurement history — every acquisition that was measured, its value, and whether it was flagged anomalous. This is the time series behind the number that list_monitored_areas reports, so use it to answer \"is it going up\", \"when did it change\", or \"how unusual is today\". Anomaly flags come from a median-absolute-deviation test on the series, not a fixed threshold. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "area_id": {
+          "type": "string",
+          "description": "The area_id from list_monitored_areas. A metric’s polygon_id is also accepted and resolves to the same area."
+        }
+      },
+      "required": [
+        "area_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "area": {
+          "type": "object"
+        },
+        "metering": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "area"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "create_monitored_area",
+    "description": "Put a place under continuous satellite measurement: pick an area and what to count, and every new Sentinel-1 / Sentinel-2 / VIIRS acquisition over it is measured automatically from then on. Use this when the question is about a quantity at a fixed place over time (\"how many ships are alongside\", \"how much has burned\", \"is the water receding\") rather than about events, which is create_standing_order. Creating is free; each automatic check costs a small number of tokens only when it finds new imagery.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "The area to measure, [west, south, east, north] in WGS84. Must be under 5,000 km² — measurement is per-pixel over the area, so a country-sized box is rejected rather than silently sampled."
+        },
+        "metric": {
+          "type": "string",
+          "description": "What to count. Plain words work: ships, fires, vegetation, water, burn, snow, built_up, moisture, night_lights. Index names are also accepted: ship_detection, fire_count, ndvi, evi, savi, ndmi, ndwi, mndwi, ndbi, ndsi, nbr, dnb, vv, vh, rvi, rfdi, cr. The sensor is chosen from the metric."
+        },
+        "name": {
+          "type": "string",
+          "description": "Label for the area (default \"Monitored area\")."
+        },
+        "start_date": {
+          "type": "string",
+          "description": "YYYY-MM-DD to begin the history from. Defaults to 30 days ago — a longer backfill measures more scenes and therefore costs more on the first check."
+        }
+      },
+      "required": [
+        "bbox",
+        "metric"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "area": {
+          "type": "object"
+        },
+        "metering": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "area"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
     }
   }
 ] as const;
