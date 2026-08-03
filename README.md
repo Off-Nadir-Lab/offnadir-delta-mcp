@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`20` tools · MCP server version `1.8.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`20` tools · MCP server version `1.8.2` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -106,7 +106,7 @@ Whether a satellite can resolve it, which one, and when it next passes.
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `search_imagery` | Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and date window — the natural follow-up to a signal (find imagery over the event location). | 2 tok |
+| `search_imagery` | Search the satellite imagery catalog (Sentinel-1, Sentinel-2, NISAR L-band) for scenes over an area and date window — the natural follow-up to a signal (find imagery over the event location). | 2 tok |
 | `plan_event_imagery` | Plan the imagery evidence for ONE event in a single call, instead of guessing collections one at a time. | 4 tok |
 | `rank_imaging_priority` | WHERE — and with what class (and therefore cost) of satellite — is observation most worthwhile right now? | 1 tok |
 | `survey_observable_events` | Which events in a window can a given in-app sensor actually RESOLVE? | 1 tok |
@@ -175,7 +175,7 @@ Keys are shown once at creation, hashed at rest, and revocable at any time from
 | `brief://latest` | The most recent AI-synthesized Daily World Brief (JSON). Free. |
 | `signals://schema` | JSON Schema of the public Signal shape returned by query_signals / /api/v1/signals. |
 | `usage://current` | Remaining token balance and plan capabilities for the calling key. Free. |
-| `imagery://collections` | The satellite catalog collections searchable via search_imagery. Free. |
+| `imagery://collections` | The satellite catalog collections searchable via search_imagery — Sentinel-1 C-band SAR, Sentinel-2 optical, and NISAR L-band SAR (provisional calibration). Free. |
 | `status://current` | How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free. |
 | `brief://{date}` | The Daily World Brief for a specific UTC date (YYYY-MM-DD). Free. |
 

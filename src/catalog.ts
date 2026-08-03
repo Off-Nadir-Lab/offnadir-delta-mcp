@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.8.0.
+// Generated for Off-Nadir Delta MCP 1.8.2.
 
 export const TOOLS = [
   {
@@ -452,7 +452,7 @@ export const TOOLS = [
   },
   {
     "name": "search_imagery",
-    "description": "Search the satellite imagery catalog (Sentinel-1/2, OPERA RTC-S1) for scenes over an area and date window — the natural follow-up to a signal (find imagery over the event location). Returns scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown (a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi [minLon,minLat,maxLon,maxLat] to get each scene's target_relation (covers_event_geometry = pure geometry gate; usable_for_analysis additionally requires acceptable cloud for optical, so a 99%-cloud scene is geometry-covering but not analysis-usable) — so a scene that only clips the wide bbox is not mistaken for covering the event. Costs 2 token(s) per call.",
+    "description": "Search the satellite imagery catalog (Sentinel-1, Sentinel-2, NISAR L-band) for scenes over an area and date window — the natural follow-up to a signal (find imagery over the event location). Returns scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown (a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi [minLon,minLat,maxLon,maxLat] to get each scene's target_relation (covers_event_geometry = pure geometry gate; usable_for_analysis additionally requires acceptable cloud for optical, so a 99%-cloud scene is geometry-covering but not analysis-usable) — so a scene that only clips the wide bbox is not mistaken for covering the event. Costs 2 token(s) per call.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -471,7 +471,7 @@ export const TOOLS = [
             "sentinel-1-grd",
             "sentinel-1-rtc",
             "sentinel-2-l2a",
-            "OPERA_L2_RTC-S1_V1"
+            "NISAR_L2_GCOV_PROVISIONAL_V1"
           ],
           "description": "Catalog collection. Defaults to sentinel-2-l2a."
         },
@@ -1222,7 +1222,7 @@ export const TOOLS = [
   },
   {
     "name": "create_standing_order",
-    "description": "Put an area under CONTINUOUS watch: save a question plus a bounding box and Delta re-answers it on a schedule, notifying only when the answer actually changed. Creating one is FREE. Each time it fires it runs ask_analyst and is metered like any Analyst question, so the cost is per CHANGE, not per check: a deterministic pass over the corpus decides whether anything new crossed the reporting bar, and quiet periods never invoke the model or charge anything. Returns projected_monthly_tokens_max — the ceiling if every single check fired — so the cost is visible before committing. Cadence and how many orders you may hold are set by your plan; the error says which limit you hit. Use it when the question is \"tell me when this changes\" rather than \"what is happening right now\".",
+    "description": "Put an area under CONTINUOUS watch: save a question plus a bounding box and Delta re-answers it on a schedule, notifying only when the answer actually changed. Creating one is FREE. Each time it fires it runs ask_analyst and is metered like any Analyst question, so the cost is per CHANGE, not per check: a deterministic pass over the corpus decides whether anything new crossed the reporting bar, and quiet periods never invoke the model or charge anything. Returns projected_monthly_tokens_typical (the observed median cost per run × this cadence) and projected_monthly_tokens_max (the true ceiling: every check fires AND every run reaches the per-question cap), so the cost is visible before committing. Cadence and how many orders you may hold are set by your plan; the error says which limit you hit. Use it when the question is \"tell me when this changes\" rather than \"what is happening right now\".",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1285,6 +1285,9 @@ export const TOOLS = [
         },
         "order": {
           "type": "object"
+        },
+        "projected_monthly_tokens_typical": {
+          "type": "number"
         },
         "projected_monthly_tokens_max": {
           "type": "number"
@@ -1534,7 +1537,7 @@ export const RESOURCES = [
   {
     "uri": "imagery://collections",
     "name": "Imagery collections",
-    "description": "The satellite catalog collections searchable via search_imagery. Free.",
+    "description": "The satellite catalog collections searchable via search_imagery — Sentinel-1 C-band SAR, Sentinel-2 optical, and NISAR L-band SAR (provisional calibration). Free.",
     "mimeType": "application/json"
   },
   {
