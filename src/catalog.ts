@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.8.2.
+// Generated for Off-Nadir Delta MCP 1.8.3.
 
 export const TOOLS = [
   {
@@ -1419,7 +1419,7 @@ export const TOOLS = [
   },
   {
     "name": "get_monitored_area",
-    "description": "Fetch one monitored area with its full measurement history — every acquisition that was measured, its value, and whether it was flagged anomalous. This is the time series behind the number that list_monitored_areas reports, so use it to answer \"is it going up\", \"when did it change\", or \"how unusual is today\". Anomaly flags come from a median-absolute-deviation test on the series, not a fixed threshold. Free of token charges.",
+    "description": "Fetch one monitored area with its full measurement history — every acquisition that was measured, its value, and whether it was flagged anomalous. This is the time series behind the number that list_monitored_areas reports, so use it to answer \"is it going up\", \"when did it change\", or \"how unusual is today\". Anomaly flags come from a median-absolute-deviation test on the series, not a fixed threshold. Free of token charges; returning the full history requires a plan that includes data export, so it can be refused with a forbidden error.",
     "inputSchema": {
       "type": "object",
       "properties": {

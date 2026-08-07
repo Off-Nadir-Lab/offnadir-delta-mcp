@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`20` tools · MCP server version `1.8.2` · [full reference](https://offnadir-delta.com/docs/mcp)
+`20` tools · MCP server version `1.8.3` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
