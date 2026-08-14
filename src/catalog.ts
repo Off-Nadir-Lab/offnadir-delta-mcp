@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.8.3.
+// Generated for Off-Nadir Delta MCP 1.11.1.
 
 export const TOOLS = [
   {
@@ -1511,6 +1511,351 @@ export const TOOLS = [
       "readOnlyHint": false,
       "openWorldHint": false,
       "destructiveHint": false
+    }
+  },
+  {
+    "name": "lookup_elevation",
+    "description": "Measure terrain height from the Copernicus DEM GLO-30 — a point (lat + lon), an area (bbox), or a drawn polygon, for which the statistics are computed over the samples INSIDE the ring rather than its bounding box. Returns min, max, mean, median, p10, p90 and relief (max − min), the number that governs SAR layover and shadow severity. Free of token charges. Three things the result carries that any answer must respect: it is a SURFACE model (buildings and tree canopy included, so not bare ground); `downsampled: true` means a large area was read below the 30 m posting, so min/max are smoothed inward and the relief is a floor rather than an exact figure; and `covered: false` or `tiles_missing > 0` means open ocean where the model has no data — which is absence, not 0 m. Heights are orthometric on the EGM2008 geoid, not ellipsoidal. Cite the returned `attribution` wherever a height is shown.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "Latitude of a single point to measure (use with lon)."
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "Longitude of a single point to measure (use with lat)."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Area to measure as [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+        },
+        "polygon": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "minItems": 3,
+          "description": "WGS84 ring [[lon, lat], …]. Statistics cover only the samples inside it."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "description": "Which form was measured: 'point', 'bbox' or 'polygon'."
+        },
+        "elevation": {
+          "type": "object"
+        },
+        "attribution": {
+          "type": "string",
+          "description": "Required Copernicus DEM credit (licence Article 6(b))."
+        }
+      },
+      "required": [
+        "elevation"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "analyze_terrain",
+    "description": "Compute FROM the terrain rather than reading heights out of it (that is lookup_elevation). Free of token charges; both operations come from one Copernicus DEM GLO-30 read. `operation: 'sar_geometry'` over a bbox, with an incidence angle and a look azimuth, returns the share of the area lost to LAYOVER and to SHADOW, the share merely foreshortened, and the mean LOCAL incidence angle — the arithmetic behind whether radar can use that ground. It changes with the pass direction (measured on one volcanic flank: 2.6% layover looking west against 0.7% looking east at the same 35°), so the geometry is required rather than assumed. `operation: 'profile'` between two points returns the ground along the line and a LINE-OF-SIGHT verdict including Earth curvature: whether the ends can see each other, where the terrain first rises above the sight line, and the worst clearance. Both results state the sample spacing they were computed at — a coarser grid reads flatter, and therefore more observable, than the ground is. A SURFACE model, so canopy and buildings are included; over a surface model they block a sight line as they would in reality. Cite the returned `attribution`.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "operation"
+      ],
+      "properties": {
+        "operation": {
+          "type": "string",
+          "enum": [
+            "sar_geometry",
+            "profile"
+          ],
+          "description": "'sar_geometry' = layover/shadow over an area; 'profile' = ground along a line plus a line-of-sight verdict."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "For 'sar_geometry': area as [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+        },
+        "incidence_deg": {
+          "type": "number",
+          "minimum": 10,
+          "maximum": 80,
+          "description": "For 'sar_geometry': sensor incidence angle. Sentinel-1 IW spans roughly 29-46 degrees; use the scene's own value when you have it."
+        },
+        "look_azimuth_deg": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 360,
+          "description": "For 'sar_geometry': compass bearing the sensor looks along the ground range. A right-looking descending pass looks roughly west (270)."
+        },
+        "lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "For 'profile': latitude of the observer end."
+        },
+        "lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "For 'profile': longitude of the observer end."
+        },
+        "to_lat": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90,
+          "description": "For 'profile': latitude of the far end."
+        },
+        "to_lon": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180,
+          "description": "For 'profile': longitude of the far end."
+        },
+        "observer_height_m": {
+          "type": "number",
+          "minimum": 0,
+          "description": "For 'profile': eye height above the ground, default 2 m. Use the real mast or tower height when that is the question."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "operation": {
+          "type": "string"
+        },
+        "sar_geometry": {
+          "type": "object"
+        },
+        "profile": {
+          "type": "object"
+        },
+        "attribution": {
+          "type": "string",
+          "description": "Required Copernicus DEM credit (licence Article 6(b))."
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "measure_index_series",
+    "description": "Measure a spectral index over an area, scene by scene, back through the Sentinel-2 archive — the answer to \"how has this changed since <year>\". Give a polygon (or a bbox), an index (ndvi, evi, savi, ndmi, ndwi, mndwi, ndbi, ndsi, nbr, iron-oxide, clay, ferrous) and a date range; each scene is measured over the samples INSIDE the ring, and the result is the per-scene mean/median/min/max with a first-to-last change. Costs 0.5 tokens per scene actually measured; a scene that fails to read is reported in `skipped` and is not charged. **Call it once with `estimate_only: true` first** — that is free and returns how many scenes match, the real date span available, and what measuring them would cost, so the user can agree to the spend. Three things the result carries that any answer must respect: the Sentinel-2 archive begins 2015-06-27, so an earlier start is clamped and `clamped_to_archive` says so (those years are genuinely unavailable, not empty); at most 24 scenes are measured per call, so a longer period comes back as a SAMPLE and the rest appear in `skipped`; and `trend` compares the first and last measured scene only — it is not a fitted rate, so do not attach a slope or a confidence to it. `scenes_found` is what the catalog holds; `scenes_examined` is the newest page this call read, so `candidate_date_span` is the edge of that page and NOT how far the archive reaches — read `notes` before saying when coverage begins. For a SAR quantity, or to keep measuring as new imagery arrives, use create_monitored_area instead. Cite the returned `attribution`.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "index",
+        "start",
+        "end"
+      ],
+      "properties": {
+        "polygon": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "description": "WGS84 ring [[lon, lat], …] with at least 3 vertices. Statistics cover the samples inside it."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Alternative to polygon: [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+        },
+        "index": {
+          "type": "string",
+          "enum": [
+            "ndvi",
+            "evi",
+            "savi",
+            "ndmi",
+            "ndwi",
+            "mndwi",
+            "ndbi",
+            "ndsi",
+            "nbr",
+            "iron-oxide",
+            "clay",
+            "ferrous"
+          ],
+          "description": "Which optical index to measure."
+        },
+        "start": {
+          "type": "string",
+          "description": "Start date YYYY-MM-DD (UTC). Clamped forward to 2015-06-27 if earlier."
+        },
+        "end": {
+          "type": "string",
+          "description": "End date YYYY-MM-DD (UTC)."
+        },
+        "max_scenes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24,
+          "description": "Cap on scenes measured in this call. Server maximum 24."
+        },
+        "max_cloud_cover": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Scene cloud-cover ceiling in percent. Default 30."
+        },
+        "estimate_only": {
+          "type": "boolean",
+          "description": "True = free: return the scene count, date span and token cost WITHOUT measuring or charging."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "estimate": {
+          "type": "object"
+        },
+        "series": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "attribution": {
+          "type": "string"
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "detect_ships",
+    "description": "Count vessel-like targets in ONE SAR scene over an area, using CFAR detection on Sentinel-1. Costs 5 tokens per detection; a scene the worker refuses (an unsupported combination, an area with no usable sea) is not charged. The natural sequence is search_imagery over the area, pick a scene, then this with its `collection` and `item_id` — radar sees through cloud and at night, so the count works when optical would not. Read `caveats` before reporting the number: it states when the land mask was unavailable (shoreline structures may be counted as vessels), how far from the coast detections were excluded (the default excludes vessels alongside a quay), and when the scene covers only part of the requested area — a partial-coverage count must never be compared with a full one as though the difference were vessels. This measures one scene at one time. To track a berth or an anchorage over time, create_monitored_area with metric `ships` measures every new acquisition.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "collection",
+        "item_id"
+      ],
+      "properties": {
+        "collection": {
+          "type": "string",
+          "enum": [
+            "sentinel-1-grd",
+            "sentinel-1-rtc"
+          ],
+          "description": "Catalog collection of the scene. NISAR detection is available in the app only (it needs a granule conversion first)."
+        },
+        "item_id": {
+          "type": "string",
+          "description": "STAC item id of the scene, as returned by search_imagery."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "Area to search within the scene, [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+        },
+        "geometry": {
+          "type": "object"
+        },
+        "algorithm_version": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "v2",
+            "v3"
+          ],
+          "description": "Detector version. 'auto' (default) picks the recommended version for the sensor."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "count": {
+          "type": "integer",
+          "description": "Vessel-like targets detected. Read `caveats` before quoting it."
+        },
+        "ships": {
+          "type": "object"
+        },
+        "caveats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "scene": {
+          "type": "object"
+        },
+        "processing": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
     }
   }
 ] as const;
