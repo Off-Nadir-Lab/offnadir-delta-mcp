@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`24` tools · MCP server version `1.11.1` · [full reference](https://offnadir-delta.com/docs/mcp)
+`25` tools · MCP server version `1.12.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-12 of the 24 tools cost nothing, so the first thing you run is free:
+12 of the 25 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -124,6 +124,7 @@ Turn reporting into a cited assessment you can audit afterwards.
 | `ask_analyst` | Ask the Delta Analyst an OSINT/GEOINT question. | 5–123 tok |
 | `get_analyst_job` | Fetch the status and result of an ask_analyst run by job_id. | free |
 | `query_claims` | Read the LEDGER of claims this key has been given — every factual assertion the Analyst made, with its evidence class (CONFIRMED / REPORTED / PARTY_CLAIM / ASSESSMENT), how many INDEPENDENT source families backed it, and the publishers. | free |
+| `refine_location` | Research one signal's location further and, if the sources genuinely narrow it, store and return the better coordinate. | 3–29 tok |
 | `measure_index_series` | Measure a spectral index over an area, scene by scene, back through the Sentinel-2 archive — the answer to "how has this changed since <year>". | 0.5 tok |
 | `detect_ships` | Count vessel-like targets in ONE SAR scene over an area, using CFAR detection on Sentinel-1. | 5 tok |
 

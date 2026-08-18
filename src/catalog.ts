@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.11.1.
+// Generated for Off-Nadir Delta MCP 1.12.0.
 
 export const TOOLS = [
   {
@@ -1671,6 +1671,43 @@ export const TOOLS = [
       "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
+    }
+  },
+  {
+    "name": "refine_location",
+    "description": "Research one signal's location further and, if the sources genuinely narrow it, store and return the better coordinate. Most signals are geolocated once, for free, from a single article's place string: measured across production, about two thirds sit at ±5 km or have no bounded radius at all. This reads the source article and live search for a source that names something finer — a facility, bridge, district, port — resolves it, and verifies it before accepting it. **You are charged only if the precision actually improves**, between 3 and 29 tokens by what the run consumed; a signal that cannot be narrowed costs nothing, and a signal an earlier caller already refined is returned free. Read the result honestly: `improved: false` with a `reason` is the common and correct outcome when no source is more specific — it does NOT mean the event is unlocated, and it is not a failure to retry. When it does improve, `evidence` lists the sources that named the place; a location without evidence is never stored, so do not present a refined point without citing them. `footprint_kind` says whether the answer is a POINT or an AREA — if it is an area, describe an area, because an admin-level place has no finite radius and drawing it as a dot misstates where the event was. `uncertainty_m: null` means unbounded, not unknown.",
+    "inputSchema": {
+      "type": "object",
+      "required": [
+        "signal_id"
+      ],
+      "properties": {
+        "signal_id": {
+          "type": "integer",
+          "description": "The signal (global_event_id) whose location should be researched further."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "result": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
     }
   },
   {
