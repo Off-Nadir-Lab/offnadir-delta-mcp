@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.12.2.
+// Generated for Off-Nadir Delta MCP 1.17.0.
 
 export const TOOLS = [
   {
@@ -1221,6 +1221,158 @@ export const TOOLS = [
     }
   },
   {
+    "name": "query_developments",
+    "description": "What actually CHANGED about the events in an area — not which articles are new. Polling query_signals and diffing the ids finds new REPORTING: a 2025 attack re-reported in 2026 with a fresh attribution is indistinguishable from a fresh attack. This returns changes as changes, each with what it was and what it became. Two kinds, labelled: `world` = the event's own state moved (a death toll revised, a perpetrator named, a report disputed); `measurement` = what WE can now see moved (a location resolved, post-event imagery arrived, a SAR before/after pair became ready). This is the right source for \"what is new since last time\" and for a standing watch. By default only changes worth a person's attention are returned — set notable_only=false for the full ledger, including changes deliberately judged too minor to notify on.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "[minLon, minLat, maxLon, maxLat]. Omit for worldwide."
+        },
+        "date": {
+          "type": "string",
+          "description": "End of the window (YYYY-MM-DD). Defaults to today."
+        },
+        "days": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 30,
+          "description": "Window length ending at `date` (default 7)."
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Restrict to these signal categories."
+        },
+        "development_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "new_event",
+              "baseline",
+              "occurrence_time_established",
+              "casualty_count_first_reported",
+              "casualty_count_raised",
+              "casualty_count_corrected",
+              "casualties_disputed",
+              "attribution_stated",
+              "attribution_changed",
+              "attribution_disputed",
+              "corroboration_increased",
+              "severity_escalated",
+              "location_resolved",
+              "observability_established",
+              "collection_ready",
+              "imagery_available",
+              "sar_pair_ready",
+              "observed",
+              "confirmed",
+              "reporting_disputed",
+              "retracted"
+            ]
+          },
+          "description": "Restrict to these kinds of change. An unknown value is an error, never an empty result."
+        },
+        "notable_only": {
+          "type": "boolean",
+          "description": "Default true. False returns every recorded change, including minor ones."
+        },
+        "limit": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 200,
+          "description": "How many developments to return (default 50)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "developments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "developments"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
+    "name": "get_event_thread",
+    "description": "The full history of ONE event: its current state, and every change in the order it happened. Answers \"is this a new event or an update to an old one\" — the distinction a news feed cannot make. Returns the canonical event (where, when it HAPPENED as distinct from when it was reported, casualties, attribution and how that attribution is grounded), a timeline of developments, and every source article behind it. `occurred_at_basis` says whether the occurrence time was stated, absent, or never measured — those are three different things. `history_incomplete` marks an event that already existed when tracking began. Free of token charges: the discovery call that found the event was already metered.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "number",
+          "description": "Any signal id belonging to the event; the whole canonical event is returned."
+        }
+      },
+      "required": [
+        "event_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "canonical_event": {
+          "type": "object"
+        },
+        "timeline": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "required": [
+        "canonical_event",
+        "timeline"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
     "name": "create_standing_order",
     "description": "Put an area under CONTINUOUS watch: save a question plus a bounding box and Delta re-answers it on a schedule, notifying only when the answer actually changed. Creating one is FREE. Each time it fires it runs ask_analyst and is metered like any Analyst question, so the cost is per CHANGE, not per check: a deterministic pass over the corpus decides whether anything new crossed the reporting bar, and quiet periods never invoke the model or charge anything. Returns projected_monthly_tokens_typical (the observed median cost per run × this cadence) and projected_monthly_tokens_max (the true ceiling: every check fires AND every run reaches the per-question cap), so the cost is visible before committing. Cadence and how many orders you may hold are set by your plan; the error says which limit you hit. Use it when the question is \"tell me when this changes\" rather than \"what is happening right now\".",
     "inputSchema": {
@@ -1299,6 +1451,132 @@ export const TOOLS = [
     },
     "annotations": {
       "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "list_layer_sets",
+    "description": "List the layer sets saved on this account — the named map configurations a user builds in the app, each with how many layers it holds, its tags, when it was last changed and when it was last opened. Use it to answer \"what have I saved\" and to tell an idle configuration from a working one. The layer tree itself is not returned: it is an internal format, and opening it is the map’s job. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Max layer sets to return (default 50)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "layer_sets": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "total": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "layer_sets"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_layer_set",
+    "description": "Read one saved layer set by id: its name, description, layer count, size, tags and timestamps. The serialized layer tree is deliberately not exposed (contents:\"not_exposed\") — it is an internal representation, not a public contract. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "layer_set_id": {
+          "type": "string",
+          "description": "The layer set id."
+        }
+      },
+      "required": [
+        "layer_set_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "layer_set": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "layer_set"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "list_uploaded_layers",
+    "description": "List the data this account uploaded to the map — name, format, size and when it was added — plus the formats the uploader actually accepts. Uploading itself happens in the app (it is a file transfer, not a JSON call), so use this to see what is already there and to answer format questions correctly: GeoJSON and GeoTIFF are accepted, a shapefile or KML is not. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "description": "Max uploads to return (default 50)."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "uploads": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "total": {
+          "type": "integer"
+        },
+        "accepted_formats": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "uploads"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
     }

@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`25` tools · MCP server version `1.12.2` · [full reference](https://offnadir-delta.com/docs/mcp)
+`30` tools · MCP server version `1.17.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-12 of the 25 tools cost nothing, so the first thing you run is free:
+16 of the 30 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -99,6 +99,8 @@ What is happening, where it concentrates, and what today looks like.
 | `query_stats` | Aggregate statistics over the signal corpus — total event count plus per-category and per-day breakdown (trend) for a bounding box and date window. | 1 tok |
 | `query_hotspots` | Geographic hotspots — signal density grid-binned into cells, ranked by event count, each with peak severity, the categories present, and up to 5 representative event_ids (trace a cell back to its signals). | 1 tok |
 | `get_world_brief` | Fetch the Daily World Brief — an AI-synthesized OSINT/GEOINT digest of the previous UTC day's worldwide event signals (headline, executive summary, top developments with why-it-matters and what-to-watch, per-theme roll-up, ranked signals). | free |
+| `query_developments` | What actually CHANGED about the events in an area — not which articles are new. | 3 tok |
+| `get_event_thread` | The full history of ONE event: its current state, and every change in the order it happened. | free |
 
 ### Plan
 
@@ -140,6 +142,16 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 | `list_monitored_areas` | List the places under continuous satellite measurement on this key (Delta Monitor), with each area’s metric, most recent value, change since the previous measurement, whether that value was flagged anomalous, and coverage — how many acquisitions were measured versus how many exist. | free |
 | `get_monitored_area` | Fetch one monitored area with its full measurement history — every acquisition that was measured, its value, and whether it was flagged anomalous. | free |
 | `create_monitored_area` | Put a place under continuous satellite measurement: pick an area and what to count, and every new Sentinel-1 / Sentinel-2 / VIIRS acquisition over it is measured automatically from then on. | free |
+
+### Workspace
+
+The map assets you own — saved layer sets and your own uploaded data.
+
+| Tool | What it does | Cost |
+| --- | --- | --- |
+| `list_layer_sets` | List the layer sets saved on this account — the named map configurations a user builds in the app, each with how many layers it holds, its tags, when it was last changed and when it was last opened. | free |
+| `get_layer_set` | Read one saved layer set by id: its name, description, layer count, size, tags and timestamps. | free |
+| `list_uploaded_layers` | List the data this account uploaded to the map — name, format, size and when it was added — plus the formats the uploader actually accepts. | free |
 
 ### Account
 
