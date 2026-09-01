@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.19.0.
+// Generated for Off-Nadir Delta MCP 1.22.0.
 
 export const TOOLS = [
   {
@@ -812,7 +812,12 @@ export const TOOLS = [
               "worldview",
               "iceye",
               "capella",
-              "skysat"
+              "skysat",
+              "umbra",
+              "synspective",
+              "iqps",
+              "radarsat-2",
+              "cosmo-skymed"
             ]
           },
           "description": "Families to consider. Omit for all seven. Use this to compare \"free systematic only\" against \"what could I task\"."
@@ -1184,6 +1189,10 @@ export const TOOLS = [
           "type": "boolean",
           "description": "Only claims a later answer restated with WEAKER evidence — read these first."
         },
+        "event_id": {
+          "type": "number",
+          "description": "Only claims about this event (global event id). Claims carry no event id — they are matched through the registry facilities the event is linked to, so an event with no facility link returns nothing rather than a guess (`event_link.linked` says which happened)."
+        },
         "limit": {
           "type": "number",
           "minimum": 1,
@@ -1207,6 +1216,9 @@ export const TOOLS = [
           }
         },
         "counts": {
+          "type": "object"
+        },
+        "event_link": {
           "type": "object"
         }
       },
@@ -1659,7 +1671,7 @@ export const TOOLS = [
   },
   {
     "name": "list_monitored_areas",
-    "description": "List the places under continuous satellite measurement on this key (Delta Monitor), with each area’s metric, most recent value, change since the previous measurement, whether that value was flagged anomalous, and coverage — how many acquisitions were measured versus how many exist. Coverage window_total is null when the catalog total is UNKNOWN; null never means zero. Also returns how many areas the plan allows and how many remain. Free of token charges.",
+    "description": "List the places under continuous satellite measurement on this key (Delta Watchlist measurements), with each area’s metric, most recent value, change since the previous measurement, whether that value was flagged anomalous, and coverage — how many acquisitions were measured versus how many exist. Coverage window_total is null when the catalog total is UNKNOWN; null never means zero. Also returns how many areas the plan allows and how many remain. Free of token charges.",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -1787,6 +1799,379 @@ export const TOOLS = [
     },
     "annotations": {
       "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "list_watches",
+    "description": "The Watchlist: everything this account keeps watch on — areas under satellite measurement, areas under event watch (standing orders), and real-world events being tracked — aggregated as one list with a state bucket per watch: needs_attention (anomaly, error, or a notable development), changed_today (a meaningful change in the last 24 h), awaiting_data, or stable. A watch groups everything on the same target: a monitored metric and a standing order on the same bbox appear as ONE watch with both capabilities. Also returns how many active watches the plan allows. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "watches": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "buckets": {
+          "type": "object"
+        },
+        "limits": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "watches"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_watch",
+    "description": "One watch end to end, in a single call: its target, current state, latest meaningful change, measurements with their recent series, standing-order questions, and — for an event watch — the event’s verification state, casualty/attribution fields, recent developments, imagery availability, and the full event thread (timeline + sources). Built so an agent does not need a chain of follow-up calls to answer \"what is the state of what I watch\". Free of token charges unless include_passes is set; an area watch’s FULL measurement history remains get_monitored_area (export-gated) — this returns the recent series.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "description": "The id from list_watches or create_watch."
+        },
+        "include_passes": {
+          "type": "boolean",
+          "description": "Add the collection outlook for this watch: which operators can image the target, when, at what off-nadir geometry, and whether a commercial tasking order is needed. Costs the same as predict_satellite_passes because it is the same answer — omit it and the call stays free. Off-Nadir Delta does not broker tasking; the outlook names where to order."
+        }
+      },
+      "required": [
+        "watch_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "watch": {
+          "type": "object"
+        },
+        "thread": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "watch"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "create_watch",
+    "description": "Add a target to the Watchlist. Two target types: an EVENT (pass the signal’s event id — the server resolves and binds the canonical event, so further reporting and even a later cluster merge stay on the same watch; never watch an article URL) or an AREA (pass a bbox — created as a saved bookmark; to actually measure something there use create_monitored_area, and to watch its events use create_standing_order — both auto-join the same watch). Free to create; event watches track state that is computed for everyone and never charge. Active watches are plan-limited.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "target_type": {
+          "type": "string",
+          "enum": [
+            "event",
+            "area"
+          ],
+          "description": "What kind of target to watch."
+        },
+        "event_id": {
+          "type": "number",
+          "description": "The signal’s numeric event id (required for target_type \"event\")."
+        },
+        "bbox": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4,
+          "description": "[west, south, east, north] WGS84 (required for target_type \"area\")."
+        },
+        "name": {
+          "type": "string",
+          "description": "Label for the watch (defaults from the target)."
+        },
+        "notify_email": {
+          "type": "boolean",
+          "description": "Email on meaningful changes (default false)."
+        }
+      },
+      "required": [
+        "target_type"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "watch": {
+          "type": "object"
+        },
+        "already_existed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "watch"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "delete_watch",
+    "description": "Delete a watch by id. This deletes the watch AND its underlying resources — bound monitored areas (with their measurement history) and standing orders are removed, exactly as the in-app Watchlist does. An event watch has no underlying resource; only the watch is removed. To stop without losing anything, pause instead: PATCH /api/v1/watches/{watchId} with status \"paused\" (also resumable). Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "description": "The id from list_watches or create_watch."
+        }
+      },
+      "required": [
+        "watch_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "deleted": {
+          "type": "string"
+        },
+        "removed": {
+          "type": "object"
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true,
+      "idempotentHint": true
+    }
+  },
+  {
+    "name": "search_entities",
+    "description": "Find a place in the location registry — ports and harbours, military bases and airfields, power and energy plants, maritime chokepoints and named seas. Use it to turn a name into something the other tools can anchor on, or to check whether Delta knows a facility at all. Matches the registry’s own names and aliases; a facility whose only recorded name is in the local script is findable by that name, not by an English one that does not exist in the source. Returns at most 50 rows and has no pagination — this is a lookup, not a data export. Costs 1 token per lookup. Cite the returned attribution wherever a registry name is shown.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "Name or partial name (at least 2 characters)."
+        },
+        "subtypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "port_facility",
+              "military_base",
+              "airport",
+              "refinery_energy",
+              "chokepoint",
+              "water_body"
+            ]
+          },
+          "description": "Restrict to these kinds of place. Omit for all."
+        },
+        "limit": {
+          "type": "number",
+          "description": "Max rows (1-50, default 20)."
+        }
+      },
+      "required": [
+        "query"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "limit": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "entities"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_entity",
+    "description": "What has happened at one place. Returns the registry record plus every event linked to it, each carrying HOW it was linked — `alias_exact_location` means a report named this facility, `geo_proximity` means a report was geolocated within range of it and the distance is given. Read the basis before treating a link as established: proximity is an association, not a statement that the event happened at this facility. Also returns how many Analyst claims mention it. Costs 1 token per lookup.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "entity_id": {
+          "type": "string",
+          "description": "The id from search_entities."
+        }
+      },
+      "required": [
+        "entity_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "entity": {
+          "type": "object"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "link_basis_counts": {
+          "type": "object"
+        },
+        "event_count": {
+          "type": "number"
+        },
+        "claim_count": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "entity"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_related_events",
+    "description": "What else connects to one event, and what came before and after it. Returns the places the event is linked to, then two kinds of DIRECT relation kept deliberately apart: `shared_entity` (another event at the same facility, strait or sea — the connection is the place, and it is named) and `nearby` (close in space and time only, with the distance and the gap stated). Nearby is NOT a claim of connection; treat it as a prompt to look, not as evidence. `network` holds the indirect events reached by walking shared names outward — kept in a separate array so a second-hop event is never read as sharing anything with the anchor. `insights.development` orders the record into what came BEFORE and what came AFTER along time-respecting paths only, grouping equal timestamps into one step rather than inventing an order inside a day; it asserts sequence, never cause. `insights.graph` returns the event↔connector bipartite graph with rarity weights, so a name shared by many events counts for less than a rare one, and `splits_into` marks the connectors whose removal would break the network apart. `assessment` grades the location against its own 90-day baseline. Costs 3 tokens for the direct relations, plus 1 for each network hop the walk ACTUALLY reaches beyond the first, up to 8 — depth is real work (about 4x the queries and 10x the payload at hop 10 versus hop 1), so it is billed rather than bundled. You are charged for hops taken, not hops requested: when the network runs out early the extra is not charged. The ceiling is fixed by `max_hop` before the call, and `meta` reports `max_charge` next to what was actually taken.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "number",
+          "description": "The signal id to anchor on."
+        },
+        "max_hop": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "How far to walk outward from the anchor, in shared-name hops (default 5). 1 returns direct relations only. The default is deliberately shallow because a relation gets weaker with every hop; raise it to trace a chain, and read `accounting.network_depth_reached` — the network often runs out before the depth asked for, and you are only charged for the hops it actually took. This sets the CEILING on the charge (3 + max_hop - 1, capped at 8), not the charge itself."
+        }
+      },
+      "required": [
+        "event_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "anchor": {
+          "type": "object"
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "network": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "nearby_facilities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "assessment": {
+          "type": "object"
+        },
+        "insights": {
+          "type": "object"
+        },
+        "accounting": {
+          "type": "object"
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        }
+      },
+      "required": [
+        "related"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
     }
@@ -2213,6 +2598,12 @@ export const RESOURCE_TEMPLATES = [
     "uriTemplate": "brief://{date}",
     "name": "Daily World Brief by date",
     "description": "The Daily World Brief for a specific UTC date (YYYY-MM-DD). Free.",
+    "mimeType": "application/json"
+  },
+  {
+    "uriTemplate": "watch://{watch_id}",
+    "name": "One watch, end to end",
+    "description": "A Watchlist entry with its current state, latest meaningful change, measurements and (for event watches) the full event thread — the same body get_watch returns. Free.",
     "mimeType": "application/json"
   }
 ] as const;
