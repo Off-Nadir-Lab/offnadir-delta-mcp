@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.23.0.
+// Generated for Off-Nadir Delta MCP 1.25.0.
 
 export const TOOLS = [
   {
@@ -163,7 +163,7 @@ export const TOOLS = [
             "concise",
             "detailed"
           ],
-          "description": "Per-signal field detail. \"concise\" (default) returns the key decision + GEOINT fields (id, date, category, title, location, lat/lng, severity/geoint scores, collection_priority, escalation, market, rs_level/rs_sensor, observability, observability_status, verification_status, geo_status, search_ready, article_count, independent_source_count, information_gain) — cheaper to scan. \"detailed\" returns the full Signal object (shape per the signals://schema resource)."
+          "description": "Per-signal field detail. \"concise\" (default) returns the key decision + GEOINT fields (id, date, category, title, location, lat/lng, severity/geoint scores, collection_priority, escalation, market, rs_level/rs_sensor, observability, observability_status, verification_status, the three verification axes (independence_status / event_verification_status / imagery_verification_status — one cannot stand for the others; signals return independence_status=not_assessed because outlet counts do not collapse syndication), geo_status, search_ready, article_count, independent_source_count, information_gain) — cheaper to scan. \"detailed\" returns the full Signal object (shape per the signals://schema resource)."
         }
       }
     },
@@ -637,7 +637,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "Inclusive start date YYYY-MM-DD. Defaults to today; clamped to your plan history floor."
+          "description": "Inclusive start date YYYY-MM-DD. Defaults to today. Not clamped to a plan history floor on this surface — the corpus epoch is the only floor."
         },
         "end_date": {
           "type": "string",
@@ -714,7 +714,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "Inclusive start date YYYY-MM-DD. Defaults to today; clamped to your plan history floor."
+          "description": "Inclusive start date YYYY-MM-DD. Defaults to today. Not clamped to a plan history floor on this surface — the corpus epoch is the only floor."
         },
         "end_date": {
           "type": "string",
