@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.22.0.
+// Generated for Off-Nadir Delta MCP 1.23.0.
 
 export const TOOLS = [
   {
@@ -1949,8 +1949,58 @@ export const TOOLS = [
     }
   },
   {
+    "name": "update_watch",
+    "description": "Rename a watch, or pause and resume it. Pausing is not a display state over live billing: the bound resources actually stop — monitored areas stop being measured (and stop being charged), standing orders stop checking. Resuming restarts them, with standing orders due immediately, and counts again against the active-watch plan limit. Use this instead of delete_watch when the measurement history is worth keeping. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "description": "The id from list_watches or create_watch."
+        },
+        "name": {
+          "type": "string",
+          "description": "New label for the watch."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "paused",
+            "saved"
+          ],
+          "description": "\"paused\" stops the bound checks; \"active\" resumes them."
+        },
+        "notify_email": {
+          "type": "boolean",
+          "description": "Email on meaningful changes."
+        }
+      },
+      "required": [
+        "watch_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "watch": {
+          "type": "object"
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
     "name": "delete_watch",
-    "description": "Delete a watch by id. This deletes the watch AND its underlying resources — bound monitored areas (with their measurement history) and standing orders are removed, exactly as the in-app Watchlist does. An event watch has no underlying resource; only the watch is removed. To stop without losing anything, pause instead: PATCH /api/v1/watches/{watchId} with status \"paused\" (also resumable). Free of token charges.",
+    "description": "Delete a watch by id. This deletes the watch AND its underlying resources — bound monitored areas (with their measurement history) and standing orders are removed, exactly as the in-app Watchlist does. An event watch has no underlying resource; only the watch is removed. To stop without losing anything, pause instead with update_watch (status \"paused\", also resumable). Free of token charges.",
     "inputSchema": {
       "type": "object",
       "properties": {

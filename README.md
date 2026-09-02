@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`37` tools · MCP server version `1.22.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`38` tools · MCP server version `1.23.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-20 of the 37 tools cost nothing, so the first thing you run is free:
+21 of the 38 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -148,6 +148,7 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 | `list_watches` | The Watchlist: everything this account keeps watch on — areas under satellite measurement, areas under event watch (standing orders), and real-world events being tracked — aggregated as one list with a state bucket per watch: needs_attention (anomaly, error, or a notable development), changed_today (a meaningful change in the last 24 h), awaiting_data, or stable. | free |
 | `get_watch` | One watch end to end, in a single call: its target, current state, latest meaningful change, measurements with their recent series, standing-order questions, and — for an event watch — the event’s verification state, casualty/attribution fields, recent developments, imagery availability, and the full event thread (timeline + sources). | free |
 | `create_watch` | Add a target to the Watchlist. | free |
+| `update_watch` | Rename a watch, or pause and resume it. | free |
 | `delete_watch` | Delete a watch by id. | free |
 
 ### Workspace
