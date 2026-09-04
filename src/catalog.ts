@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.26.0.
+// Generated for Off-Nadir Delta MCP 1.27.0.
 
 export const TOOLS = [
   {
@@ -817,10 +817,11 @@ export const TOOLS = [
               "synspective",
               "iqps",
               "radarsat-2",
-              "cosmo-skymed"
+              "cosmo-skymed",
+              "nisar"
             ]
           },
-          "description": "Families to consider. Omit for all seven. Use this to compare \"free systematic only\" against \"what could I task\"."
+          "description": "Families to consider. Omit for all thirteen. Use this to compare \"free systematic only\" (Sentinel, Landsat, NISAR) against \"what could I task\"."
         },
         "max_passes": {
           "type": "number",

@@ -32,7 +32,7 @@ import {
 
 import { PROMPTS, RESOURCES, RESOURCE_TEMPLATES, TOOLS } from './catalog.js';
 
-const VERSION = '1.26.0';
+const VERSION = '1.27.0';
 const REMOTE_URL = new URL(process.env.OFFNADIR_DELTA_MCP_URL ?? 'https://offnadir-delta.com/api/v1/mcp');
 
 /** Lazily-connected client to the hosted remote MCP server. */
@@ -53,7 +53,16 @@ async function getRemote(): Promise<Client> {
 
   connecting = (async () => {
     const transport = new StreamableHTTPClientTransport(REMOTE_URL, {
-      requestInit: { headers: { Authorization: `Bearer ${apiKey}` } },
+      requestInit: {
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          // Identify the proxy in the server's request log. Without it every call through this
+          // package arrives as a bare `node` and cannot be told apart from any other Node client,
+          // so "how much traffic comes through npm" has no answer. Same shape as the Python SDK
+          // (`offnadir-delta-python/x.y.z`), which the server already parses.
+          'User-Agent': `offnadir-delta-mcp/${VERSION}`,
+        },
+      },
     });
     const client = new Client({ name: 'offnadir-delta-mcp-proxy', version: VERSION }, { capabilities: {} });
     await client.connect(transport);
