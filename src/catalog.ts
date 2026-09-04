@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.25.0.
+// Generated for Off-Nadir Delta MCP 1.26.0.
 
 export const TOOLS = [
   {
@@ -1843,7 +1843,7 @@ export const TOOLS = [
   },
   {
     "name": "get_watch",
-    "description": "One watch end to end, in a single call: its target, current state, latest meaningful change, measurements with their recent series, standing-order questions, and — for an event watch — the event’s verification state, casualty/attribution fields, recent developments, imagery availability, and the full event thread (timeline + sources). Built so an agent does not need a chain of follow-up calls to answer \"what is the state of what I watch\". Free of token charges unless include_passes is set; an area watch’s FULL measurement history remains get_monitored_area (export-gated) — this returns the recent series.",
+    "description": "One watch end to end, in a single call: its target, current state, latest meaningful change, measurements with their recent series, standing-order questions, and — for an event watch — the event’s verification state, casualty/attribution fields, recent developments, imagery availability, and the full event thread (timeline + sources). Also returns what this account has written on the watch: the one line saying what it is tracking, and the notes and judgments kept against it, newest first. Built so an agent does not need a chain of follow-up calls to answer \"what is the state of what I watch\". Free of token charges unless include_passes is set; an area watch’s FULL measurement history remains get_monitored_area (export-gated) — this returns the recent series.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2025,6 +2025,126 @@ export const TOOLS = [
         },
         "removed": {
           "type": "object"
+        }
+      }
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true,
+      "idempotentHint": true
+    }
+  },
+  {
+    "name": "add_note",
+    "description": "Add a note to a watch, start a thread on it, or reply to one — one append-only ledger. Give a title and the note becomes a THREAD others can reply to (pass its id as parent_id); give neither and it is a plain note. Replies are one level deep and carry no title of their own. Separately, the difference between a note and a judgment is whether you state a confidence. With no confidence it is a NOTE: something worth writing down about this target, kept with it and superseding nothing. With confidence (high/moderate/low) it is a JUDGMENT, and it supersedes the previous judgment instead of overwriting it, so the record of what was thought when survives; likelihood (ICD 203 terms) separately says how probable the thing itself is. Gaps and a next check can be recorded alongside — what would change this, and when to look again. This is the account’s own record about its own target; it does not change the event’s public verification state. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "description": "The id from list_watches or create_watch."
+        },
+        "note": {
+          "type": "string",
+          "description": "What you want kept with this watch."
+        },
+        "title": {
+          "type": "string",
+          "description": "Give it a heading and the note becomes a thread others can reply to. Omit for a plain note. A reply cannot have one."
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "Reply to this note id (from get_watch). One level deep — reply to the thread, not to a reply."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "high",
+            "moderate",
+            "low"
+          ],
+          "description": "How sure this judgment is — a statement about the evidence, not the event. Omit it and the entry is kept as a plain note, which supersedes nothing."
+        },
+        "likelihood": {
+          "type": "string",
+          "enum": [
+            "very unlikely",
+            "unlikely",
+            "roughly even chance",
+            "likely",
+            "very likely",
+            "almost certain"
+          ],
+          "description": "How probable the thing itself is (ICD 203). Omit rather than guess."
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "What is missing — what would change this judgment. Only meaningful with a confidence."
+        },
+        "next_check": {
+          "type": "string",
+          "description": "When or what to look at next."
+        }
+      },
+      "required": [
+        "watch_id",
+        "note"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "note": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "note"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "delete_note",
+    "description": "Delete one note from a watch. The note itself is removed; the fact that it was deleted stays in the account’s action log, so nothing disappears without a trace. If the note was a judgment that a later judgment superseded, the later one stays — it simply stops pointing at what it replaced. Free of token charges.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "description": "The id from list_watches or create_watch."
+        },
+        "note_id": {
+          "type": "string",
+          "description": "The note id from get_watch or add_note."
+        }
+      },
+      "required": [
+        "watch_id",
+        "note_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "deleted": {
+          "type": "string"
         }
       }
     },
@@ -2653,7 +2773,7 @@ export const RESOURCE_TEMPLATES = [
   {
     "uriTemplate": "watch://{watch_id}",
     "name": "One watch, end to end",
-    "description": "A Watchlist entry with its current state, latest meaningful change, measurements and (for event watches) the full event thread — the same body get_watch returns. Free.",
+    "description": "A Watchlist entry with its current state, latest meaningful change, measurements, (for event watches) the full event thread, and the notes kept against it. The same body get_watch returns. Free.",
     "mimeType": "application/json"
   }
 ] as const;

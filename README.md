@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`38` tools · MCP server version `1.25.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`40` tools · MCP server version `1.26.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-21 of the 38 tools cost nothing, so the first thing you run is free:
+23 of the 40 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -150,6 +150,8 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 | `create_watch` | Add a target to the Watchlist. | free |
 | `update_watch` | Rename a watch, or pause and resume it. | free |
 | `delete_watch` | Delete a watch by id. | free |
+| `add_note` | Add a note to a watch, start a thread on it, or reply to one — one append-only ledger. | free |
+| `delete_note` | Delete one note from a watch. | free |
 
 ### Workspace
 
@@ -203,7 +205,7 @@ Keys are shown once at creation, hashed at rest, and revocable at any time from
 | `imagery://collections` | The satellite catalog collections searchable via search_imagery — Sentinel-1 C-band SAR, Sentinel-2 optical, and NISAR L-band SAR (provisional calibration). Free. |
 | `status://current` | How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free. |
 | `brief://{date}` | The Daily World Brief for a specific UTC date (YYYY-MM-DD). Free. |
-| `watch://{watch_id}` | A Watchlist entry with its current state, latest meaningful change, measurements and (for event watches) the full event thread — the same body get_watch returns. Free. |
+| `watch://{watch_id}` | A Watchlist entry with its current state, latest meaningful change, measurements, (for event watches) the full event thread, and the notes kept against it. The same body get_watch returns. Free. |
 
 | Prompt | Description |
 | --- | --- |
