@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.27.0.
+// Generated for Off-Nadir Delta MCP 1.28.0.
 
 export const TOOLS = [
   {
@@ -1192,7 +1192,7 @@ export const TOOLS = [
         },
         "event_id": {
           "type": "number",
-          "description": "Only claims about this event (global event id). Claims carry no event id — they are matched through the registry facilities the event is linked to, so an event with no facility link returns nothing rather than a guess (`event_link.linked` says which happened)."
+          "description": "Only claims about this event (global event id). Two deterministic anchors are tried: the claim’s own recorded event, and the registry facilities the event is linked to. Neither is a guess — when neither resolves, nothing is returned and `event_link.linked` says so."
         },
         "limit": {
           "type": "number",
@@ -1231,6 +1231,93 @@ export const TOOLS = [
       "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
+    }
+  },
+  {
+    "name": "test_hypotheses",
+    "description": "Given competing statements, return the observation that would REFUTE the most of them — and, in the same answer, the observations that would refute none of them however convincing they look. Each statement is decomposed into the observables it requires (vessel presence, berth occupancy, burn extent, ground deformation, a running total…), and the observables are scored by how many statements their ABSENCE would eliminate. Read the direction carefully, because it only runs one way: an observable that is absent refutes every statement requiring it; an observable that is PRESENT refutes nothing, since a statement that does not require it is not predicting its absence. Four verdicts come back: `actionable` (Delta serves it today), `procurable` (real, but bought or fetched elsewhere — `how_to_obtain` says where), `not_observable` (no overhead collection settles it; a record or a transponder might), and `no_diagnostic_value` (every statement requires it, so measuring it cannot separate them). Pass `hypotheses` for a comparison you define, or `event_id` to test the claims you were already given about that event. Answering \"nothing you can collect would change this\" is a supported outcome, not a failure.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "maxItems": 8,
+          "description": "Two to eight competing statements, one assertion each (up to 500 characters). Omit when using event_id."
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "competing",
+            "joint"
+          ],
+          "description": "`competing` (default): the statements are mutually exclusive, so the goal is to separate them and an observable required by all of them has no diagnostic value. `joint`: they are held together, so the goal is to falsify the most at once and an observable required by all of them is the best one. Ignored with event_id, which is always joint."
+        },
+        "event_id": {
+          "type": "number",
+          "description": "Use the standing claims you were given about this event (global event id) as the statements. Restated claims are excluded — only what currently stands is tested."
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "meta": {
+          "type": "object",
+          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "hypotheses": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "best": {
+          "type": "object"
+        },
+        "discriminators": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "no_diagnostic_value": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "undecomposable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "no_discriminator_reason": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "discriminators",
+        "note"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
     }
   },
   {
@@ -2219,7 +2306,7 @@ export const TOOLS = [
   },
   {
     "name": "get_entity",
-    "description": "What has happened at one place. Returns the registry record plus every event linked to it, each carrying HOW it was linked — `alias_exact_location` means a report named this facility, `geo_proximity` means a report was geolocated within range of it and the distance is given. Read the basis before treating a link as established: proximity is an association, not a statement that the event happened at this facility. Also returns how many Analyst claims mention it. Costs 1 token per lookup.",
+    "description": "What has happened at one place. Returns the registry record plus every event linked to it, each carrying HOW it was linked — `alias_exact_location` means a report named this facility, `geo_proximity` means a report was geolocated within range of it and the distance is given. Read the basis before treating a link as established: proximity is an association, not a statement that the event happened at this facility. Also returns how many Analyst claims mention it, and an OBSERVABILITY profile: the events linked here are decomposed into the observables that would have tested them, counted, and marked with whether Delta serves each one or where it could be obtained instead. That profile is derived from what actually happened at this place — it is not a general claim about places of this type, and a place with no linked events returns no profile rather than a guess. Costs 1 token per lookup.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2256,6 +2343,9 @@ export const TOOLS = [
         },
         "claim_count": {
           "type": "number"
+        },
+        "observability": {
+          "type": "object"
         }
       },
       "required": [

@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`40` tools · MCP server version `1.27.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`41` tools · MCP server version `1.28.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-23 of the 40 tools cost nothing, so the first thing you run is free:
+23 of the 41 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -116,6 +116,7 @@ Whether a satellite can resolve it, which one, and when it next passes.
 | `rank_imaging_priority` | WHERE — and with what class (and therefore cost) of satellite — is observation most worthwhile right now? | 1 tok |
 | `survey_observable_events` | Which events in a window can a given in-app sensor actually RESOLVE? | 1 tok |
 | `predict_satellite_passes` | WHEN can this place next be imaged, and by WHAT — the timing half of collection planning. | 2 tok |
+| `test_hypotheses` | Given competing statements, return the observation that would REFUTE the most of them — and, in the same answer, the observations that would refute none of them however convincing they look. | 3 tok |
 | `lookup_elevation` | Measure terrain height from the Copernicus DEM GLO-30 — a point (lat + lon), an area (bbox), or a drawn polygon, for which the statistics are computed over the samples INSIDE the ring rather than its bounding box. | free |
 | `analyze_terrain` | Compute FROM the terrain rather than reading heights out of it (that is lookup_elevation). | free |
 
