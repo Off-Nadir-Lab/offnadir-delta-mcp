@@ -14,12 +14,12 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.28.0.
+// Generated for Off-Nadir Delta MCP 1.29.0.
 
 export const TOOLS = [
   {
     "name": "query_signals",
-    "description": "Query geolocated world event signals (Delta Signals: geopolitical, security, disaster, and infrastructure events distilled from global news media, AI-enriched with severity/GEOINT scores and satellite-collection recommendations). Filter by bounding box, date window, and category. Costs 3 token(s) per call, charged to the API key owner's balance.",
+    "description": "Geolocated world events (geopolitical, security, disaster, infrastructure) from global news media, AI-enriched with severity/GEOINT scores and collection recommendations.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -30,17 +30,17 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide."
+          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+          "description": "Window end date, YYYY-MM-DD (UTC). Default today."
         },
         "days": {
           "type": "integer",
           "minimum": 1,
           "maximum": 30,
-          "description": "Window length in days ending on `date`. Defaults to 1."
+          "description": "Window length in days. Default 1."
         },
         "categories": {
           "type": "array",
@@ -59,7 +59,7 @@ export const TOOLS = [
               "other"
             ]
           },
-          "description": "Restrict to these categories. Omit for all."
+          "description": "Restrict to these categories."
         },
         "markets": {
           "type": "array",
@@ -77,27 +77,27 @@ export const TOOLS = [
               "equities"
             ]
           },
-          "description": "Restrict to signals AI-tagged as exposing these financial markets via a direct physical/supply channel (informational only, not investment advice). Omit for all."
+          "description": "Markets AI-tagged as exposed through a direct physical/supply channel."
         },
         "limit": {
           "type": "integer",
           "minimum": 1,
           "maximum": 500,
-          "description": "Maximum rows per page. Defaults to 100."
+          "description": "Max rows per page. Default 100."
         },
         "cursor": {
           "type": "string",
-          "description": "Opaque pagination cursor from a previous response's meta.next_cursor."
+          "description": "Cursor from meta.next_cursor."
         },
         "minSeverity": {
           "type": "number",
           "minimum": 0,
           "maximum": 10,
-          "description": "Keep only signals with severity_score >= this (0-10)."
+          "description": "severity_score >= this (0-10)."
         },
         "escalating": {
           "type": "boolean",
-          "description": "Keep only signals whose escalation_trend is \"escalating\"."
+          "description": "escalation_trend is \"escalating\"."
         },
         "sort": {
           "type": "string",
@@ -107,15 +107,15 @@ export const TOOLS = [
             "sources",
             "geoint"
           ],
-          "description": "Result ordering. Omit for the feed's default ranking. \"geoint\" ranks by the continuous GEOINT collection priority (intelligence.collection_priority) — an imageability gate times tasking value (severity, urgency, information gain, corroboration, escalation, market) — so imageable, decision-relevant events (e.g. a high-severity escalating strike) rise and non-observable news noise sinks. This is NOT the saturated geoint_score."
+          "description": "\"geoint\" = collection_priority, NOT the saturated geoint_score."
         },
         "updatedSince": {
           "type": "string",
-          "description": "Differential fetch: only signals (re)enriched at/after this ISO 8601 timestamp. Ignores the date window. Response signals carry last_updated_at."
+          "description": "Only signals (re)enriched at/after this ISO 8601 time. Ignores the date window."
         },
         "createdSince": {
           "type": "string",
-          "description": "Differential fetch: only signals first enriched at/after this ISO 8601 timestamp."
+          "description": "Only signals FIRST enriched at/after this ISO 8601 time."
         },
         "observability": {
           "type": "string",
@@ -123,7 +123,7 @@ export const TOOLS = [
             "observable",
             "not-observable"
           ],
-          "description": "Keep only signals with this satellite observability — whether a physical mark is imageable at all (intelligence.satellite_observability)."
+          "description": "Is a physical mark imageable at all."
         },
         "observabilityStatus": {
           "type": "string",
@@ -132,7 +132,7 @@ export const TOOLS = [
             "not_observable",
             "insufficient_detail"
           ],
-          "description": "3-state observability filter. Unlike `observability` (binary), this exposes `insufficient_detail` — signals where imageability is unknown (no RS enrichment yet, unresolved location, or an Impossible verdict rescued because the event reads kinetic). `not_observable` = a considered \"nothing to image\"; neither bucket leaks insufficient_detail."
+          "description": "3-state `observability`, adding `insufficient_detail`; neither bucket leaks it."
         },
         "openData": {
           "type": "string",
@@ -141,21 +141,21 @@ export const TOOLS = [
             "commercial-recommended",
             "not-applicable"
           ],
-          "description": "Keep only signals with this open-data sufficiency — free imagery is enough vs commercial tasking recommended (intelligence.open_data_sufficiency)."
+          "description": "Free imagery enough vs commercial tasking recommended."
         },
         "minInformationGain": {
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Keep only signals whose intelligence.expected_information_gain >= this (0-1)."
+          "description": "expected_information_gain >= this (0-1)."
         },
         "taskableOnly": {
           "type": "boolean",
-          "description": "Keep only signals whose coordinate is search_ready — GEO-READY ONLY: drops country centroids, ADM1 mismatches, reporting-dateline fallbacks and unresolved fixes (intelligence.geo_validation.search_ready). It does NOT imply observable or quality-passed, so not-observable / insufficient-detail / quality-failed signals can still appear. For automated imagery tasking use collectionReadyOnly (or combine with observability:\"observable\")."
+          "description": "Coordinate is search_ready. GEOMETRY ONLY — for tasking use collectionReadyOnly."
         },
         "collectionReadyOnly": {
           "type": "boolean",
-          "description": "STRICT tasking-candidate filter: search_ready AND observability=observable AND quality.status!=failed AND a concrete collection plan (rs_target + rs_reason present) AND an event coordinate. The safe input set for automated imagery tasking — a superset of every gate taskableOnly alone does not check."
+          "description": "Strict tasking candidates: search_ready AND observable AND quality!=failed AND a plan AND a coordinate."
         },
         "responseFormat": {
           "type": "string",
@@ -163,7 +163,7 @@ export const TOOLS = [
             "concise",
             "detailed"
           ],
-          "description": "Per-signal field detail. \"concise\" (default) returns the key decision + GEOINT fields (id, date, category, title, location, lat/lng, severity/geoint scores, collection_priority, escalation, market, rs_level/rs_sensor, observability, observability_status, verification_status, the three verification axes (independence_status / event_verification_status / imagery_verification_status — one cannot stand for the others; signals return independence_status=not_assessed because outlet counts do not collapse syndication), geo_status, search_ready, article_count, independent_source_count, information_gain) — cheaper to scan. \"detailed\" returns the full Signal object (shape per the signals://schema resource)."
+          "description": "\"detailed\" returns the full Signal (see signals://schema)."
         }
       }
     },
@@ -198,7 +198,7 @@ export const TOOLS = [
   },
   {
     "name": "query_stats",
-    "description": "Aggregate statistics over the signal corpus — total event count plus per-category and per-day breakdown (trend) for a bounding box and date window. Cheaper than query_signals (returns roll-ups, not rows). NOTE the unit: `total` counts article-deduped events (meta.population = article_deduped_events), which is NOT cluster-collapsed, so it is >= the query_signals count for the same window. Costs 1 token(s) per call.",
+    "description": "Roll-ups over the corpus: totals plus per-category and per-day breakdown. NOTE the unit — `total` counts article-deduped events, not clusters, so it is >= the query_signals count.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -209,7 +209,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide."
+          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
         },
         "date": {
           "type": "string",
@@ -270,7 +270,7 @@ export const TOOLS = [
   },
   {
     "name": "query_hotspots",
-    "description": "Geographic hotspots — signal density grid-binned into cells, ranked by event count, each with peak severity, the categories present, and up to 5 representative event_ids (trace a cell back to its signals). Use to find WHERE activity is concentrating. NOTE the unit: cells count satellite-observable points (meta.population = rs_observable_points); meta reports source_point_count and dropped_by_geo_count / dropped_by_severity_count so point_count is fully accountable. Costs 1 token(s) per call.",
+    "description": "Where activity concentrates: density grid-binned into ranked cells with peak severity, categories and representative event_ids. Cells count satellite-observable points.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -281,7 +281,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Omit for worldwide."
+          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
         },
         "date": {
           "type": "string",
@@ -328,7 +328,7 @@ export const TOOLS = [
           "type": "integer",
           "minimum": 1,
           "maximum": 500,
-          "description": "Max source points sampled before grid-binning — NOT the number of cells returned. Defaults to 500 (the max). Lower values sample fewer events and fragment clusters (each cell trends toward count 1), so leave at the default for a representative density map."
+          "description": "Source points sampled before binning — NOT the cell count. Default/max 500."
         }
       }
     },
@@ -363,13 +363,13 @@ export const TOOLS = [
   },
   {
     "name": "get_world_brief",
-    "description": "Fetch the Daily World Brief — an AI-synthesized OSINT/GEOINT digest of the previous UTC day's worldwide event signals (headline, executive summary, top developments with why-it-matters and what-to-watch, per-theme roll-up, ranked signals). Free of token charges. The result includes a freshness object (brief_date, age_hours, is_stale) — if is_stale is true this is the latest published brief and a newer day is not yet available, so relay it as possibly out of date.",
+    "description": "The Daily World Brief — an AI digest of the previous UTC day. freshness.is_stale means no newer day is available yet, so relay it as possibly out of date.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "date": {
           "type": "string",
-          "description": "Brief date, YYYY-MM-DD (UTC). Defaults to the latest available."
+          "description": "YYYY-MM-DD (UTC). Default latest available."
         }
       }
     },
@@ -396,7 +396,7 @@ export const TOOLS = [
   },
   {
     "name": "get_usage",
-    "description": "Check the calling key's remaining token balance and plan capabilities — monthly allocation, tokens used this period, tokens remaining, and whether the plan includes AI tools over the API (assess_signal / ask_analyst). Use this to pre-flight a metered call: decide whether enough balance is left before spending. Free of token charges.",
+    "description": "The calling key's remaining token balance and plan capabilities. Pre-flight a metered call with it.",
     "inputSchema": {
       "type": "object",
       "properties": {}
@@ -452,7 +452,7 @@ export const TOOLS = [
   },
   {
     "name": "search_imagery",
-    "description": "Search the satellite imagery catalog (Sentinel-1, Sentinel-2, NISAR L-band) for scenes over an area and date window — the natural follow-up to a signal (find imagery over the event location). Returns scene metadata (id, datetime, footprint, cloud cover, platform, orbit geometry, coverage, catalog link) — no imagery bytes. Pass eventDate to classify each scene timing=pre/post/same_day_unknown (a same-day scene is same_day_unknown, never post, without a real event time) and get pre/post bracketing + window_status + SAR sar_pair_status in meta. Pass eventPoint [lon,lat] and/or eventAoi [minLon,minLat,maxLon,maxLat] to get each scene's target_relation (covers_event_geometry = pure geometry gate; usable_for_analysis additionally requires acceptable cloud for optical, so a 99%-cloud scene is geometry-covering but not analysis-usable) — so a scene that only clips the wide bbox is not mistaken for covering the event. Costs 2 token(s) per call.",
+    "description": "Search the imagery catalog (Sentinel-1, Sentinel-2, NISAR L-band) over an area and window. Metadata only, no pixels. eventDate tags each scene pre/post — **a same-day scene is same_day_unknown, never post** — and eventPoint/eventAoi add target_relation, so a scene that only clips the bbox is not read as covering the event.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -463,7 +463,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Bounding box [minLon, minLat, maxLon, maxLat] (WGS84). Required."
+          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Required."
         },
         "collection": {
           "type": "string",
@@ -473,21 +473,21 @@ export const TOOLS = [
             "sentinel-2-l2a",
             "NISAR_L2_GCOV_PROVISIONAL_V1"
           ],
-          "description": "Catalog collection. Defaults to sentinel-2-l2a."
+          "description": "Catalog collection. Default sentinel-2-l2a."
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+          "description": "Window end date, YYYY-MM-DD (UTC). Default today."
         },
         "days": {
           "type": "integer",
           "minimum": 1,
           "maximum": 30,
-          "description": "Window length in days. Defaults to 7."
+          "description": "Window length in days. Default 7."
         },
         "eventDate": {
           "type": "string",
-          "description": "Event date, YYYY-MM-DD (UTC). When set, each scene is tagged timing=pre/post/same_day_unknown and the search window is widened to the canonical pre/post span, so meta reports has_pre_baseline / has_post / bracketing_available / window_status; for sentinel-1-grd it also reports sar_pair_status (ready | not_ready | indeterminate_event_time) + orbit_note."
+          "description": "Widens the window to the canonical pre/post span and adds bracketing; sentinel-1-grd also gets sar_pair_status."
         },
         "eventPoint": {
           "type": "array",
@@ -496,7 +496,7 @@ export const TOOLS = [
           },
           "minItems": 2,
           "maxItems": 2,
-          "description": "Event point [lon, lat] (WGS84). When set, each scene reports target_relation.covers_event_point / usable_for_event so a scene that only clips the wide bbox is not presented as covering the event."
+          "description": "[lon, lat] WGS84. Drives covers_event_point / usable_for_event."
         },
         "eventAoi": {
           "type": "array",
@@ -505,11 +505,11 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Event AOI bbox [minLon, minLat, maxLon, maxLat] (WGS84). Drives target_relation.intersects_event_aoi / event_aoi_coverage_ratio."
+          "description": "[minLon,minLat,maxLon,maxLat]. Drives intersects_event_aoi / coverage_ratio."
         },
         "eventTimestamp": {
           "type": "string",
-          "description": "Full event timestamp (ISO 8601) when known — promotes same-day scenes from same_day_unknown to pre/post by time."
+          "description": "ISO 8601 event time — promotes same-day scenes to pre/post."
         },
         "cloudCoverMax": {
           "type": "number",
@@ -529,7 +529,7 @@ export const TOOLS = [
             "concise",
             "detailed"
           ],
-          "description": "Per-scene field detail. \"concise\" (default) returns id, collection, datetime, timing, cloud_cover, platform, orbit_state, relative_orbit, instrument_mode, product_type, coverage_ratio, covers_event_point, usable_for_event, stac_item_url, preview. \"detailed\" adds the full footprint bbox/geometry, the complete target_relation, constellation, polarizations, absolute_orbit, incidence_angle, and non-signed asset hrefs."
+          "description": "\"detailed\" adds footprint geometry, full target_relation, polarizations, orbit numbers, incidence."
         }
       },
       "required": [
@@ -567,13 +567,13 @@ export const TOOLS = [
   },
   {
     "name": "plan_event_imagery",
-    "description": "Plan the imagery evidence for ONE event in a single call, instead of guessing collections one at a time. Give the event_id and what you are trying to establish (damage_assessment | flood_mapping | wildfire_assessment) and the SERVER runs the deterministic plan for that goal: it always checks BOTH in-app sensors — sentinel-1-grd (SAR: all-weather, the only look that survives cloud and night) and sentinel-2-l2a (optical, human-legible) — exactly once each, against the event’s own footprint and a pre/post window around its date. The result carries, per search, why it was made, how many scenes came back, how many actually COVER the event and are usable (cloud-obscured optical does not count), the SAR pair status, and whether a pre/post bracket exists. It also states screening / detection / identification capability: Sentinel-1/2 screen and detect at facility scale, and only object-level identification needs commercial VHR — a VHR recommendation NEVER invalidates what the free catalog already showed. Prefer this over several search_imagery calls for the same event: it cannot miss the SAR look and cannot repeat a search. An event with no resolvable footprint is refused rather than planned against a guess. Costs 4 token(s) per call (it deliberately issues two catalog searches).",
+    "description": "The deterministic imagery plan for ONE event: checks BOTH sensors exactly once — sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a — against the event footprint and a pre/post window. **A VHR recommendation never invalidates what the free catalog showed.**",
     "inputSchema": {
       "type": "object",
       "properties": {
         "event_id": {
           "type": "integer",
-          "description": "The `id` from query_signals. The server resolves its authoritative point + AOI."
+          "description": "The `id` from query_signals; the server resolves its point and AOI."
         },
         "analysis_goal": {
           "type": "string",
@@ -582,11 +582,11 @@ export const TOOLS = [
             "flood_mapping",
             "wildfire_assessment"
           ],
-          "description": "What the imagery must establish — decides which collection leads and how cloud is gated."
+          "description": "What the imagery must establish — decides the lead collection and cloud gating."
         },
         "event_date": {
           "type": "string",
-          "description": "Event date YYYY-MM-DD. Optional — the event row supplies it when known."
+          "description": "YYYY-MM-DD. The event row supplies it when known."
         }
       },
       "required": [
@@ -622,7 +622,7 @@ export const TOOLS = [
   },
   {
     "name": "rank_imaging_priority",
-    "description": "WHERE — and with what class (and therefore cost) of satellite — is observation most worthwhile right now? Crosses each event’s composite IMPORTANCE (severity × source breadth × market relevance) with the SPEC CLASS its required resolution demands: coarse (≤100 m), hr (≤10 m, Sentinel-class free data) or vhr (sub-metre, commercial tasking). Returns how many imageable events fall in each class with their mean importance, plus the top targets with importance, required class and AOI. Use it to triage a theatre before spending on imagery: a high-importance event that only needs hr is answerable with free Sentinel data, while a vhr one is what a paid order is for. Deterministic — no LLM, no per-event cost. Costs 1 token(s) per call.",
+    "description": "WHERE, and with what class of satellite, observation is most worthwhile now: composite IMPORTANCE crossed with the SPEC CLASS the required resolution demands — coarse, hr (free Sentinel-class) or vhr. Deterministic.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -633,22 +633,22 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Area [west, south, east, north] in WGS84. Omit for a global survey."
+          "description": "[west, south, east, north] WGS84. Omit for global."
         },
         "start_date": {
           "type": "string",
-          "description": "Inclusive start date YYYY-MM-DD. Defaults to today. Not clamped to a plan history floor on this surface — the corpus epoch is the only floor."
+          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here."
         },
         "end_date": {
           "type": "string",
-          "description": "Inclusive end date YYYY-MM-DD. Defaults to today. The window is capped at 30 days."
+          "description": "YYYY-MM-DD, inclusive. Default today; capped at 30 days."
         },
         "categories": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Restrict to these Delta categories (kinetic, armed_conflict, maritime, natural_disaster, infrastructure, aviation, humanitarian, protest, diplomacy)."
+          "description": "Restrict to these Delta categories."
         },
         "min_geoint_score": {
           "type": "number",
@@ -691,7 +691,7 @@ export const TOOLS = [
   },
   {
     "name": "survey_observable_events",
-    "description": "Which events in a window can a given in-app sensor actually RESOLVE? Evaluates the FULL set (not just the top few) against each event’s precomputed required resolution, and returns how many are observable vs not, the breakdown by required resolution, and the top observable events with the ready-made imaging rationale. Observability here is resolvability — whether the physical mark is large enough for the sensor: Sentinel-2 is ~10 m optical (needs daylight and clear sky), Sentinel-1 is SAR (all-weather, day or night). Prefer this over asking about events one at a time: it is exhaustive AND cheap, and it is the honest way to answer \"what can we actually see\" before committing collection effort. The population is deliberately UNGATED by tasking readiness — it answers \"what could this sensor resolve\", not \"what may we task\" — so its total sits above rank_imaging_priority and counts a different unit from query_signals' clusters; see population_detail, and read collection_ready per event for taskability. Deterministic — no LLM. Costs 1 token(s) per call.",
+    "description": "Which events a sensor can actually RESOLVE, over the FULL set. **The population is ungated by tasking readiness**, so its total sits above rank_imaging_priority and counts a different unit from query_signals clusters.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -701,7 +701,7 @@ export const TOOLS = [
             "sentinel-2",
             "sentinel-1"
           ],
-          "description": "Which in-app sensor to evaluate against. sentinel-2 = ~10 m optical (daylight, clear sky); sentinel-1 = SAR (all-weather, day/night). Default sentinel-2."
+          "description": "sentinel-2 = ~10 m optical (needs daylight and clear sky); sentinel-1 = SAR."
         },
         "bbox": {
           "type": "array",
@@ -710,15 +710,15 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Area [west, south, east, north] in WGS84. Omit for a global survey."
+          "description": "[west, south, east, north] WGS84. Omit for global."
         },
         "start_date": {
           "type": "string",
-          "description": "Inclusive start date YYYY-MM-DD. Defaults to today. Not clamped to a plan history floor on this surface — the corpus epoch is the only floor."
+          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here."
         },
         "end_date": {
           "type": "string",
-          "description": "Inclusive end date YYYY-MM-DD. Defaults to today. The window is capped at 30 days."
+          "description": "YYYY-MM-DD, inclusive. Default today; capped at 30 days."
         },
         "categories": {
           "type": "array",
@@ -768,7 +768,7 @@ export const TOOLS = [
   },
   {
     "name": "predict_satellite_passes",
-    "description": "WHEN can this place next be imaged, and by WHAT — the timing half of collection planning. Propagates current orbital elements (SGP4 over day-cached CelesTrak two-line elements) for seven families and returns the access windows over a target: Sentinel-1 (SAR), Sentinel-2 and Landsat (free, SYSTEMATIC — routinely collected, so near-certain), plus WorldView, ICEYE, Capella and SkySat (commercial, AGILE — taskable ACCESS opportunities that require a paid order and are NOT guaranteed collects). Each pass carries acquisition/loss times, the closest-approach instant, peak elevation, OFF-NADIR angle, ground distance, ascending/descending, solar elevation and whether the target is sunlit (optical needs light; SAR does not), and the age of the element set it was computed from. Use it to answer \"when is the next chance to see this\", to choose between waiting for a free systematic pass and paying to task an agile one, and to time a pre/post change-detection pair. Give lat/lon, or a bbox whose centre is used. Horizon is capped at 7 days. If elements cannot be retrieved the result says so (retrieval_ok:false) — that means timing is UNAVAILABLE, never \"no passes\". Every pass is a GEOMETRIC access opportunity computed from orbital elements and swath width (geometry_only:true, acquisition_plan_verified:false): no operator collection plan is consulted, so this is when a sensor COULD see the target, never a confirmed acquisition schedule. With no start_date the window begins NOW, so the first pass listed is always still ahead. Costs 2 token(s) per call.",
+    "description": "WHEN a place can next be imaged and by WHAT: SGP4 over day-cached elements for 13 free-systematic and commercial-taskable families. **Every pass is a GEOMETRIC access opportunity** — no operator plan is consulted. retrieval_ok:false means timing is UNAVAILABLE, never \"no passes\".",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -776,13 +776,13 @@ export const TOOLS = [
           "type": "number",
           "minimum": -90,
           "maximum": 90,
-          "description": "Target latitude (-90..90; positive = North). Required unless bbox is given."
+          "description": "Target latitude. Required unless bbox is given."
         },
         "lon": {
           "type": "number",
           "minimum": -180,
           "maximum": 180,
-          "description": "Target longitude (-180..180; positive = East). Required unless bbox is given."
+          "description": "Target longitude. Required unless bbox is given."
         },
         "bbox": {
           "type": "array",
@@ -791,15 +791,15 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Area [west, south, east, north] in WGS84. The CENTRE is used as the target when lat/lon are omitted."
+          "description": "[west, south, east, north] WGS84. Its CENTRE is the target if lat/lon are omitted."
         },
         "start_date": {
           "type": "string",
-          "description": "Inclusive start date YYYY-MM-DD (UTC). Defaults to today."
+          "description": "YYYY-MM-DD (UTC), inclusive. Default today."
         },
         "end_date": {
           "type": "string",
-          "description": "Inclusive end date YYYY-MM-DD (UTC). Defaults to start+2 days; the window is capped to a 7-day horizon."
+          "description": "YYYY-MM-DD (UTC), inclusive. Default start+2 days; 7-day horizon."
         },
         "satellites": {
           "type": "array",
@@ -821,7 +821,7 @@ export const TOOLS = [
               "nisar"
             ]
           },
-          "description": "Families to consider. Omit for all thirteen. Use this to compare \"free systematic only\" (Sentinel, Landsat, NISAR) against \"what could I task\"."
+          "description": "Families to consider. Omit for all thirteen."
         },
         "max_passes": {
           "type": "number",
@@ -866,7 +866,7 @@ export const TOOLS = [
   },
   {
     "name": "assess_signal",
-    "description": "Run an AI RS (remote-sensing) deep-dive assessment for a specific signal: what to observe, recommended sensors, and a collection window. `eventId` is the `id` from query_signals. The result also carries a deterministic `context` block (event id/date, normalized target, AOI bbox, observability + quality verdict, and an `imagery_handoff` giving the exact bbox + event_date to pass to search_imagery for REAL pre/post scene candidates) — turning the assessment into an actionable collection plan. Costs 5 (quick) or 15 (deep) tokens, charged to the key owner's balance. A prior assessment for the same signal is cached (no re-charge). The exact charge and remaining balance are in the result meta.tokens. Signals that are not satellite-observable (observability:\"not-observable\" — e.g. political statements or broad-area events with no imageable physical mark) are rejected BEFORE any charge, so pre-filter with query_signals observability:\"observable\" to spend only where imagery helps.",
+    "description": "AI remote-sensing deep-dive for one signal: what to observe, sensors, a collection window. Also returns a deterministic `context` whose `imagery_handoff.parameters` are the exact search_imagery inputs. Cached per signal; not-observable signals are rejected before any charge.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -891,10 +891,12 @@ export const TOOLS = [
       "type": "object",
       "properties": {
         "kind": {
-          "type": "string"
+          "type": "string",
+          "description": "Assessment depth actually run (\"quick\" | \"deep\")."
         },
         "cached": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "True when a prior assessment for this signal was reused (no re-charge)."
         },
         "model": {
           "type": "string"
@@ -905,13 +907,237 @@ export const TOOLS = [
         "meta": {
           "type": "object",
           "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
+        },
+        "context": {
+          "type": "object",
+          "description": "Deterministic collection context for this signal — not model prose. Use `imagery_handoff` to go straight from the assessment to real scene candidates.",
+          "properties": {
+            "event_id": {
+              "type": "integer"
+            },
+            "event_date": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "category": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "target": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "description": "Normalized observation target."
+            },
+            "location": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "aoi_bbox": {
+              "type": [
+                "array",
+                "null"
+              ],
+              "items": {
+                "type": "number"
+              },
+              "minItems": 4,
+              "maxItems": 4,
+              "description": "Event AOI [minLon, minLat, maxLon, maxLat] (WGS84), or null when unresolved."
+            },
+            "point": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "description": "{ lat, lng } of the event, or null."
+            },
+            "satellite_observability": {
+              "type": "string",
+              "enum": [
+                "observable",
+                "not-observable",
+                "insufficient-detail"
+              ]
+            },
+            "quality_status": {
+              "type": "string",
+              "description": "Cross-field consistency verdict for the signal row."
+            },
+            "rs_level": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "rs_sensor": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "signal_verification": {
+              "type": "object"
+            },
+            "verification_reconciliation": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "collection_plan": {
+              "type": "object"
+            },
+            "claim_test": {
+              "type": [
+                "object",
+                "null"
+              ]
+            },
+            "imagery_handoff": {
+              "type": "object",
+              "description": "How to turn this assessment into a real scene search.",
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "description": "Always \"search_imagery\"."
+                },
+                "handoff_mode": {
+                  "type": "string",
+                  "enum": [
+                    "targeted_collection",
+                    "wide_area_screening",
+                    "multi_aoi_collection",
+                    "blocked"
+                  ]
+                },
+                "target_specificity": {
+                  "type": "string",
+                  "enum": [
+                    "point_or_aoi",
+                    "multi_region",
+                    "unresolved"
+                  ]
+                },
+                "parameters": {
+                  "type": "object",
+                  "description": "Pass straight to search_imagery — these keys ARE its input-schema keys, no renaming.",
+                  "properties": {
+                    "bbox": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 4,
+                      "maxItems": 4
+                    },
+                    "eventDate": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "eventPoint": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 2,
+                      "maxItems": 2,
+                      "description": "[lon, lat]."
+                    },
+                    "eventAoi": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 4,
+                      "maxItems": 4
+                    },
+                    "eventTimestamp": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                },
+                "missing_parameters": {
+                  "type": "array",
+                  "description": "Parameters that could not be filled, each with why — so the gap is legible.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "type": "string"
+                      },
+                      "reason": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "note": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "tool",
+                "handoff_mode",
+                "parameters"
+              ]
+            }
+          },
+          "required": [
+            "event_id",
+            "satellite_observability",
+            "imagery_handoff"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_observable",
+            "needs_repair"
+          ],
+          "description": "Present ONLY on a pre-charge rejection; `content` and `meta` are then absent."
+        },
+        "event_id": {
+          "type": "integer",
+          "description": "Echoed on a rejection so the caller can tell which signal it was."
+        },
+        "charged": {
+          "type": "integer",
+          "description": "Tokens charged on a rejection — always 0."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why the signal was rejected before any charge."
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
-      "required": [
-        "kind",
-        "content",
-        "meta"
-      ]
+      "required": []
     },
     "annotations": {
       "readOnlyHint": false,
@@ -922,7 +1148,7 @@ export const TOOLS = [
   },
   {
     "name": "ask_analyst",
-    "description": "Ask the Delta Analyst an OSINT/GEOINT question. Runs an agentic multi-step analysis over the signal corpus and returns a structured brief (summary, findings with collection recommendations, assessment, citations). Costs 5–123 tokens (usage-based, metered by the compute the question actually uses; charged ONCE, when the run completes; the exact charge and remaining balance are in the result meta.tokens). Durable async: the run is ENQUEUED and returns {status:\"processing\", job_id} immediately, then completes in a background worker — so it is never lost to a client timeout. Timing: most questions finish in ~30–90s; a complex brief (satellite-imagery lookups or many sources) can take 2–3 minutes. Fetch the finished brief by calling get_analyst_job with the job_id (poll every ~10–20s), or ask_analyst again with the SAME idempotencyKey (no second charge).",
+    "description": "Ask the Delta Analyst an OSINT/GEOINT question; returns a structured brief. **Durable async**: {status:\"processing\", job_id} comes back immediately and the run finishes in a background worker. Fetch with get_analyst_job, or re-send the SAME idempotencyKey (no second charge).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -937,7 +1163,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Optional focus bounding box [minLon, minLat, maxLon, maxLat] (WGS84)."
+          "description": "Focus bbox [minLon, minLat, maxLon, maxLat] WGS84."
         },
         "mode": {
           "type": "string",
@@ -945,11 +1171,11 @@ export const TOOLS = [
             "fast",
             "deep"
           ],
-          "description": "fast (default) or deep. Deep enables extended reasoning and wider evidence-gathering budgets — for forecasting, collection trade-offs and market-implication questions where step-by-step reasoning materially helps. It is slower and the ceiling rises from 123 to 415 tokens; charging stays metered by what the run actually consumes, so a light deep question does not cost the ceiling."
+          "description": "fast (default) or deep. Deep widens reasoning and gathering: slower, ceiling 123→415, still charged by usage."
         },
         "idempotencyKey": {
           "type": "string",
-          "description": "Optional at-most-once key. Re-sending the SAME key resolves to the SAME run: if it finished you get the brief with NO second charge; if it is still running you get its processing status. Strongly recommended — it makes a timeout recoverable. Use a fresh key to ask again."
+          "description": "At-most-once key. Re-sending the SAME key returns the SAME run with no second charge, so a timeout is recoverable."
         },
         "response_format": {
           "type": "string",
@@ -957,7 +1183,7 @@ export const TOOLS = [
             "full",
             "compact"
           ],
-          "description": "\"full\" (default) returns the prose brief alongside the structured result. \"compact\" omits the prose brief and returns only the structured result — which still carries the assembled structured_summary — so a completed run costs materially fewer context tokens."
+          "description": "\"compact\" drops the prose brief, returning only the structured result."
         }
       },
       "required": [
@@ -1057,7 +1283,7 @@ export const TOOLS = [
   },
   {
     "name": "get_analyst_job",
-    "description": "Fetch the status and result of an ask_analyst run by job_id. Job status is ONLY \"processing\" (still running — poll again in ~10-20s), \"done\" (with the finished brief and meta.tokens), or \"error\". When done, result_quality.status (\"complete\" | \"partial\", with any issues[]) reports whether the structured output is fully populated — this is SEPARATE from the job status (a done job can carry a partial result). Free of token charges — the run itself is charged once on completion. A job is visible only to the API key owner that created it.",
+    "description": "Status and result of an ask_analyst run. Status is \"processing\", \"done\" or \"error\"; result_quality.status is **SEPARATE** — a done job can carry a partial result.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1071,7 +1297,7 @@ export const TOOLS = [
             "full",
             "compact"
           ],
-          "description": "\"full\" (default) returns the prose brief alongside the structured result. \"compact\" omits the prose brief and returns only the structured result — which still carries the assembled structured_summary — so a re-fetch costs materially fewer context tokens."
+          "description": "\"compact\" drops the prose brief and returns only the structured result."
         }
       },
       "required": [
@@ -1162,13 +1388,13 @@ export const TOOLS = [
   },
   {
     "name": "query_claims",
-    "description": "Read the LEDGER of claims this key has been given — every factual assertion the Analyst made, with its evidence class (CONFIRMED / REPORTED / PARTY_CLAIM / ASSESSMENT), how many INDEPENDENT source families backed it, and the publishers. The point is the time axis: when a later answer restated the same assertion, the claim carries the link and says which way the evidence moved — restated_only surfaces those chains, and downgraded_only isolates the cases where a later answer was LESS sure than an earlier one, which is where this product contradicted itself. Use it to audit what you were told before acting on it, or to check whether an assertion has since weakened. Scoped to your own key; no other caller’s claims are visible. Free of token charges.",
+    "description": "The ledger of claims this key was given, each with its evidence class, independent source families and publishers. The point is the time axis: a restated assertion links to the earlier one and says which way the evidence moved.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "since": {
           "type": "string",
-          "description": "Only claims asserted on or after this date (YYYY-MM-DD or ISO 8601)."
+          "description": "Only claims asserted on/after this date."
         },
         "evidence_class": {
           "type": "string",
@@ -1192,7 +1418,7 @@ export const TOOLS = [
         },
         "event_id": {
           "type": "number",
-          "description": "Only claims about this event (global event id). Two deterministic anchors are tried: the claim’s own recorded event, and the registry facilities the event is linked to. Neither is a guess — when neither resolves, nothing is returned and `event_link.linked` says so."
+          "description": "Only claims about this event. If neither anchor resolves, `event_link.linked` says so."
         },
         "limit": {
           "type": "number",
@@ -1235,7 +1461,7 @@ export const TOOLS = [
   },
   {
     "name": "test_hypotheses",
-    "description": "Given competing statements, return the observation that would REFUTE the most of them — and, in the same answer, the observations that would refute none of them however convincing they look. Each statement is decomposed into the observables it requires (vessel presence, berth occupancy, burn extent, ground deformation, a running total…), and the observables are scored by how many statements their ABSENCE would eliminate. Read the direction carefully, because it only runs one way: an observable that is absent refutes every statement requiring it; an observable that is PRESENT refutes nothing, since a statement that does not require it is not predicting its absence. Four verdicts come back: `actionable` (Delta serves it today), `procurable` (real, but bought or fetched elsewhere — `how_to_obtain` says where), `not_observable` (no overhead collection settles it; a record or a transponder might), and `no_diagnostic_value` (every statement requires it, so measuring it cannot separate them). Pass `hypotheses` for a comparison you define, or `event_id` to test the claims you were already given about that event. Answering \"nothing you can collect would change this\" is a supported outcome, not a failure.",
+    "description": "Given competing statements, the observation that would REFUTE the most — and those that would refute none. **The logic runs one way**: an ABSENT observable refutes every statement requiring it; a PRESENT one refutes nothing.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1246,7 +1472,7 @@ export const TOOLS = [
           },
           "minItems": 2,
           "maxItems": 8,
-          "description": "Two to eight competing statements, one assertion each (up to 500 characters). Omit when using event_id."
+          "description": "Two to eight competing statements, one assertion each (<=500 chars)."
         },
         "mode": {
           "type": "string",
@@ -1254,11 +1480,11 @@ export const TOOLS = [
             "competing",
             "joint"
           ],
-          "description": "`competing` (default): the statements are mutually exclusive, so the goal is to separate them and an observable required by all of them has no diagnostic value. `joint`: they are held together, so the goal is to falsify the most at once and an observable required by all of them is the best one. Ignored with event_id, which is always joint."
+          "description": "`competing` (default): an observable required by ALL is useless. `joint`: one required by all is BEST."
         },
         "event_id": {
           "type": "number",
-          "description": "Use the standing claims you were given about this event (global event id) as the statements. Restated claims are excluded — only what currently stands is tested."
+          "description": "Test the standing claims about this event; restated claims are excluded."
         }
       },
       "required": []
@@ -1322,7 +1548,7 @@ export const TOOLS = [
   },
   {
     "name": "query_developments",
-    "description": "What actually CHANGED about the events in an area — not which articles are new. Polling query_signals and diffing the ids finds new REPORTING: a 2025 attack re-reported in 2026 with a fresh attribution is indistinguishable from a fresh attack. This returns changes as changes, each with what it was and what it became. Two kinds, labelled: `world` = the event's own state moved (a death toll revised, a perpetrator named, a report disputed); `measurement` = what WE can now see moved (a location resolved, post-event imagery arrived, a SAR before/after pair became ready). This is the right source for \"what is new since last time\" and for a standing watch. By default only changes worth a person's attention are returned — set notable_only=false for the full ledger, including changes deliberately judged too minor to notify on.",
+    "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved) or `measurement` (what we can see moved).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1380,11 +1606,11 @@ export const TOOLS = [
               "retracted"
             ]
           },
-          "description": "Restrict to these kinds of change. An unknown value is an error, never an empty result."
+          "description": "Restrict to these kinds of change. An unknown value is an error, not an empty result."
         },
         "notable_only": {
           "type": "boolean",
-          "description": "Default true. False returns every recorded change, including minor ones."
+          "description": "Default true. False returns every recorded change."
         },
         "limit": {
           "type": "number",
@@ -1425,13 +1651,13 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "The full history of ONE event: its current state, and every change in the order it happened. Answers \"is this a new event or an update to an old one\" — the distinction a news feed cannot make. Returns the canonical event (where, when it HAPPENED as distinct from when it was reported, casualties, attribution and how that attribution is grounded), a timeline of developments, and every source article behind it. `occurred_at_basis` says whether the occurrence time was stated, absent, or never measured — those are three different things. `history_incomplete` marks an event that already existed when tracking began. Free of token charges: the discovery call that found the event was already metered.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "event_id": {
           "type": "number",
-          "description": "Any signal id belonging to the event; the whole canonical event is returned."
+          "description": "Any signal id in the event; the canonical event is returned."
         }
       },
       "required": [
@@ -1474,7 +1700,7 @@ export const TOOLS = [
   },
   {
     "name": "create_standing_order",
-    "description": "Put an area under CONTINUOUS watch: save a question plus a bounding box and Delta re-answers it on a schedule, notifying only when the answer actually changed. Creating one is FREE. Each time it fires it runs ask_analyst and is metered like any Analyst question, so the cost is per CHANGE, not per check: a deterministic pass over the corpus decides whether anything new crossed the reporting bar, and quiet periods never invoke the model or charge anything. Returns projected_monthly_tokens_typical (the observed median cost per run × this cadence) and projected_monthly_tokens_max (the true ceiling: every check fires AND every run reaches the per-question cap), so the cost is visible before committing. Cadence and how many orders you may hold are set by your plan; the error says which limit you hit. Use it when the question is \"tell me when this changes\" rather than \"what is happening right now\".",
+    "description": "Put an area under CONTINUOUS watch: a question plus a bbox, re-answered on a schedule, notifying only when the answer changed. **Cost is per CHANGE, not per check.**",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1485,11 +1711,11 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Area to watch, [west, south, east, north] in WGS84. Required — a global standing order would fire on everything."
+          "description": "[west, south, east, north] WGS84. Required — a global order would fire on everything."
         },
         "question": {
           "type": "string",
-          "description": "The question to re-answer each time something changes. Omit for \"what changed in this area, and what does it mean?\"."
+          "description": "Omit for \"what changed in this area, and what does it mean?\"."
         },
         "name": {
           "type": "string",
@@ -1502,26 +1728,26 @@ export const TOOLS = [
             "weekly",
             "monthly"
           ],
-          "description": "How often to CHECK (checking is free; only a fired check costs tokens). Default weekly. Faster cadences may require a higher plan."
+          "description": "How often to CHECK (checking is free). Default weekly; faster may need a higher plan."
         },
         "categories": {
           "type": "array",
           "items": {
             "type": "string"
           },
-          "description": "Restrict the watch to these Delta categories (kinetic, armed_conflict, maritime, natural_disaster, infrastructure, aviation, humanitarian, protest, diplomacy)."
+          "description": "Restrict the watch to these Delta categories."
         },
         "min_geoint_score": {
           "type": "number",
-          "description": "Reporting bar (0-10, default 6). Raise it to be told only about major developments."
+          "description": "Reporting bar (0-10, default 6)."
         },
         "min_new_events": {
           "type": "number",
-          "description": "How many new qualifying events must appear before a run is triggered (default 1)."
+          "description": "New qualifying events needed to trigger a run (default 1)."
         },
         "notify_email": {
           "type": "boolean",
-          "description": "Email the result when it fires (default true). Results are readable via list_standing_orders either way."
+          "description": "Email on fire (default true); readable via list_standing_orders anyway."
         }
       },
       "required": [
@@ -1557,7 +1783,7 @@ export const TOOLS = [
   },
   {
     "name": "list_layer_sets",
-    "description": "List the layer sets saved on this account — the named map configurations a user builds in the app, each with how many layers it holds, its tags, when it was last changed and when it was last opened. Use it to answer \"what have I saved\" and to tell an idle configuration from a working one. The layer tree itself is not returned: it is an internal format, and opening it is the map’s job. Free of token charges.",
+    "description": "The layer sets saved on this account. The layer tree itself is not returned: it is an internal format, and opening it is the map's job.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1599,7 +1825,7 @@ export const TOOLS = [
   },
   {
     "name": "get_layer_set",
-    "description": "Read one saved layer set by id: its name, description, layer count, size, tags and timestamps. The serialized layer tree is deliberately not exposed (contents:\"not_exposed\") — it is an internal representation, not a public contract. Free of token charges.",
+    "description": "One saved layer set by id. The serialized layer tree is deliberately not exposed — an internal representation, not a public contract.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1635,7 +1861,7 @@ export const TOOLS = [
   },
   {
     "name": "list_uploaded_layers",
-    "description": "List the data this account uploaded to the map — name, format, size and when it was added — plus the formats the uploader actually accepts. Uploading itself happens in the app (it is a file transfer, not a JSON call), so use this to see what is already there and to answer format questions correctly: GeoJSON and GeoTIFF are accepted, a shapefile or KML is not. Free of token charges.",
+    "description": "The data this account uploaded to the map, plus the formats the uploader accepts. Uploading happens in the app; GeoJSON and GeoTIFF only.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1683,7 +1909,7 @@ export const TOOLS = [
   },
   {
     "name": "list_standing_orders",
-    "description": "List the standing orders on this key, with each one’s cadence, watched area, when it last checked, when it last actually fired, and how many consecutive checks found nothing (quiet_checks — a high number means the watch is not earning its place). Also returns how many orders the plan allows and how many remain. Free of token charges.",
+    "description": "The standing orders on this key: cadence, area, last check, last actual fire, and quiet_checks — a high quiet_checks means the watch is not earning its place.",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -1718,17 +1944,17 @@ export const TOOLS = [
   },
   {
     "name": "delete_standing_order",
-    "description": "Delete a standing order by id, or pause/resume it instead by passing active=false/true. Pausing keeps the order and its history; deleting removes both. Neither costs tokens. A paused order still counts against the plan limit, so delete rather than pause when you want the slot back.",
+    "description": "Delete a standing order, or pause/resume with active=false/true. A paused order still counts against the plan limit.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "order_id": {
           "type": "string",
-          "description": "The id returned by create_standing_order or list_standing_orders."
+          "description": "From create_standing_order or list_standing_orders."
         },
         "active": {
           "type": "boolean",
-          "description": "Omit to DELETE. Pass false to pause and true to resume, keeping the order."
+          "description": "Omit to DELETE. false pauses, true resumes."
         }
       },
       "required": [
@@ -1759,7 +1985,7 @@ export const TOOLS = [
   },
   {
     "name": "list_monitored_areas",
-    "description": "List the places under continuous satellite measurement on this key (Delta Watchlist measurements), with each area’s metric, most recent value, change since the previous measurement, whether that value was flagged anomalous, and coverage — how many acquisitions were measured versus how many exist. Coverage window_total is null when the catalog total is UNKNOWN; null never means zero. Also returns how many areas the plan allows and how many remain. Free of token charges.",
+    "description": "Places under continuous satellite measurement: metric, latest value, change, anomaly flag, coverage. **coverage.window_total is null when the catalog total is UNKNOWN; null never means zero.**",
     "inputSchema": {
       "type": "object",
       "properties": {},
@@ -1797,13 +2023,13 @@ export const TOOLS = [
   },
   {
     "name": "get_monitored_area",
-    "description": "Fetch one monitored area with its full measurement history — every acquisition that was measured, its value, and whether it was flagged anomalous. This is the time series behind the number that list_monitored_areas reports, so use it to answer \"is it going up\", \"when did it change\", or \"how unusual is today\". Anomaly flags come from a median-absolute-deviation test on the series, not a fixed threshold. Free of token charges; returning the full history requires a plan that includes data export, so it can be refused with a forbidden error.",
+    "description": "One monitored area with its full measurement history. Anomaly flags come from a median-absolute-deviation test, not a fixed threshold. Needs a plan that includes data export.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "area_id": {
           "type": "string",
-          "description": "The area_id from list_monitored_areas. A metric’s polygon_id is also accepted and resolves to the same area."
+          "description": "From list_monitored_areas; a metric's polygon_id also resolves."
         }
       },
       "required": [
@@ -1836,7 +2062,7 @@ export const TOOLS = [
   },
   {
     "name": "create_monitored_area",
-    "description": "Put a place under continuous satellite measurement: pick an area and what to count, and every new Sentinel-1 / Sentinel-2 / VIIRS acquisition over it is measured automatically from then on. Use this when the question is about a quantity at a fixed place over time (\"how many ships are alongside\", \"how much has burned\", \"is the water receding\") rather than about events, which is create_standing_order. Creating is free; each automatic check costs a small number of tokens only when it finds new imagery.",
+    "description": "Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition is measured. For a QUANTITY at a fixed place; for events use create_standing_order.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1847,11 +2073,11 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "The area to measure, [west, south, east, north] in WGS84. Must be under 5,000 km² — measurement is per-pixel over the area, so a country-sized box is rejected rather than silently sampled."
+          "description": "[west, south, east, north] WGS84, under 5,000 km² — a larger box is rejected, not sampled."
         },
         "metric": {
           "type": "string",
-          "description": "What to count. Plain words work: ships, fires, vegetation, water, burn, snow, built_up, moisture, night_lights. Index names are also accepted: ship_detection, fire_count, ndvi, evi, savi, ndmi, ndwi, mndwi, ndbi, ndsi, nbr, dnb, vv, vh, rvi, rfdi, cr. The sensor is chosen from the metric."
+          "description": "Plain words (ships, fires, vegetation, water, burn, snow, built_up, moisture, night_lights) or index ids (ndvi, ndwi, nbr, vv, vh …). The sensor follows."
         },
         "name": {
           "type": "string",
@@ -1859,7 +2085,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD to begin the history from. Defaults to 30 days ago — a longer backfill measures more scenes and therefore costs more on the first check."
+          "description": "YYYY-MM-DD to backfill from. Default 30 days ago; longer costs more on the first check."
         }
       },
       "required": [
@@ -1893,10 +2119,25 @@ export const TOOLS = [
   },
   {
     "name": "list_watches",
-    "description": "The Watchlist: everything this account keeps watch on — areas under satellite measurement, areas under event watch (standing orders), and real-world events being tracked — aggregated as one list with a state bucket per watch: needs_attention (anomaly, error, or a notable development), changed_today (a meaningful change in the last 24 h), awaiting_data, or stable. A watch groups everything on the same target: a monitored metric and a standing order on the same bbox appear as ONE watch with both capabilities. Also returns how many active watches the plan allows. Free of token charges.",
+    "description": "The Watchlist as one list, each entry with a state bucket. `updated_since` returns only watches whose CONTENT changed after that instant — what a synchronised copy should poll.",
     "inputSchema": {
       "type": "object",
-      "properties": {},
+      "properties": {
+        "updated_since": {
+          "type": "string",
+          "description": "ISO 8601. Only watches whose CONTENT changed after it — the evidence, not renames."
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor from meta.next_cursor."
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Watches per page when paging (1..500, default 100).",
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
       "required": []
     },
     "outputSchema": {
@@ -1917,6 +2158,9 @@ export const TOOLS = [
         },
         "limits": {
           "type": "object"
+        },
+        "meta": {
+          "type": "object"
         }
       },
       "required": [
@@ -1931,7 +2175,7 @@ export const TOOLS = [
   },
   {
     "name": "get_watch",
-    "description": "One watch end to end, in a single call: its target, current state, latest meaningful change, measurements with their recent series, standing-order questions, and — for an event watch — the event’s verification state, casualty/attribution fields, recent developments, imagery availability, and the full event thread (timeline + sources). Also returns what this account has written on the watch: the one line saying what it is tracking, and the notes and judgments kept against it, newest first. Built so an agent does not need a chain of follow-up calls to answer \"what is the state of what I watch\". Free of token charges unless include_passes is set; an area watch’s FULL measurement history remains get_monitored_area (export-gated) — this returns the recent series.",
+    "description": "One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its verification state, developments and thread, plus this account's notes.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1941,7 +2185,7 @@ export const TOOLS = [
         },
         "include_passes": {
           "type": "boolean",
-          "description": "Add the collection outlook for this watch: which operators can image the target, when, at what off-nadir geometry, and whether a commercial tasking order is needed. Costs the same as predict_satellite_passes because it is the same answer — omit it and the call stays free. Off-Nadir Delta does not broker tasking; the outlook names where to order."
+          "description": "Add the collection outlook. Costs the same as predict_satellite_passes — it is the same answer; omit it and the call is free."
         }
       },
       "required": [
@@ -1973,8 +2217,126 @@ export const TOOLS = [
     }
   },
   {
+    "name": "get_decision_package",
+    "description": "Everything needed to decide what to collect next about one watch, in one object. **Only `absent` asserts a negative** — `inconclusive` means imagery could not answer, `not_collected` means no valid look happened. `revision` is a content hash.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "watch_id": {
+          "type": "string",
+          "description": "The id from list_watches or create_watch."
+        }
+      },
+      "required": [
+        "watch_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "schema_version": {
+          "type": "string"
+        },
+        "package_id": {
+          "type": "string"
+        },
+        "external_key": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "generated_at": {
+          "type": "string"
+        },
+        "watch": {
+          "type": "object"
+        },
+        "target": {
+          "type": "object"
+        },
+        "current_state": {
+          "type": "object"
+        },
+        "claims": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "discriminators": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "no_diagnostic_value": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "undecomposable": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "no_discriminator_reason": {
+          "type": "string"
+        },
+        "collection_options": {
+          "type": "object"
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "negative_evidence": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "assessments": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "revision",
+        "negative_evidence",
+        "limitations",
+        "note"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "openWorldHint": false,
+      "destructiveHint": true
+    }
+  },
+  {
     "name": "create_watch",
-    "description": "Add a target to the Watchlist. Two target types: an EVENT (pass the signal’s event id — the server resolves and binds the canonical event, so further reporting and even a later cluster merge stay on the same watch; never watch an article URL) or an AREA (pass a bbox — created as a saved bookmark; to actually measure something there use create_monitored_area, and to watch its events use create_standing_order — both auto-join the same watch). Free to create; event watches track state that is computed for everyone and never charge. Active watches are plan-limited.",
+    "description": "Add a target to the Watchlist. EVENT: pass the signal's event id and the server binds the canonical event — **never watch an article URL**. AREA: pass a bbox.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1988,7 +2350,7 @@ export const TOOLS = [
         },
         "event_id": {
           "type": "number",
-          "description": "The signal’s numeric event id (required for target_type \"event\")."
+          "description": "Signal event id (required for target_type \"event\")."
         },
         "bbox": {
           "type": "array",
@@ -2038,7 +2400,7 @@ export const TOOLS = [
   },
   {
     "name": "update_watch",
-    "description": "Rename a watch, or pause and resume it. Pausing is not a display state over live billing: the bound resources actually stop — monitored areas stop being measured (and stop being charged), standing orders stop checking. Resuming restarts them, with standing orders due immediately, and counts again against the active-watch plan limit. Use this instead of delete_watch when the measurement history is worth keeping. Free of token charges.",
+    "description": "Rename, pause or resume a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2088,7 +2450,7 @@ export const TOOLS = [
   },
   {
     "name": "delete_watch",
-    "description": "Delete a watch by id. This deletes the watch AND its underlying resources — bound monitored areas (with their measurement history) and standing orders are removed, exactly as the in-app Watchlist does. An event watch has no underlying resource; only the watch is removed. To stop without losing anything, pause instead with update_watch (status \"paused\", also resumable). Free of token charges.",
+    "description": "Delete a watch and its underlying resources — bound monitored areas with their history, and standing orders. To stop without losing them, pause with update_watch.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2125,7 +2487,7 @@ export const TOOLS = [
   },
   {
     "name": "add_note",
-    "description": "Add a note to a watch, start a thread on it, or reply to one — one append-only ledger. Give a title and the note becomes a THREAD others can reply to (pass its id as parent_id); give neither and it is a plain note. Replies are one level deep and carry no title of their own. Separately, the difference between a note and a judgment is whether you state a confidence. With no confidence it is a NOTE: something worth writing down about this target, kept with it and superseding nothing. With confidence (high/moderate/low) it is a JUDGMENT, and it supersedes the previous judgment instead of overwriting it, so the record of what was thought when survives; likelihood (ICD 203 terms) separately says how probable the thing itself is. Gaps and a next check can be recorded alongside — what would change this, and when to look again. This is the account’s own record about its own target; it does not change the event’s public verification state. Free of token charges.",
+    "description": "Add a note to a watch, start a thread, or reply. **Confidence is what separates a note from a judgment**: with one it is a JUDGMENT that supersedes the previous judgment rather than overwriting it.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2139,11 +2501,11 @@ export const TOOLS = [
         },
         "title": {
           "type": "string",
-          "description": "Give it a heading and the note becomes a thread others can reply to. Omit for a plain note. A reply cannot have one."
+          "description": "A heading makes it a thread. A reply cannot have one."
         },
         "parent_id": {
           "type": "string",
-          "description": "Reply to this note id (from get_watch). One level deep — reply to the thread, not to a reply."
+          "description": "Reply to this note id. One level deep."
         },
         "confidence": {
           "type": "string",
@@ -2152,7 +2514,7 @@ export const TOOLS = [
             "moderate",
             "low"
           ],
-          "description": "How sure this judgment is — a statement about the evidence, not the event. Omit it and the entry is kept as a plain note, which supersedes nothing."
+          "description": "How sure the judgment is — about the evidence, not the event. Omit and it stays a note."
         },
         "likelihood": {
           "type": "string",
@@ -2171,7 +2533,7 @@ export const TOOLS = [
           "items": {
             "type": "string"
           },
-          "description": "What is missing — what would change this judgment. Only meaningful with a confidence."
+          "description": "What would change this judgment. Only meaningful with a confidence."
         },
         "next_check": {
           "type": "string",
@@ -2206,7 +2568,7 @@ export const TOOLS = [
   },
   {
     "name": "delete_note",
-    "description": "Delete one note from a watch. The note itself is removed; the fact that it was deleted stays in the account’s action log, so nothing disappears without a trace. If the note was a judgment that a later judgment superseded, the later one stays — it simply stops pointing at what it replaced. Free of token charges.",
+    "description": "Delete one note from a watch. The deletion itself stays in the account's action log.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2245,7 +2607,7 @@ export const TOOLS = [
   },
   {
     "name": "search_entities",
-    "description": "Find a place in the location registry — ports and harbours, military bases and airfields, power and energy plants, maritime chokepoints and named seas. Use it to turn a name into something the other tools can anchor on, or to check whether Delta knows a facility at all. Matches the registry’s own names and aliases; a facility whose only recorded name is in the local script is findable by that name, not by an English one that does not exist in the source. Returns at most 50 rows and has no pagination — this is a lookup, not a data export. Costs 1 token per lookup. Cite the returned attribution wherever a registry name is shown.",
+    "description": "Find a place in the location registry — ports, bases, airfields, power plants, chokepoints, named seas. Matches the registry's own names and aliases. At most 50 rows.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2306,7 +2668,7 @@ export const TOOLS = [
   },
   {
     "name": "get_entity",
-    "description": "What has happened at one place. Returns the registry record plus every event linked to it, each carrying HOW it was linked — `alias_exact_location` means a report named this facility, `geo_proximity` means a report was geolocated within range of it and the distance is given. Read the basis before treating a link as established: proximity is an association, not a statement that the event happened at this facility. Also returns how many Analyst claims mention it, and an OBSERVABILITY profile: the events linked here are decomposed into the observables that would have tested them, counted, and marked with whether Delta serves each one or where it could be obtained instead. That profile is derived from what actually happened at this place — it is not a general claim about places of this type, and a place with no linked events returns no profile rather than a guess. Costs 1 token per lookup.",
+    "description": "What has happened at one place: the registry record plus every linked event with HOW it was linked. **Read the basis: `geo_proximity` is an association, not a statement that the event happened there.**",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2360,7 +2722,7 @@ export const TOOLS = [
   },
   {
     "name": "get_related_events",
-    "description": "What else connects to one event, and what came before and after it. Returns the places the event is linked to, then two kinds of DIRECT relation kept deliberately apart: `shared_entity` (another event at the same facility, strait or sea — the connection is the place, and it is named) and `nearby` (close in space and time only, with the distance and the gap stated). Nearby is NOT a claim of connection; treat it as a prompt to look, not as evidence. `network` holds the indirect events reached by walking shared names outward — kept in a separate array so a second-hop event is never read as sharing anything with the anchor. `insights.development` orders the record into what came BEFORE and what came AFTER along time-respecting paths only, grouping equal timestamps into one step rather than inventing an order inside a day; it asserts sequence, never cause. `insights.graph` returns the event↔connector bipartite graph with rarity weights, so a name shared by many events counts for less than a rare one, and `splits_into` marks the connectors whose removal would break the network apart. `assessment` grades the location against its own 90-day baseline. Costs 3 tokens for the direct relations, plus 1 for each network hop the walk ACTUALLY reaches beyond the first, up to 8 — depth is real work (about 4x the queries and 10x the payload at hop 10 versus hop 1), so it is billed rather than bundled. You are charged for hops taken, not hops requested: when the network runs out early the extra is not charged. The ceiling is fixed by `max_hop` before the call, and `meta` reports `max_charge` next to what was actually taken.",
+    "description": "What else connects to one event, and what came before and after. `shared_entity` names the connecting place; `nearby` is **close in space and time only, NOT a claim of connection**. `insights.development` asserts sequence, never cause.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2372,7 +2734,7 @@ export const TOOLS = [
           "type": "number",
           "minimum": 1,
           "maximum": 10,
-          "description": "How far to walk outward from the anchor, in shared-name hops (default 5). 1 returns direct relations only. The default is deliberately shallow because a relation gets weaker with every hop; raise it to trace a chain, and read `accounting.network_depth_reached` — the network often runs out before the depth asked for, and you are only charged for the hops it actually took. This sets the CEILING on the charge (3 + max_hop - 1, capped at 8), not the charge itself."
+          "description": "Shared-name hops (default 5); 1 = direct only. Sets the charge CEILING (3 + max_hop - 1, capped 8), not the charge."
         }
       },
       "required": [
@@ -2439,7 +2801,7 @@ export const TOOLS = [
   },
   {
     "name": "lookup_elevation",
-    "description": "Measure terrain height from the Copernicus DEM GLO-30 — a point (lat + lon), an area (bbox), or a drawn polygon, for which the statistics are computed over the samples INSIDE the ring rather than its bounding box. Returns min, max, mean, median, p10, p90 and relief (max − min), the number that governs SAR layover and shadow severity. Free of token charges. Three things the result carries that any answer must respect: it is a SURFACE model (buildings and tree canopy included, so not bare ground); `downsampled: true` means a large area was read below the 30 m posting, so min/max are smoothed inward and the relief is a floor rather than an exact figure; and `covered: false` or `tiles_missing > 0` means open ocean where the model has no data — which is absence, not 0 m. Heights are orthometric on the EGM2008 geoid, not ellipsoidal. Cite the returned `attribution` wherever a height is shown.",
+    "description": "Terrain height from the Copernicus DEM GLO-30 for a point, bbox or polygon, with relief — the number that governs SAR layover and shadow. A SURFACE model; `covered: false` is no data, not 0 m. Cite the `attribution`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2462,7 +2824,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Area to measure as [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+          "description": "[lon_min, lat_min, lon_max, lat_max] WGS84."
         },
         "polygon": {
           "type": "array",
@@ -2506,7 +2868,7 @@ export const TOOLS = [
   },
   {
     "name": "analyze_terrain",
-    "description": "Compute FROM the terrain rather than reading heights out of it (that is lookup_elevation). Free of token charges; both operations come from one Copernicus DEM GLO-30 read. `operation: 'sar_geometry'` over a bbox, with an incidence angle and a look azimuth, returns the share of the area lost to LAYOVER and to SHADOW, the share merely foreshortened, and the mean LOCAL incidence angle — the arithmetic behind whether radar can use that ground. It changes with the pass direction (measured on one volcanic flank: 2.6% layover looking west against 0.7% looking east at the same 35°), so the geometry is required rather than assumed. `operation: 'profile'` between two points returns the ground along the line and a LINE-OF-SIGHT verdict including Earth curvature: whether the ends can see each other, where the terrain first rises above the sight line, and the worst clearance. Both results state the sample spacing they were computed at — a coarser grid reads flatter, and therefore more observable, than the ground is. A SURFACE model, so canopy and buildings are included; over a surface model they block a sight line as they would in reality. Cite the returned `attribution`.",
+    "description": "Compute FROM the terrain. `sar_geometry` returns layover, shadow, foreshortening and mean LOCAL incidence — **required, not assumed, because it changes with pass direction**. `profile` returns ground along a line and a line-of-sight verdict. Cite the `attribution`.",
     "inputSchema": {
       "type": "object",
       "required": [
@@ -2519,7 +2881,7 @@ export const TOOLS = [
             "sar_geometry",
             "profile"
           ],
-          "description": "'sar_geometry' = layover/shadow over an area; 'profile' = ground along a line plus a line-of-sight verdict."
+          "description": "'sar_geometry' = layover/shadow over an area; 'profile' = ground along a line + line-of-sight."
         },
         "bbox": {
           "type": "array",
@@ -2528,19 +2890,19 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "For 'sar_geometry': area as [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+          "description": "For 'sar_geometry': [lon_min, lat_min, lon_max, lat_max] WGS84."
         },
         "incidence_deg": {
           "type": "number",
           "minimum": 10,
           "maximum": 80,
-          "description": "For 'sar_geometry': sensor incidence angle. Sentinel-1 IW spans roughly 29-46 degrees; use the scene's own value when you have it."
+          "description": "For 'sar_geometry'. Sentinel-1 IW spans ~29-46°."
         },
         "look_azimuth_deg": {
           "type": "number",
           "minimum": 0,
           "maximum": 360,
-          "description": "For 'sar_geometry': compass bearing the sensor looks along the ground range. A right-looking descending pass looks roughly west (270)."
+          "description": "For 'sar_geometry': bearing along ground range. Right-looking descending ≈ 270."
         },
         "lat": {
           "type": "number",
@@ -2569,7 +2931,7 @@ export const TOOLS = [
         "observer_height_m": {
           "type": "number",
           "minimum": 0,
-          "description": "For 'profile': eye height above the ground, default 2 m. Use the real mast or tower height when that is the question."
+          "description": "For 'profile': eye height above ground, default 2 m."
         }
       }
     },
@@ -2599,7 +2961,7 @@ export const TOOLS = [
   },
   {
     "name": "refine_location",
-    "description": "Research one signal's location further and, if the sources genuinely narrow it, store and return the better coordinate. Most signals are geolocated once, for free, from a single article's place string: measured across production, about two thirds sit at ±5 km or have no bounded radius at all. This reads the source article and live search for a source that names something finer — a facility, bridge, district, port — resolves it, and verifies it before accepting it. **You are charged only if the precision actually improves**, between 3 and 29 tokens by what the run consumed; a signal that cannot be narrowed costs nothing, and a signal an earlier caller already refined is returned free. Read the result honestly: `improved: false` with a `reason` is the common and correct outcome when no source is more specific — it does NOT mean the event is unlocated, and it is not a failure to retry. When it does improve, `evidence` lists the sources that named the place; a location without evidence is never stored, so do not present a refined point without citing them. `footprint_kind` says whether the answer is a POINT or an AREA — if it is an area, describe an area, because an admin-level place has no finite radius and drawing it as a dot misstates where the event was. `uncertainty_m: null` means unbounded, not unknown.",
+    "description": "Research one signal's location further and store a better coordinate if the sources genuinely narrow it. **Charged only if the precision improves.** `improved: false` is the common CORRECT outcome, not worth retrying.",
     "inputSchema": {
       "type": "object",
       "required": [
@@ -2608,7 +2970,7 @@ export const TOOLS = [
       "properties": {
         "signal_id": {
           "type": "integer",
-          "description": "The signal (global_event_id) whose location should be researched further."
+          "description": "The signal (global_event_id) to research further."
         }
       }
     },
@@ -2636,7 +2998,7 @@ export const TOOLS = [
   },
   {
     "name": "measure_index_series",
-    "description": "Measure a spectral index over an area, scene by scene, back through the Sentinel-2 archive — the answer to \"how has this changed since <year>\". Give a polygon (or a bbox), an index (ndvi, evi, savi, ndmi, ndwi, mndwi, ndbi, ndsi, nbr, iron-oxide, clay, ferrous) and a date range; each scene is measured over the samples INSIDE the ring, and the result is the per-scene mean/median/min/max with a first-to-last change. Costs 0.5 tokens per scene actually measured; a scene that fails to read is reported in `skipped` and is not charged. **Call it once with `estimate_only: true` first** — that is free and returns how many scenes match, the real date span available, and what measuring them would cost, so the user can agree to the spend. Three things the result carries that any answer must respect: the Sentinel-2 archive begins 2015-06-27, so an earlier start is clamped and `clamped_to_archive` says so (those years are genuinely unavailable, not empty); at most 24 scenes are measured per call, so a longer period comes back as a SAMPLE and the rest appear in `skipped`; and `trend` compares the first and last measured scene only — it is not a fitted rate, so do not attach a slope or a confidence to it. `scenes_found` is what the catalog holds; `scenes_examined` is the newest page this call read, so `candidate_date_span` is the edge of that page and NOT how far the archive reaches — read `notes` before saying when coverage begins. For a SAR quantity, or to keep measuring as new imagery arrives, use create_monitored_area instead. Cite the returned `attribution`.",
+    "description": "Measure a spectral index over an area scene by scene through the Sentinel-2 archive. **Call `estimate_only: true` first** — free, and returns the scene count, real date span and cost. At most 24 scenes, so a longer period is a SAMPLE. Cite the `attribution`.",
     "inputSchema": {
       "type": "object",
       "required": [
@@ -2653,7 +3015,7 @@ export const TOOLS = [
               "type": "number"
             }
           },
-          "description": "WGS84 ring [[lon, lat], …] with at least 3 vertices. Statistics cover the samples inside it."
+          "description": "WGS84 ring [[lon, lat], …], 3+ vertices. Statistics cover the samples inside it."
         },
         "bbox": {
           "type": "array",
@@ -2662,7 +3024,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Alternative to polygon: [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+          "description": "Alternative to polygon: [lon_min, lat_min, lon_max, lat_max] WGS84."
         },
         "index": {
           "type": "string",
@@ -2684,7 +3046,7 @@ export const TOOLS = [
         },
         "start": {
           "type": "string",
-          "description": "Start date YYYY-MM-DD (UTC). Clamped forward to 2015-06-27 if earlier."
+          "description": "YYYY-MM-DD (UTC). Clamped forward to 2015-06-27 if earlier."
         },
         "end": {
           "type": "string",
@@ -2704,7 +3066,7 @@ export const TOOLS = [
         },
         "estimate_only": {
           "type": "boolean",
-          "description": "True = free: return the scene count, date span and token cost WITHOUT measuring or charging."
+          "description": "True = free: scene count, date span and cost, without measuring."
         }
       }
     },
@@ -2738,7 +3100,7 @@ export const TOOLS = [
   },
   {
     "name": "detect_ships",
-    "description": "Count vessel-like targets in ONE SAR scene over an area, using CFAR detection on Sentinel-1. Costs 5 tokens per detection; a scene the worker refuses (an unsupported combination, an area with no usable sea) is not charged. The natural sequence is search_imagery over the area, pick a scene, then this with its `collection` and `item_id` — radar sees through cloud and at night, so the count works when optical would not. Read `caveats` before reporting the number: it states when the land mask was unavailable (shoreline structures may be counted as vessels), how far from the coast detections were excluded (the default excludes vessels alongside a quay), and when the scene covers only part of the requested area — a partial-coverage count must never be compared with a full one as though the difference were vessels. This measures one scene at one time. To track a berth or an anchorage over time, create_monitored_area with metric `ships` measures every new acquisition.",
+    "description": "Count vessel-like targets in ONE Sentinel-1 SAR scene by CFAR detection — radar sees through cloud and at night. **Read `caveats` before reporting the number**: land mask, offshore exclusion and partial coverage change what it means.",
     "inputSchema": {
       "type": "object",
       "required": [
@@ -2752,11 +3114,11 @@ export const TOOLS = [
             "sentinel-1-grd",
             "sentinel-1-rtc"
           ],
-          "description": "Catalog collection of the scene. NISAR detection is available in the app only (it needs a granule conversion first)."
+          "description": "Collection of the scene. NISAR detection is app-only."
         },
         "item_id": {
           "type": "string",
-          "description": "STAC item id of the scene, as returned by search_imagery."
+          "description": "STAC item id from search_imagery."
         },
         "bbox": {
           "type": "array",
@@ -2765,7 +3127,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "Area to search within the scene, [lon_min, lat_min, lon_max, lat_max] (WGS84)."
+          "description": "[lon_min, lat_min, lon_max, lat_max] WGS84, within the scene."
         },
         "geometry": {
           "type": "object"
@@ -2777,7 +3139,7 @@ export const TOOLS = [
             "v2",
             "v3"
           ],
-          "description": "Detector version. 'auto' (default) picks the recommended version for the sensor."
+          "description": "'auto' (default) picks the recommended version for the sensor."
         }
       }
     },
