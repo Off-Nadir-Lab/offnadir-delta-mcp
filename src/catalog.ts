@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.29.0.
+// Generated for Off-Nadir Delta MCP 1.30.0.
 
 export const TOOLS = [
   {
@@ -2181,7 +2181,7 @@ export const TOOLS = [
       "properties": {
         "watch_id": {
           "type": "string",
-          "description": "The id from list_watches or create_watch."
+          "description": "Id from list_watches."
         },
         "include_passes": {
           "type": "boolean",
@@ -2224,7 +2224,7 @@ export const TOOLS = [
       "properties": {
         "watch_id": {
           "type": "string",
-          "description": "The id from list_watches or create_watch."
+          "description": "Id from list_watches."
         }
       },
       "required": [
@@ -2346,7 +2346,7 @@ export const TOOLS = [
             "event",
             "area"
           ],
-          "description": "What kind of target to watch."
+          "description": "Kind of target."
         },
         "event_id": {
           "type": "number",
@@ -2363,11 +2363,15 @@ export const TOOLS = [
         },
         "name": {
           "type": "string",
-          "description": "Label for the watch (defaults from the target)."
+          "description": "Label (defaults from the target)."
         },
         "notify_email": {
           "type": "boolean",
           "description": "Email on meaningful changes (default false)."
+        },
+        "imagery_alerts": {
+          "type": "boolean",
+          "description": "AREA only: tell me when a new scene covers it."
         }
       },
       "required": [
@@ -2406,11 +2410,11 @@ export const TOOLS = [
       "properties": {
         "watch_id": {
           "type": "string",
-          "description": "The id from list_watches or create_watch."
+          "description": "Id from list_watches."
         },
         "name": {
           "type": "string",
-          "description": "New label for the watch."
+          "description": "New label."
         },
         "status": {
           "type": "string",
@@ -2423,7 +2427,11 @@ export const TOOLS = [
         },
         "notify_email": {
           "type": "boolean",
-          "description": "Email on meaningful changes."
+          "description": "Email on changes."
+        },
+        "imagery_alerts": {
+          "type": "boolean",
+          "description": "AREA only: tell me when a new scene covers it."
         }
       },
       "required": [
@@ -2456,7 +2464,7 @@ export const TOOLS = [
       "properties": {
         "watch_id": {
           "type": "string",
-          "description": "The id from list_watches or create_watch."
+          "description": "Id from list_watches."
         }
       },
       "required": [
@@ -2493,7 +2501,7 @@ export const TOOLS = [
       "properties": {
         "watch_id": {
           "type": "string",
-          "description": "The id from list_watches or create_watch."
+          "description": "Id from list_watches."
         },
         "note": {
           "type": "string",
@@ -2537,7 +2545,7 @@ export const TOOLS = [
         },
         "next_check": {
           "type": "string",
-          "description": "When or what to look at next."
+          "description": "When/what to look at next."
         }
       },
       "required": [
@@ -2574,11 +2582,11 @@ export const TOOLS = [
       "properties": {
         "watch_id": {
           "type": "string",
-          "description": "The id from list_watches or create_watch."
+          "description": "Id from list_watches."
         },
         "note_id": {
           "type": "string",
-          "description": "The note id from get_watch or add_note."
+          "description": "Note id from get_watch."
         }
       },
       "required": [
