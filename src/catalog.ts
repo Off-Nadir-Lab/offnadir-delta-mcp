@@ -14,12 +14,12 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.30.0.
+// Generated for Off-Nadir Delta MCP 1.31.0.
 
 export const TOOLS = [
   {
     "name": "query_signals",
-    "description": "Geolocated world events (geopolitical, security, disaster, infrastructure) from global news media, AI-enriched with severity/GEOINT scores and collection recommendations.",
+    "description": "Geolocated world events from global news media, AI-enriched with severity/GEOINT scores and collection recommendations.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -452,7 +452,7 @@ export const TOOLS = [
   },
   {
     "name": "search_imagery",
-    "description": "Search the imagery catalog (Sentinel-1, Sentinel-2, NISAR L-band) over an area and window. Metadata only, no pixels. eventDate tags each scene pre/post — **a same-day scene is same_day_unknown, never post** — and eventPoint/eventAoi add target_relation, so a scene that only clips the bbox is not read as covering the event.",
+    "description": "Search the imagery catalog over an area and window. Metadata only, no pixels. eventDate tags each scene pre/post — **a same-day scene is same_day_unknown, never post** — and eventPoint/eventAoi add target_relation, so a scene that only clips the bbox is not read as covering the event.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -768,7 +768,7 @@ export const TOOLS = [
   },
   {
     "name": "predict_satellite_passes",
-    "description": "WHEN a place can next be imaged and by WHAT: SGP4 over day-cached elements for 13 free-systematic and commercial-taskable families. **Every pass is a GEOMETRIC access opportunity** — no operator plan is consulted. retrieval_ok:false means timing is UNAVAILABLE, never \"no passes\".",
+    "description": "WHEN a place can next be imaged and by WHAT: 13 free-systematic and commercial-taskable families. **Every pass is a GEOMETRIC access opportunity** — no operator plan is consulted. retrieval_ok:false means timing is UNAVAILABLE, never \"no passes\".",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2185,7 +2185,7 @@ export const TOOLS = [
         },
         "include_passes": {
           "type": "boolean",
-          "description": "Add the collection outlook. Costs the same as predict_satellite_passes — it is the same answer; omit it and the call is free."
+          "description": "Add the collection outlook. Costs the same as predict_satellite_passes; omit it and the call is free."
         }
       },
       "required": [
@@ -2730,7 +2730,7 @@ export const TOOLS = [
   },
   {
     "name": "get_related_events",
-    "description": "What else connects to one event, and what came before and after. `shared_entity` names the connecting place; `nearby` is **close in space and time only, NOT a claim of connection**. `insights.development` asserts sequence, never cause.",
+    "description": "What else connects to one event, and what came before and after. Every `related` entry NAMES what the two share; **merely-nearby events are in `context` and claim nothing**. `insights.development` asserts sequence, never cause.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2743,6 +2743,10 @@ export const TOOLS = [
           "minimum": 1,
           "maximum": 10,
           "description": "Shared-name hops (default 5); 1 = direct only. Sets the charge CEILING (3 + max_hop - 1, capped 8), not the charge."
+        },
+        "include_hypotheses": {
+          "type": "boolean",
+          "description": "Ask what COULD connect the `context` events. ICD 203 word, never a number; each states what would REFUTE it. Empty is normal; omit = no model."
         }
       },
       "required": [
@@ -2770,6 +2774,15 @@ export const TOOLS = [
           "items": {
             "type": "object"
           }
+        },
+        "context": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "hypotheses": {
+          "type": "object"
         },
         "network": {
           "type": "array",

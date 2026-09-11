@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`42` tools · MCP server version `1.30.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`42` tools · MCP server version `1.31.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -95,7 +95,7 @@ What is happening, where it concentrates, and what today looks like.
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `query_signals` | Geolocated world events (geopolitical, security, disaster, infrastructure) from global news media, AI-enriched with severity/GEOINT scores and collection recommendations. | 3 tok |
+| `query_signals` | Geolocated world events from global news media, AI-enriched with severity/GEOINT scores and collection recommendations. | 3 tok |
 | `query_stats` | Roll-ups over the corpus: totals plus per-category and per-day breakdown. | 1 tok |
 | `query_hotspots` | Where activity concentrates: density grid-binned into ranked cells with peak severity, categories and representative event_ids. | 1 tok |
 | `get_world_brief` | The Daily World Brief — an AI digest of the previous UTC day. | free |
@@ -111,11 +111,11 @@ Whether a satellite can resolve it, which one, and when it next passes.
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `search_imagery` | Search the imagery catalog (Sentinel-1, Sentinel-2, NISAR L-band) over an area and window. | 2 tok |
+| `search_imagery` | Search the imagery catalog over an area and window. | 2 tok |
 | `plan_event_imagery` | The deterministic imagery plan for ONE event: checks BOTH sensors exactly once — sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a — against the event footprint and a pre/post window. | 4 tok |
 | `rank_imaging_priority` | WHERE, and with what class of satellite, observation is most worthwhile now: composite IMPORTANCE crossed with the SPEC CLASS the required resolution demands — coarse, hr (free Sentinel-class) or vhr. | 1 tok |
 | `survey_observable_events` | Which events a sensor can actually RESOLVE, over the FULL set. | 1 tok |
-| `predict_satellite_passes` | WHEN a place can next be imaged and by WHAT: SGP4 over day-cached elements for 13 free-systematic and commercial-taskable families. | 2 tok |
+| `predict_satellite_passes` | WHEN a place can next be imaged and by WHAT: 13 free-systematic and commercial-taskable families. | 2 tok |
 | `test_hypotheses` | Given competing statements, the observation that would REFUTE the most — and those that would refute none. | 3 tok |
 | `lookup_elevation` | Terrain height from the Copernicus DEM GLO-30 for a point, bbox or polygon, with relief — the number that governs SAR layover and shadow. | free |
 | `analyze_terrain` | Compute FROM the terrain. | free |
