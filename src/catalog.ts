@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.31.0.
+// Generated for Off-Nadir Delta MCP 1.32.0.
 
 export const TOOLS = [
   {
@@ -1460,93 +1460,6 @@ export const TOOLS = [
     }
   },
   {
-    "name": "test_hypotheses",
-    "description": "Given competing statements, the observation that would REFUTE the most — and those that would refute none. **The logic runs one way**: an ABSENT observable refutes every statement requiring it; a PRESENT one refutes nothing.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "hypotheses": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "minItems": 2,
-          "maxItems": 8,
-          "description": "Two to eight competing statements, one assertion each (<=500 chars)."
-        },
-        "mode": {
-          "type": "string",
-          "enum": [
-            "competing",
-            "joint"
-          ],
-          "description": "`competing` (default): an observable required by ALL is useless. `joint`: one required by all is BEST."
-        },
-        "event_id": {
-          "type": "number",
-          "description": "Test the standing claims about this event; restated claims are excluded."
-        }
-      },
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        },
-        "hypotheses": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "best": {
-          "type": "object"
-        },
-        "discriminators": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "no_diagnostic_value": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "undecomposable": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "no_discriminator_reason": {
-          "type": "string"
-        },
-        "note": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "summary",
-        "discriminators",
-        "note"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
-    }
-  },
-  {
     "name": "query_developments",
     "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved) or `measurement` (what we can see moved).",
     "inputSchema": {
@@ -2267,27 +2180,6 @@ export const TOOLS = [
           "items": {
             "type": "object"
           }
-        },
-        "discriminators": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "no_diagnostic_value": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "undecomposable": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "no_discriminator_reason": {
-          "type": "string"
         },
         "collection_options": {
           "type": "object"

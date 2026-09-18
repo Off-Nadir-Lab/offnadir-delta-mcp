@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`42` tools · MCP server version `1.31.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`41` tools · MCP server version `1.32.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-23 of the 42 tools cost nothing, so the first thing you run is free:
+23 of the 41 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -116,7 +116,6 @@ Whether a satellite can resolve it, which one, and when it next passes.
 | `rank_imaging_priority` | WHERE, and with what class of satellite, observation is most worthwhile now: composite IMPORTANCE crossed with the SPEC CLASS the required resolution demands — coarse, hr (free Sentinel-class) or vhr. | 1 tok |
 | `survey_observable_events` | Which events a sensor can actually RESOLVE, over the FULL set. | 1 tok |
 | `predict_satellite_passes` | WHEN a place can next be imaged and by WHAT: 13 free-systematic and commercial-taskable families. | 2 tok |
-| `test_hypotheses` | Given competing statements, the observation that would REFUTE the most — and those that would refute none. | 3 tok |
 | `lookup_elevation` | Terrain height from the Copernicus DEM GLO-30 for a point, bbox or polygon, with relief — the number that governs SAR layover and shadow. | free |
 | `analyze_terrain` | Compute FROM the terrain. | free |
 
