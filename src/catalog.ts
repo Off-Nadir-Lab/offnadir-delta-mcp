@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.32.0.
+// Generated for Off-Nadir Delta MCP 1.34.0.
 
 export const TOOLS = [
   {
@@ -107,55 +107,57 @@ export const TOOLS = [
             "sources",
             "geoint"
           ],
-          "description": "\"geoint\" = collection_priority, NOT the saturated geoint_score."
+          "description": "Default \"severity\". \"geoint\" = collection relevance: satellite-visible first, then geoint_score, then stage."
         },
         "updatedSince": {
           "type": "string",
-          "description": "Only signals (re)enriched at/after this ISO 8601 time. Ignores the date window."
+          "description": "Only signals refolded at/after this ISO 8601 time. Narrows the date window rather than replacing it."
         },
         "createdSince": {
           "type": "string",
-          "description": "Only signals FIRST enriched at/after this ISO 8601 time."
+          "description": "Only signals FIRST seen at/after this ISO 8601 time."
         },
-        "observability": {
-          "type": "string",
-          "enum": [
-            "observable",
-            "not-observable"
-          ],
-          "description": "Is a physical mark imageable at all."
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "localized",
+              "pinpointed"
+            ]
+          },
+          "description": "Place precision: reported (country/province), localized (town), pinpointed (block/facility)."
         },
-        "observabilityStatus": {
-          "type": "string",
-          "enum": [
-            "observable",
-            "not_observable",
-            "insufficient_detail"
-          ],
-          "description": "3-state `observability`, adding `insufficient_detail`; neither bucket leaks it."
+        "sensors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "sentinel-2",
+              "sentinel-1-sar",
+              "viirs-thermal",
+              "planet",
+              "vhr-optical",
+              "multi-sensor",
+              "none"
+            ]
+          },
+          "description": "Keep only signals whose recommended sensor is one of these."
         },
-        "openData": {
-          "type": "string",
-          "enum": [
-            "sufficient",
-            "commercial-recommended",
-            "not-applicable"
-          ],
-          "description": "Free imagery enough vs commercial tasking recommended."
-        },
-        "minInformationGain": {
+        "minGeoint": {
           "type": "number",
           "minimum": 0,
-          "maximum": 1,
-          "description": "expected_information_gain >= this (0-1)."
+          "maximum": 10,
+          "description": "geoint_score >= this (0-10) — how much a satellite look would add."
         },
-        "taskableOnly": {
+        "plottableOnly": {
           "type": "boolean",
-          "description": "Coordinate is search_ready. GEOMETRY ONLY — for tasking use collectionReadyOnly."
+          "description": "Coordinate is precise enough to draw as a point, and therefore to point a sensor at."
         },
-        "collectionReadyOnly": {
+        "observableOnly": {
           "type": "boolean",
-          "description": "Strict tasking candidates: search_ready AND observable AND quality!=failed AND a plan AND a coordinate."
+          "description": "A satellite could see it (effect large enough, place fine enough). Tasking: with plottableOnly."
         },
         "responseFormat": {
           "type": "string",
@@ -198,7 +200,7 @@ export const TOOLS = [
   },
   {
     "name": "query_stats",
-    "description": "Roll-ups over the corpus: totals plus per-category and per-day breakdown. NOTE the unit — `total` counts article-deduped events, not clusters, so it is >= the query_signals count.",
+    "description": "Roll-ups over the corpus: totals plus per-category and per-day breakdown. `total` counts the same events query_signals returns, so it matches its meta.total_count for the same query.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -270,7 +272,7 @@ export const TOOLS = [
   },
   {
     "name": "query_hotspots",
-    "description": "Where activity concentrates: density grid-binned into ranked cells with peak severity, categories and representative event_ids. Cells count satellite-observable points.",
+    "description": "Where activity concentrates: density grid-binned into ranked cells with peak severity, categories and representative event_ids. Events too coarse to place are counted in meta.dropped_by_plottable_count, not spread over the grid.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -322,13 +324,13 @@ export const TOOLS = [
           "type": "number",
           "minimum": 0,
           "maximum": 10,
-          "description": "Keep only points with severity_score >= this."
+          "description": "Keep only events with severity_score >= this."
         },
         "limit": {
           "type": "integer",
           "minimum": 1,
           "maximum": 500,
-          "description": "Source points sampled before binning — NOT the cell count. Default/max 500."
+          "description": "Max CELLS returned, highest first. The whole window is aggregated either way; meta.total_cell_count is the uncut count. Default/max 500."
         }
       }
     },
@@ -572,8 +574,8 @@ export const TOOLS = [
       "type": "object",
       "properties": {
         "event_id": {
-          "type": "integer",
-          "description": "The `id` from query_signals; the server resolves its point and AOI."
+          "type": "string",
+          "description": "The `id` (UUID) from query_signals; the server resolves its point and AOI."
         },
         "analysis_goal": {
           "type": "string",
@@ -871,8 +873,8 @@ export const TOOLS = [
       "type": "object",
       "properties": {
         "eventId": {
-          "type": "integer",
-          "description": "Signal id (global_event_id) from query_signals."
+          "type": "string",
+          "description": "Signal id (UUID) from query_signals."
         },
         "kind": {
           "type": "string",
@@ -913,7 +915,7 @@ export const TOOLS = [
           "description": "Deterministic collection context for this signal — not model prose. Use `imagery_handoff` to go straight from the assessment to real scene candidates.",
           "properties": {
             "event_id": {
-              "type": "integer"
+              "type": "string"
             },
             "event_date": {
               "type": [
@@ -1119,7 +1121,7 @@ export const TOOLS = [
           "description": "Present ONLY on a pre-charge rejection; `content` and `meta` are then absent."
         },
         "event_id": {
-          "type": "integer",
+          "type": "string",
           "description": "Echoed on a rejection so the caller can tell which signal it was."
         },
         "charged": {
@@ -1417,8 +1419,8 @@ export const TOOLS = [
           "description": "Only claims a later answer restated with WEAKER evidence — read these first."
         },
         "event_id": {
-          "type": "number",
-          "description": "Only claims about this event. If neither anchor resolves, `event_link.linked` says so."
+          "type": "string",
+          "description": "Only claims about this event (the UUID from query_signals). `event_link.linked` says whether any resolved."
         },
         "limit": {
           "type": "number",
@@ -1491,45 +1493,52 @@ export const TOOLS = [
           },
           "description": "Restrict to these signal categories."
         },
-        "development_types": {
+        "axes": {
           "type": "array",
           "items": {
             "type": "string",
             "enum": [
-              "new_event",
-              "baseline",
-              "occurrence_time_established",
-              "casualty_count_first_reported",
-              "casualty_count_raised",
-              "casualty_count_corrected",
+              "attributed_actor",
               "casualties_disputed",
-              "attribution_stated",
-              "attribution_changed",
-              "attribution_disputed",
-              "corroboration_increased",
-              "severity_escalated",
-              "location_resolved",
-              "observability_established",
-              "collection_ready",
-              "imagery_available",
-              "sar_pair_ready",
-              "observed",
-              "confirmed",
-              "reporting_disputed",
-              "retracted"
+              "casualties_injured",
+              "casualties_killed",
+              "distinct_hosts",
+              "escalation_trend",
+              "geoint_score",
+              "imagery_post_status",
+              "imagery_sar_pair_status",
+              "location_level",
+              "means_reported",
+              "member_count",
+              "occurred_at",
+              "point_plottable",
+              "quality_status",
+              "severity_score",
+              "stage",
+              "target_status",
+              "targets_named"
             ]
           },
-          "description": "Restrict to these kinds of change. An unknown value is an error, not an empty result."
+          "description": "Restrict to these axes. An unknown value errors rather than returning nothing."
         },
         "notable_only": {
           "type": "boolean",
           "description": "Default true. False returns every recorded change."
+        },
+        "include_member_count": {
+          "type": "boolean",
+          "description": "Default false. \"One more report arrived\" is not news about the event."
         },
         "limit": {
           "type": "number",
           "minimum": 1,
           "maximum": 200,
           "description": "How many developments to return (default 50)."
+        },
+        "offset": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Skip this many; meta.total_count is the window."
         }
       },
       "required": []
@@ -1569,8 +1578,8 @@ export const TOOLS = [
       "type": "object",
       "properties": {
         "event_id": {
-          "type": "number",
-          "description": "Any signal id in the event; the canonical event is returned."
+          "type": "string",
+          "description": "Event id (UUID). A folded id resolves to its event; merged_from_request says so."
         }
       },
       "required": [
@@ -2296,7 +2305,7 @@ export const TOOLS = [
   },
   {
     "name": "update_watch",
-    "description": "Rename, pause or resume a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking.",
+    "description": "Rename, pause, resume or close a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking. **Closing states how the question ended** and requires close_reason.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2313,9 +2322,19 @@ export const TOOLS = [
           "enum": [
             "active",
             "paused",
-            "saved"
+            "saved",
+            "closed"
           ],
-          "description": "\"paused\" stops the bound checks; \"active\" resumes them."
+          "description": "\"paused\" stops the bound checks; \"active\" resumes them; \"closed\" ends the question and needs close_reason."
+        },
+        "close_reason": {
+          "type": "string",
+          "enum": [
+            "resolved",
+            "lapsed",
+            "false_alarm"
+          ],
+          "description": "Required when status is \"closed\". resolved = an answer was reached; lapsed = interest moved on without an answer; false_alarm = never a watchable event. They point at different things to fix, so do not collapse them."
         },
         "notify_email": {
           "type": "boolean",
@@ -2882,8 +2901,8 @@ export const TOOLS = [
       ],
       "properties": {
         "signal_id": {
-          "type": "integer",
-          "description": "The signal (global_event_id) to research further."
+          "type": "string",
+          "description": "The signal id (UUID from query_signals) to research further."
         }
       }
     },
