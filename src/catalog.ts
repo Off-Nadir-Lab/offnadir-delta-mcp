@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.34.0.
+// Generated for Off-Nadir Delta MCP 1.35.0.
 
 export const TOOLS = [
   {
@@ -34,7 +34,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Default today."
+          "description": "Window end date, YYYY-MM-DD (UTC). Default today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
         },
         "days": {
           "type": "integer",
@@ -215,7 +215,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
         },
         "days": {
           "type": "integer",
@@ -287,7 +287,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today."
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
         },
         "days": {
           "type": "integer",
@@ -639,7 +639,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here."
+          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
         },
         "end_date": {
           "type": "string",
@@ -716,7 +716,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here."
+          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
         },
         "end_date": {
           "type": "string",
@@ -1478,7 +1478,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "End of the window (YYYY-MM-DD). Defaults to today."
+          "description": "End of the window (YYYY-MM-DD). Defaults to today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
         },
         "days": {
           "type": "number",
@@ -2587,7 +2587,7 @@ export const TOOLS = [
   },
   {
     "name": "get_entity",
-    "description": "What has happened at one place: the registry record plus every linked event with HOW it was linked. **Read the basis: `geo_proximity` is an association, not a statement that the event happened there.**",
+    "description": "What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. **`link_kind: proximity` is an association, not a statement that the event happened there.**",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2616,17 +2616,14 @@ export const TOOLS = [
             "type": "object"
           }
         },
-        "link_basis_counts": {
-          "type": "object"
-        },
         "event_count": {
+          "type": "number"
+        },
+        "events_24h": {
           "type": "number"
         },
         "claim_count": {
           "type": "number"
-        },
-        "observability": {
-          "type": "object"
         }
       },
       "required": [
@@ -2641,23 +2638,13 @@ export const TOOLS = [
   },
   {
     "name": "get_related_events",
-    "description": "What else connects to one event, and what came before and after. Every `related` entry NAMES what the two share; **merely-nearby events are in `context` and claim nothing**. `insights.development` asserts sequence, never cause.",
+    "description": "The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. Merely-nearby events are not relations and are not returned.",
     "inputSchema": {
       "type": "object",
       "properties": {
         "event_id": {
-          "type": "number",
-          "description": "The signal id to anchor on."
-        },
-        "max_hop": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 10,
-          "description": "Shared-name hops (default 5); 1 = direct only. Sets the charge CEILING (3 + max_hop - 1, capped 8), not the charge."
-        },
-        "include_hypotheses": {
-          "type": "boolean",
-          "description": "Ask what COULD connect the `context` events. ICD 203 word, never a number; each states what would REFUTE it. Empty is normal; omit = no model."
+          "type": "string",
+          "description": "The event id (a UUID) from query_signals."
         }
       },
       "required": [
@@ -2674,7 +2661,13 @@ export const TOOLS = [
         "anchor": {
           "type": "object"
         },
-        "entities": {
+        "facilities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "places": {
           "type": "array",
           "items": {
             "type": "object"
@@ -2686,39 +2679,14 @@ export const TOOLS = [
             "type": "object"
           }
         },
-        "context": {
+        "merged_in": {
           "type": "array",
           "items": {
             "type": "object"
           }
-        },
-        "hypotheses": {
-          "type": "object"
-        },
-        "network": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "nearby_facilities": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "assessment": {
-          "type": "object"
-        },
-        "insights": {
-          "type": "object"
         },
         "accounting": {
           "type": "object"
-        },
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
         }
       },
       "required": [
@@ -2889,43 +2857,6 @@ export const TOOLS = [
       "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
-    }
-  },
-  {
-    "name": "refine_location",
-    "description": "Research one signal's location further and store a better coordinate if the sources genuinely narrow it. **Charged only if the precision improves.** `improved: false` is the common CORRECT outcome, not worth retrying.",
-    "inputSchema": {
-      "type": "object",
-      "required": [
-        "signal_id"
-      ],
-      "properties": {
-        "signal_id": {
-          "type": "string",
-          "description": "The signal id (UUID from query_signals) to research further."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "result": {
-          "type": "object"
-        },
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        }
-      }
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
     }
   },
   {

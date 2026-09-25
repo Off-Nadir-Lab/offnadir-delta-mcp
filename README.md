@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`41` tools · MCP server version `1.34.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`40` tools · MCP server version `1.35.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-23 of the 41 tools cost nothing, so the first thing you run is free:
+23 of the 40 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -102,8 +102,8 @@ What is happening, where it concentrates, and what today looks like.
 | `query_developments` | What actually CHANGED about the events in an area, not which articles are new. | 3 tok |
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |
 | `search_entities` | Find a place in the location registry — ports, bases, airfields, power plants, chokepoints, named seas. | 1 tok |
-| `get_entity` | What has happened at one place: the registry record plus every linked event with HOW it was linked. | 1 tok |
-| `get_related_events` | What else connects to one event, and what came before and after. | 3–8 tok |
+| `get_entity` | What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. | 1 tok |
+| `get_related_events` | The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. | 3 tok |
 
 ### Plan
 
@@ -129,7 +129,6 @@ Turn reporting into a cited assessment you can audit afterwards.
 | `ask_analyst` | Ask the Delta Analyst an OSINT/GEOINT question; returns a structured brief. | 5–123 tok |
 | `get_analyst_job` | Status and result of an ask_analyst run. | free |
 | `query_claims` | The ledger of claims this key was given, each with its evidence class, independent source families and publishers. | free |
-| `refine_location` | Research one signal's location further and store a better coordinate if the sources genuinely narrow it. | 3–29 tok |
 | `measure_index_series` | Measure a spectral index over an area scene by scene through the Sentinel-2 archive. | 0.5 tok |
 | `detect_ships` | Count vessel-like targets in ONE Sentinel-1 SAR scene by CFAR detection — radar sees through cloud and at night. | 5 tok |
 
