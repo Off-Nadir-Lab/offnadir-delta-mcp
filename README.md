@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`40` tools · MCP server version `1.35.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`40` tools · MCP server version `1.36.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -103,7 +103,7 @@ What is happening, where it concentrates, and what today looks like.
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |
 | `search_entities` | Find a place in the location registry — ports, bases, airfields, power plants, chokepoints, named seas. | 1 tok |
 | `get_entity` | What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. | 1 tok |
-| `get_related_events` | The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. | 3 tok |
+| `get_related_events` | The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. | 1 tok |
 
 ### Plan
 
