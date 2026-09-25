@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.36.0.
+// Generated for Off-Nadir Delta MCP 1.37.0.
 
 export const TOOLS = [
   {
@@ -34,7 +34,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Default today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
+          "description": "Window end date, YYYY-MM-DD (UTC). Default today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "days": {
           "type": "integer",
@@ -77,7 +77,7 @@ export const TOOLS = [
               "equities"
             ]
           },
-          "description": "Markets AI-tagged as exposed through a direct physical/supply channel."
+          "description": "Markets exposed via a physical/supply channel."
         },
         "limit": {
           "type": "integer",
@@ -95,6 +95,12 @@ export const TOOLS = [
           "maximum": 10,
           "description": "severity_score >= this (0-10)."
         },
+        "minSeverityBand": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "severity_band >= this."
+        },
         "escalating": {
           "type": "boolean",
           "description": "escalation_trend is \"escalating\"."
@@ -107,15 +113,15 @@ export const TOOLS = [
             "sources",
             "geoint"
           ],
-          "description": "Default \"severity\". \"geoint\" = collection relevance: satellite-visible first, then geoint_score, then stage."
+          "description": "Default \"severity\". \"geoint\": visible first, then geoint_score, stage."
         },
         "updatedSince": {
           "type": "string",
-          "description": "Only signals refolded at/after this ISO 8601 time. Narrows the date window rather than replacing it."
+          "description": "Refolded at/after (ISO); narrows the window."
         },
         "createdSince": {
           "type": "string",
-          "description": "Only signals FIRST seen at/after this ISO 8601 time."
+          "description": "FIRST seen at/after (ISO)."
         },
         "stages": {
           "type": "array",
@@ -127,7 +133,7 @@ export const TOOLS = [
               "pinpointed"
             ]
           },
-          "description": "Place precision: reported (country/province), localized (town), pinpointed (block/facility)."
+          "description": "reported=country/province, localized=town, pinpointed=block/facility."
         },
         "sensors": {
           "type": "array",
@@ -143,21 +149,38 @@ export const TOOLS = [
               "none"
             ]
           },
-          "description": "Keep only signals whose recommended sensor is one of these."
+          "description": "Recommended sensor is one of these."
         },
         "minGeoint": {
           "type": "number",
           "minimum": 0,
           "maximum": 10,
-          "description": "geoint_score >= this (0-10) — how much a satellite look would add."
+          "description": "geoint_score >= this (0-10)."
         },
         "plottableOnly": {
           "type": "boolean",
-          "description": "Coordinate is precise enough to draw as a point, and therefore to point a sensor at."
+          "description": "Precise enough to be a point."
         },
         "observableOnly": {
           "type": "boolean",
-          "description": "A satellite could see it (effect large enough, place fine enough). Tasking: with plottableOnly."
+          "description": "A satellite could see it."
+        },
+        "q": {
+          "type": "string",
+          "description": "Text search: all words; \"phrase\"; -exclude."
+        },
+        "reportedSince": {
+          "type": "string",
+          "description": "Last reported at/after (ISO)."
+        },
+        "minPublishers": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "At least this many publishers."
+        },
+        "unplottableOnly": {
+          "type": "boolean",
+          "description": "Only events that cannot be a point."
         },
         "responseFormat": {
           "type": "string",
@@ -165,7 +188,7 @@ export const TOOLS = [
             "concise",
             "detailed"
           ],
-          "description": "\"detailed\" returns the full Signal (see signals://schema)."
+          "description": "\"detailed\": full Signal (signals://schema)."
         }
       }
     },
@@ -215,7 +238,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "days": {
           "type": "integer",
@@ -287,7 +310,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
+          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "days": {
           "type": "integer",
@@ -330,7 +353,7 @@ export const TOOLS = [
           "type": "integer",
           "minimum": 1,
           "maximum": 500,
-          "description": "Max CELLS returned, highest first. The whole window is aggregated either way; meta.total_cell_count is the uncut count. Default/max 500."
+          "description": "Max CELLS, highest first; the whole window is aggregated either way (meta.total_cell_count). Default/max 500."
         }
       }
     },
@@ -365,13 +388,21 @@ export const TOOLS = [
   },
   {
     "name": "get_world_brief",
-    "description": "The Daily World Brief — an AI digest of the previous UTC day. freshness.is_stale means no newer day is available yet, so relay it as possibly out of date.",
+    "description": "AI world brief: daily (prior UTC day, all plans) or weekly/monthly by plan. freshness.is_stale: no newer day, so relay as stale.",
     "inputSchema": {
       "type": "object",
       "properties": {
+        "period": {
+          "type": "string",
+          "enum": [
+            "daily",
+            "weekly",
+            "monthly"
+          ]
+        },
         "date": {
           "type": "string",
-          "description": "YYYY-MM-DD (UTC). Default latest available."
+          "description": "YYYY-MM-DD UTC; weekly/monthly: last day. Default latest"
         }
       }
     },
@@ -489,7 +520,7 @@ export const TOOLS = [
         },
         "eventDate": {
           "type": "string",
-          "description": "Widens the window to the canonical pre/post span and adds bracketing; sentinel-1-grd also gets sar_pair_status."
+          "description": "Widens to the canonical pre/post span with bracketing; sentinel-1-grd adds sar_pair_status."
         },
         "eventPoint": {
           "type": "array",
@@ -523,7 +554,7 @@ export const TOOLS = [
           "type": "integer",
           "minimum": 1,
           "maximum": 100,
-          "description": "Max scenes to return. Defaults to 25."
+          "description": "Max scenes. Default 25."
         },
         "responseFormat": {
           "type": "string",
@@ -531,7 +562,7 @@ export const TOOLS = [
             "concise",
             "detailed"
           ],
-          "description": "\"detailed\" adds footprint geometry, full target_relation, polarizations, orbit numbers, incidence."
+          "description": "\"detailed\" adds footprint geometry, full target_relation and SAR metadata."
         }
       },
       "required": [
@@ -639,7 +670,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
+          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "end_date": {
           "type": "string",
@@ -716,7 +747,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
+          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "end_date": {
           "type": "string",
@@ -1463,7 +1494,7 @@ export const TOOLS = [
   },
   {
     "name": "query_developments",
-    "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved) or `measurement` (what we can see moved).",
+    "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved) or `measurement` (what we can see moved). Plan-dependent values say so (`locked_by`).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1478,7 +1509,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "End of the window (YYYY-MM-DD). Defaults to today. Records start 2026-09-23; before that, empty means unrecorded, not quiet."
+          "description": "End of the window (YYYY-MM-DD). Defaults to today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "days": {
           "type": "number",
@@ -1515,6 +1546,7 @@ export const TOOLS = [
               "quality_status",
               "severity_score",
               "stage",
+              "target_effect",
               "target_status",
               "targets_named"
             ]
@@ -1533,7 +1565,7 @@ export const TOOLS = [
           "type": "number",
           "minimum": 1,
           "maximum": 200,
-          "description": "How many developments to return (default 50)."
+          "description": "Developments to return (default 50)."
         },
         "offset": {
           "type": "number",
@@ -1573,7 +1605,7 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. Plan-dependent: see `locked_by`, `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2638,7 +2670,7 @@ export const TOOLS = [
   },
   {
     "name": "get_related_events",
-    "description": "The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. Merely-nearby events are not relations and are not returned.",
+    "description": "The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. Merely-nearby events are not relations and are not returned. Plan-dependent: see `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
