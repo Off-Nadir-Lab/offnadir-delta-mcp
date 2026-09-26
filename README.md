@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`40` tools · MCP server version `1.37.1` · [full reference](https://offnadir-delta.com/docs/mcp)
+`40` tools · MCP server version `1.37.2` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -143,9 +143,9 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 | `delete_standing_order` | Delete a standing order, or pause/resume with active=false/true. | free |
 | `list_monitored_areas` | Places under continuous satellite measurement: metric, latest value, change, anomaly flag, coverage. | free |
 | `get_monitored_area` | One monitored area with its full measurement history. | free |
-| `create_monitored_area` | Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition is measured. | free |
+| `create_monitored_area` | Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition (or FIRMS fire detection) is measured. | free |
 | `list_watches` | The Watchlist as one list, each entry with a state bucket. | free |
-| `get_watch` | One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its verification state, developments and thread, plus this account's notes. | free |
+| `get_watch` | One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments and thread, plus this account's notes. | free |
 | `get_decision_package` | Everything needed to decide what to collect next about one watch, in one object. | 5 tok |
 | `create_watch` | Add a target to the Watchlist. | free |
 | `update_watch` | Rename, pause, resume or close a watch. | free |

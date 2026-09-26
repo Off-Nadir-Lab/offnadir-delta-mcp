@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.37.1.
+// Generated for Off-Nadir Delta MCP 1.37.2.
 
 export const TOOLS = [
   {
@@ -39,7 +39,6 @@ export const TOOLS = [
         "days": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 30,
           "description": "Window length in days. Default 1."
         },
         "categories": {
@@ -243,7 +242,6 @@ export const TOOLS = [
         "days": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 30,
           "description": "Window length in days. Defaults to 1."
         },
         "categories": {
@@ -315,7 +313,6 @@ export const TOOLS = [
         "days": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 30,
           "description": "Window length in days. Defaults to 1."
         },
         "categories": {
@@ -1514,7 +1511,6 @@ export const TOOLS = [
         "days": {
           "type": "number",
           "minimum": 1,
-          "maximum": 30,
           "description": "Window length ending at `date` (default 7)."
         },
         "categories": {
@@ -2016,7 +2012,7 @@ export const TOOLS = [
   },
   {
     "name": "create_monitored_area",
-    "description": "Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition is measured. For a QUANTITY at a fixed place; for events use create_standing_order.",
+    "description": "Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition (or FIRMS fire detection) is measured. For a QUANTITY at a fixed place; for events use create_standing_order.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2039,7 +2035,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD to backfill from. Default 30 days ago; longer costs more on the first check."
+          "description": "YYYY-MM-DD to backfill from. Default 3 months ago; longer costs more on the first check."
         }
       },
       "required": [
@@ -2129,7 +2125,7 @@ export const TOOLS = [
   },
   {
     "name": "get_watch",
-    "description": "One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its verification state, developments and thread, plus this account's notes.",
+    "description": "One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments and thread, plus this account's notes.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2282,8 +2278,8 @@ export const TOOLS = [
           "description": "Kind of target."
         },
         "event_id": {
-          "type": "number",
-          "description": "Signal event id (required for target_type \"event\")."
+          "type": "string",
+          "description": "Signal id (uuid; required for target_type \"event\")."
         },
         "bbox": {
           "type": "array",
