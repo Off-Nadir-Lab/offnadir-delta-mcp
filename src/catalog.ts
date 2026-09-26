@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.37.0.
+// Generated for Off-Nadir Delta MCP 1.37.1.
 
 export const TOOLS = [
   {
@@ -402,7 +402,7 @@ export const TOOLS = [
         },
         "date": {
           "type": "string",
-          "description": "YYYY-MM-DD UTC; weekly/monthly: last day. Default latest"
+          "description": "YYYY-MM-DD UTC (daily: within the plan window); weekly/monthly: last day. Default latest"
         }
       }
     },
@@ -670,7 +670,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
+          "description": "YYYY-MM-DD, inclusive. Default today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "end_date": {
           "type": "string",
@@ -747,7 +747,7 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; no plan history floor here. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
+          "description": "YYYY-MM-DD, inclusive. Default today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "end_date": {
           "type": "string",
