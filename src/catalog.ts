@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.37.2.
+// Generated for Off-Nadir Delta MCP 1.38.0.
 
 export const TOOLS = [
   {
@@ -2265,7 +2265,7 @@ export const TOOLS = [
   },
   {
     "name": "create_watch",
-    "description": "Add a target to the Watchlist. EVENT: pass the signal's event id and the server binds the canonical event — **never watch an article URL**. AREA: pass a bbox.",
+    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2273,13 +2273,13 @@ export const TOOLS = [
           "type": "string",
           "enum": [
             "event",
-            "area"
-          ],
-          "description": "Kind of target."
+            "area",
+            "site"
+          ]
         },
         "event_id": {
           "type": "string",
-          "description": "Signal id (uuid; required for target_type \"event\")."
+          "description": "EVENT: signal uuid."
         },
         "bbox": {
           "type": "array",
@@ -2288,19 +2288,44 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "[west, south, east, north] WGS84 (required for target_type \"area\")."
+          "description": "AREA: [W,S,E,N] WGS84."
+        },
+        "entity_id": {
+          "type": "string",
+          "description": "SITE: registry id"
+        },
+        "lat": {
+          "type": "number"
+        },
+        "lon": {
+          "type": "number"
+        },
+        "scale": {
+          "type": "string",
+          "enum": [
+            "facility",
+            "city",
+            "country"
+          ]
+        },
+        "radius_m": {
+          "type": "number"
+        },
+        "metric": {
+          "type": "string",
+          "description": "SITE: metric or \"none\"."
         },
         "name": {
           "type": "string",
-          "description": "Label (defaults from the target)."
+          "description": "Label."
         },
         "notify_email": {
           "type": "boolean",
-          "description": "Email on meaningful changes (default false)."
+          "description": "Email on changes."
         },
         "imagery_alerts": {
           "type": "boolean",
-          "description": "AREA only: tell me when a new scene covers it."
+          "description": "AREA/SITE: new-scene alerts."
         }
       },
       "required": [
@@ -2333,7 +2358,7 @@ export const TOOLS = [
   },
   {
     "name": "update_watch",
-    "description": "Rename, pause, resume or close a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking. **Closing states how the question ended** and requires close_reason.",
+    "description": "Rename, pause, resume or close a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking. **Closing states how the question ended** (close_reason).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2370,7 +2395,7 @@ export const TOOLS = [
         },
         "imagery_alerts": {
           "type": "boolean",
-          "description": "AREA only: tell me when a new scene covers it."
+          "description": "AREA/SITE: new-scene alerts."
         }
       },
       "required": [
