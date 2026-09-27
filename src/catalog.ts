@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.38.0.
+// Generated for Off-Nadir Delta MCP 1.39.0.
 
 export const TOOLS = [
   {
@@ -2579,7 +2579,7 @@ export const TOOLS = [
   },
   {
     "name": "search_entities",
-    "description": "Find a place in the location registry — ports, bases, airfields, power plants, chokepoints, named seas. Matches the registry's own names and aliases. At most 50 rows.",
+    "description": "Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code. Max 50.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2596,11 +2596,16 @@ export const TOOLS = [
               "military_base",
               "airport",
               "refinery_energy",
+              "nuclear_facility",
+              "launch_site",
+              "dam",
+              "bridge",
+              "government_site",
               "chokepoint",
               "water_body"
             ]
           },
-          "description": "Restrict to these kinds of place. Omit for all."
+          "description": "Kinds to keep. Omit for all."
         },
         "limit": {
           "type": "number",
