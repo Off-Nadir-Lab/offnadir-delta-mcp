@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 1.39.0.
+// Generated for Off-Nadir Delta MCP 2.0.0.
 
 export const TOOLS = [
   {
@@ -32,14 +32,22 @@ export const TOOLS = [
           "maxItems": 4,
           "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
         },
-        "date": {
+        "startDate": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Default today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
+          "description": "Date range start, YYYY-MM-DD (UTC). With endDate. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Window length in days. Default 1."
+        "endDate": {
+          "type": "string",
+          "description": "Date range end, YYYY-MM-DD (UTC), inclusive."
+        },
+        "recency": {
+          "type": "string",
+          "enum": [
+            "15m",
+            "1h",
+            "24h"
+          ],
+          "description": "Last reported within. Default 24h when no date range."
         },
         "categories": {
           "type": "array",
@@ -60,6 +68,40 @@ export const TOOLS = [
           },
           "description": "Restrict to these categories."
         },
+        "q": {
+          "type": "string",
+          "description": "Text search: all words; \"phrase\"; -exclude."
+        },
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "localized",
+              "pinpointed"
+            ]
+          },
+          "description": "reported=country/province, localized=town, pinpointed=block/facility."
+        },
+        "minSeverityBand": {
+          "type": "integer",
+          "enum": [
+            4,
+            6,
+            9
+          ],
+          "description": "severity_band >= this."
+        },
+        "minPublishers": {
+          "type": "integer",
+          "enum": [
+            2,
+            3,
+            5
+          ],
+          "description": "At least this many publishers."
+        },
         "markets": {
           "type": "array",
           "items": {
@@ -78,61 +120,23 @@ export const TOOLS = [
           },
           "description": "Markets exposed via a physical/supply channel."
         },
-        "limit": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 500,
-          "description": "Max rows per page. Default 100."
-        },
-        "cursor": {
-          "type": "string",
-          "description": "Cursor from meta.next_cursor."
-        },
-        "minSeverity": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 10,
-          "description": "severity_score >= this (0-10)."
-        },
-        "minSeverityBand": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 10,
-          "description": "severity_band >= this."
-        },
-        "escalating": {
-          "type": "boolean",
-          "description": "escalation_trend is \"escalating\"."
-        },
-        "sort": {
+        "placement": {
           "type": "string",
           "enum": [
-            "severity",
-            "recent",
-            "sources",
-            "geoint"
+            "all",
+            "map",
+            "list"
           ],
-          "description": "Default \"severity\". \"geoint\": visible first, then geoint_score, stage."
+          "description": "map=a point; list=country/province only."
         },
-        "updatedSince": {
+        "observable": {
           "type": "string",
-          "description": "Refolded at/after (ISO); narrows the window."
-        },
-        "createdSince": {
-          "type": "string",
-          "description": "FIRST seen at/after (ISO)."
-        },
-        "stages": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "reported",
-              "localized",
-              "pinpointed"
-            ]
-          },
-          "description": "reported=country/province, localized=town, pinpointed=block/facility."
+          "enum": [
+            "any",
+            "yes",
+            "no"
+          ],
+          "description": "A satellite could see it."
         },
         "sensors": {
           "type": "array",
@@ -148,46 +152,58 @@ export const TOOLS = [
               "none"
             ]
           },
-          "description": "Recommended sensor is one of these."
+          "description": "Recommended sensor (unassessed passes)."
         },
-        "minGeoint": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 10,
-          "description": "geoint_score >= this (0-10)."
+        "collectionLevels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "GSD<0.1m",
+              "GSD<0.5m",
+              "GSD<1m",
+              "GSD<10m",
+              "GSD<100m",
+              "Impossible"
+            ]
+          },
+          "description": "Resolution needed (unassessed passes)."
         },
-        "plottableOnly": {
-          "type": "boolean",
-          "description": "Precise enough to be a point."
+        "escalationTrends": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "escalating",
+              "de-escalating",
+              "stable",
+              "new"
+            ]
+          },
+          "description": "Trend (unassessed passes)."
         },
-        "observableOnly": {
-          "type": "boolean",
-          "description": "A satellite could see it."
-        },
-        "q": {
-          "type": "string",
-          "description": "Text search: all words; \"phrase\"; -exclude."
-        },
-        "reportedSince": {
-          "type": "string",
-          "description": "Last reported at/after (ISO)."
-        },
-        "minPublishers": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "At least this many publishers."
-        },
-        "unplottableOnly": {
-          "type": "boolean",
-          "description": "Only events that cannot be a point."
-        },
-        "responseFormat": {
+        "sort": {
           "type": "string",
           "enum": [
-            "concise",
-            "detailed"
+            "latest",
+            "oldest",
+            "geoint"
           ],
-          "description": "\"detailed\": full Signal (signals://schema)."
+          "description": "Default latest. geoint: visible first, then geoint_score, stage."
+        },
+        "updatedSince": {
+          "type": "string",
+          "description": "Refolded at/after (ISO); narrows the window."
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500,
+          "description": "Max rows per page. Default 100."
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor from meta.next_cursor."
         }
       }
     },
@@ -212,169 +228,6 @@ export const TOOLS = [
       "required": [
         "meta",
         "signals"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
-    }
-  },
-  {
-    "name": "query_stats",
-    "description": "Roll-ups over the corpus: totals plus per-category and per-day breakdown. `total` counts the same events query_signals returns, so it matches its meta.total_count for the same query.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
-        },
-        "date": {
-          "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
-        },
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Window length in days. Defaults to 1."
-        },
-        "categories": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "kinetic",
-              "armed_conflict",
-              "maritime",
-              "natural_disaster",
-              "infrastructure",
-              "aviation",
-              "humanitarian",
-              "protest",
-              "diplomacy",
-              "other"
-            ]
-          },
-          "description": "Restrict to these categories. Omit for all."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        },
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "stats": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "meta",
-        "stats"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
-    }
-  },
-  {
-    "name": "query_hotspots",
-    "description": "Where activity concentrates: density grid-binned into ranked cells with peak severity, categories and representative event_ids. Events too coarse to place are counted in meta.dropped_by_plottable_count, not spread over the grid.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
-        },
-        "date": {
-          "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Defaults to today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
-        },
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "description": "Window length in days. Defaults to 1."
-        },
-        "categories": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "kinetic",
-              "armed_conflict",
-              "maritime",
-              "natural_disaster",
-              "infrastructure",
-              "aviation",
-              "humanitarian",
-              "protest",
-              "diplomacy",
-              "other"
-            ]
-          },
-          "description": "Restrict to these categories. Omit for all."
-        },
-        "precision": {
-          "type": "number",
-          "minimum": 0.1,
-          "maximum": 5,
-          "description": "Grid cell size in decimal degrees. Defaults to 1."
-        },
-        "minSeverity": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 10,
-          "description": "Keep only events with severity_score >= this."
-        },
-        "limit": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 500,
-          "description": "Max CELLS, highest first; the whole window is aggregated either way (meta.total_cell_count). Default/max 500."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        },
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "hotspots": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        }
-      },
-      "required": [
-        "meta",
-        "hotspots"
       ]
     },
     "annotations": {
@@ -505,15 +358,13 @@ export const TOOLS = [
           ],
           "description": "Catalog collection. Default sentinel-2-l2a."
         },
-        "date": {
+        "startDate": {
           "type": "string",
-          "description": "Window end date, YYYY-MM-DD (UTC). Default today."
+          "description": "Date range start, YYYY-MM-DD (UTC). With endDate; omit both for the last 7 days (max 30)."
         },
-        "days": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 30,
-          "description": "Window length in days. Default 7."
+        "endDate": {
+          "type": "string",
+          "description": "Date range end, YYYY-MM-DD (UTC), inclusive."
         },
         "eventDate": {
           "type": "string",
@@ -552,14 +403,6 @@ export const TOOLS = [
           "minimum": 1,
           "maximum": 100,
           "description": "Max scenes. Default 25."
-        },
-        "responseFormat": {
-          "type": "string",
-          "enum": [
-            "concise",
-            "detailed"
-          ],
-          "description": "\"detailed\" adds footprint geometry, full target_relation and SAR metadata."
         }
       },
       "required": [
@@ -1206,14 +1049,6 @@ export const TOOLS = [
         "idempotencyKey": {
           "type": "string",
           "description": "At-most-once key. Re-sending the SAME key returns the SAME run with no second charge, so a timeout is recoverable."
-        },
-        "response_format": {
-          "type": "string",
-          "enum": [
-            "full",
-            "compact"
-          ],
-          "description": "\"compact\" drops the prose brief, returning only the structured result."
         }
       },
       "required": [
@@ -1320,14 +1155,6 @@ export const TOOLS = [
         "job_id": {
           "type": "string",
           "description": "The job_id returned by ask_analyst."
-        },
-        "response_format": {
-          "type": "string",
-          "enum": [
-            "full",
-            "compact"
-          ],
-          "description": "\"compact\" drops the prose brief and returns only the structured result."
         }
       },
       "required": [
@@ -1417,79 +1244,6 @@ export const TOOLS = [
     }
   },
   {
-    "name": "query_claims",
-    "description": "The ledger of claims this key was given, each with its evidence class, independent source families and publishers. The point is the time axis: a restated assertion links to the earlier one and says which way the evidence moved.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "since": {
-          "type": "string",
-          "description": "Only claims asserted on/after this date."
-        },
-        "evidence_class": {
-          "type": "string",
-          "enum": [
-            "CONFIRMED",
-            "REPORTED",
-            "PARTY_CLAIM",
-            "DISPUTED",
-            "ASSESSMENT",
-            "UNKNOWN"
-          ],
-          "description": "Restrict to one evidence class."
-        },
-        "restated_only": {
-          "type": "boolean",
-          "description": "Only claims that sit in a restatement chain."
-        },
-        "downgraded_only": {
-          "type": "boolean",
-          "description": "Only claims a later answer restated with WEAKER evidence — read these first."
-        },
-        "event_id": {
-          "type": "string",
-          "description": "Only claims about this event (the UUID from query_signals). `event_link.linked` says whether any resolved."
-        },
-        "limit": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 200,
-          "description": "How many claims to return (default 50)."
-        }
-      },
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "claims": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "counts": {
-          "type": "object"
-        },
-        "event_link": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "claims"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
     "name": "query_developments",
     "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved) or `measurement` (what we can see moved). Plan-dependent values say so (`locked_by`).",
     "inputSchema": {
@@ -1504,14 +1258,13 @@ export const TOOLS = [
           "maxItems": 4,
           "description": "[minLon, minLat, maxLon, maxLat]. Omit for worldwide."
         },
-        "date": {
+        "start_date": {
           "type": "string",
-          "description": "End of the window (YYYY-MM-DD). Defaults to today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
+          "description": "Date range start (YYYY-MM-DD). With end_date; omit both for today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
-        "days": {
-          "type": "number",
-          "minimum": 1,
-          "description": "Window length ending at `date` (default 7)."
+        "end_date": {
+          "type": "string",
+          "description": "Date range end (YYYY-MM-DD), inclusive."
         },
         "categories": {
           "type": "array",
@@ -1650,7 +1403,7 @@ export const TOOLS = [
   },
   {
     "name": "create_standing_order",
-    "description": "Put an area under CONTINUOUS watch: a question plus a bbox, re-answered on a schedule, notifying only when the answer changed. **Cost is per CHANGE, not per check.**",
+    "description": "Put an area under CONTINUOUS watch (the app’s \"Watch this area\"): checked weekly, notifying only when new events cross the bar. **Cost is per CHANGE, not per check.**",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1663,37 +1416,9 @@ export const TOOLS = [
           "maxItems": 4,
           "description": "[west, south, east, north] WGS84. Required — a global order would fire on everything."
         },
-        "question": {
-          "type": "string",
-          "description": "Omit for \"what changed in this area, and what does it mean?\"."
-        },
         "name": {
           "type": "string",
           "description": "Label for the order (default \"Standing order\")."
-        },
-        "cadence": {
-          "type": "string",
-          "enum": [
-            "daily",
-            "weekly",
-            "monthly"
-          ],
-          "description": "How often to CHECK (checking is free). Default weekly; faster may need a higher plan."
-        },
-        "categories": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Restrict the watch to these Delta categories."
-        },
-        "min_geoint_score": {
-          "type": "number",
-          "description": "Reporting bar (0-10, default 6)."
-        },
-        "min_new_events": {
-          "type": "number",
-          "description": "New qualifying events needed to trigger a run (default 1)."
         },
         "notify_email": {
           "type": "boolean",
@@ -1713,12 +1438,6 @@ export const TOOLS = [
         },
         "order": {
           "type": "object"
-        },
-        "projected_monthly_tokens_typical": {
-          "type": "number"
-        },
-        "projected_monthly_tokens_max": {
-          "type": "number"
         }
       },
       "required": [
@@ -1893,47 +1612,6 @@ export const TOOLS = [
     }
   },
   {
-    "name": "delete_standing_order",
-    "description": "Delete a standing order, or pause/resume with active=false/true. A paused order still counts against the plan limit.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "order_id": {
-          "type": "string",
-          "description": "From create_standing_order or list_standing_orders."
-        },
-        "active": {
-          "type": "boolean",
-          "description": "Omit to DELETE. false pauses, true resumes."
-        }
-      },
-      "required": [
-        "order_id"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "deleted": {
-          "type": "string"
-        },
-        "order": {
-          "type": "object"
-        }
-      }
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true,
-      "idempotentHint": true
-    }
-  },
-  {
     "name": "list_monitored_areas",
     "description": "Places under continuous satellite measurement: metric, latest value, change, anomaly flag, coverage. **coverage.window_total is null when the catalog total is UNKNOWN; null never means zero.**",
     "inputSchema": {
@@ -2028,6 +1706,10 @@ export const TOOLS = [
         "metric": {
           "type": "string",
           "description": "Plain words (ships, fires, vegetation, water, burn, snow, built_up, moisture, night_lights) or index ids (ndvi, ndwi, nbr, vv, vh …). The sensor follows."
+        },
+        "satellite": {
+          "type": "string",
+          "description": "Pick the sensor like the app does (e.g. ship detection on NISAR_L2_GCOV_PROVISIONAL_V1). Default: the metric’s first."
         },
         "name": {
           "type": "string",
@@ -2167,103 +1849,6 @@ export const TOOLS = [
     }
   },
   {
-    "name": "get_decision_package",
-    "description": "Everything needed to decide what to collect next about one watch, in one object. **Only `absent` asserts a negative** — `inconclusive` means imagery could not answer, `not_collected` means no valid look happened. `revision` is a content hash.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "watch_id": {
-          "type": "string",
-          "description": "Id from list_watches."
-        }
-      },
-      "required": [
-        "watch_id"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "schema_version": {
-          "type": "string"
-        },
-        "package_id": {
-          "type": "string"
-        },
-        "external_key": {
-          "type": "string"
-        },
-        "revision": {
-          "type": "string"
-        },
-        "generated_at": {
-          "type": "string"
-        },
-        "watch": {
-          "type": "object"
-        },
-        "target": {
-          "type": "object"
-        },
-        "current_state": {
-          "type": "object"
-        },
-        "claims": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "collection_options": {
-          "type": "object"
-        },
-        "observations": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "negative_evidence": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "assessments": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "limitations": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "note": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "summary",
-        "revision",
-        "negative_evidence",
-        "limitations",
-        "note"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
-    }
-  },
-  {
     "name": "create_watch",
     "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale.",
     "inputSchema": {
@@ -2358,17 +1943,13 @@ export const TOOLS = [
   },
   {
     "name": "update_watch",
-    "description": "Rename, pause, resume or close a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking. **Closing states how the question ended** (close_reason).",
+    "description": "Pause, resume or close a watch. **Pausing is not a display state**: monitored areas stop being measured and charged, standing orders stop checking. **Closing states how the question ended** (close_reason).",
     "inputSchema": {
       "type": "object",
       "properties": {
         "watch_id": {
           "type": "string",
           "description": "Id from list_watches."
-        },
-        "name": {
-          "type": "string",
-          "description": "New label."
         },
         "status": {
           "type": "string",
@@ -2678,9 +2259,6 @@ export const TOOLS = [
           "type": "number"
         },
         "events_24h": {
-          "type": "number"
-        },
-        "claim_count": {
           "type": "number"
         }
       },
@@ -3033,9 +2611,10 @@ export const TOOLS = [
           "type": "string",
           "enum": [
             "sentinel-1-grd",
-            "sentinel-1-rtc"
+            "sentinel-1-rtc",
+            "NISAR_L2_GCOV_PROVISIONAL_V1"
           ],
-          "description": "Collection of the scene. NISAR detection is app-only."
+          "description": "Collection of the scene (Sentinel-1, or NISAR L-band — converted first, extra tokens)."
         },
         "item_id": {
           "type": "string",
@@ -3124,12 +2703,6 @@ export const RESOURCES = [
     "mimeType": "application/json"
   },
   {
-    "uri": "imagery://collections",
-    "name": "Imagery collections",
-    "description": "The satellite catalog collections searchable via search_imagery — Sentinel-1 C-band SAR, Sentinel-2 optical, and NISAR L-band SAR (provisional calibration). Free.",
-    "mimeType": "application/json"
-  },
-  {
     "uri": "status://current",
     "name": "Data freshness & pipeline status",
     "description": "How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free.",
@@ -3152,59 +2725,4 @@ export const RESOURCE_TEMPLATES = [
   }
 ] as const;
 
-export const PROMPTS = [
-  {
-    "name": "daily-situation-briefing",
-    "description": "Summarize the current world situation from the Daily World Brief.",
-    "arguments": [
-      {
-        "name": "date",
-        "description": "UTC date YYYY-MM-DD (optional; defaults to latest).",
-        "required": false
-      }
-    ]
-  },
-  {
-    "name": "assess-top-signal",
-    "description": "Find the highest-severity recent signal in an area/category and run an RS assessment.",
-    "arguments": [
-      {
-        "name": "bbox",
-        "description": "Bounding box \"minLon,minLat,maxLon,maxLat\" (optional).",
-        "required": false
-      },
-      {
-        "name": "category",
-        "description": "Category filter (optional).",
-        "required": false
-      }
-    ]
-  },
-  {
-    "name": "aoi-watch",
-    "description": "Scan an area of interest for recent escalations and recommend collection.",
-    "arguments": [
-      {
-        "name": "bbox",
-        "description": "Bounding box \"minLon,minLat,maxLon,maxLat\".",
-        "required": true
-      }
-    ]
-  },
-  {
-    "name": "market-exposure-check",
-    "description": "Find recent events that could plausibly move a given market (oil, grain, shipping, ...) and explain each transmission channel. Informational only — not investment advice.",
-    "arguments": [
-      {
-        "name": "market",
-        "description": "Market to check: oil, natural_gas, grain, shipping, defense, metals, semiconductors, fx, equities.",
-        "required": true
-      },
-      {
-        "name": "days",
-        "description": "Lookback window in days (optional; default 3).",
-        "required": false
-      }
-    ]
-  }
-] as const;
+export const PROMPTS = [] as const;

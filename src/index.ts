@@ -10,10 +10,10 @@
  * registries only speak local stdio, or prefer a bearer key over interactive
  * OAuth. This binary gives them the same tool surface with a single env var.
  *
- * Introspection (initialize / tools/list / resources/list / prompts/list) is
- * answered from a bundled catalog and needs NO credentials, so registries can
- * inspect the server in a bare container. Only tools/call, resources/read and
- * prompts/get reach the network, and those require OFFNADIR_DELTA_API_KEY.
+ * Introspection (initialize / tools/list / resources/list) is answered from a
+ * bundled catalog and needs NO credentials, so registries can inspect the server
+ * in a bare container. Only tools/call and resources/read reach the network, and
+ * those require OFFNADIR_DELTA_API_KEY.
  */
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -22,17 +22,15 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import {
   CallToolRequestSchema,
-  GetPromptRequestSchema,
-  ListPromptsRequestSchema,
   ListResourcesRequestSchema,
   ListResourceTemplatesRequestSchema,
   ListToolsRequestSchema,
   ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-import { PROMPTS, RESOURCES, RESOURCE_TEMPLATES, TOOLS } from './catalog.js';
+import { RESOURCES, RESOURCE_TEMPLATES, TOOLS } from './catalog.js';
 
-const VERSION = '1.39.0';
+const VERSION = '2.0.0';
 const REMOTE_URL = new URL(process.env.OFFNADIR_DELTA_MCP_URL ?? 'https://offnadir-delta.com/api/v1/mcp');
 
 /** Lazily-connected client to the hosted remote MCP server. */
@@ -81,14 +79,13 @@ async function getRemote(): Promise<Client> {
 
 const server = new Server(
   { name: 'off-nadir-delta', title: 'Off-Nadir Delta', version: VERSION },
-  { capabilities: { tools: {}, resources: {}, prompts: {} } },
+  { capabilities: { tools: {}, resources: {} } },
 );
 
 // --- Introspection: answered locally, no network, no credentials. ---
 server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
 server.setRequestHandler(ListResourcesRequestSchema, async () => ({ resources: RESOURCES }));
 server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => ({ resourceTemplates: RESOURCE_TEMPLATES }));
-server.setRequestHandler(ListPromptsRequestSchema, async () => ({ prompts: PROMPTS }));
 
 // --- Execution: forwarded to the hosted remote server with the caller's key. ---
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
@@ -99,11 +96,6 @@ server.setRequestHandler(CallToolRequestSchema, async (req) => {
 server.setRequestHandler(ReadResourceRequestSchema, async (req) => {
   const client = await getRemote();
   return client.readResource({ uri: req.params.uri });
-});
-
-server.setRequestHandler(GetPromptRequestSchema, async (req) => {
-  const client = await getRemote();
-  return client.getPrompt({ name: req.params.name, arguments: req.params.arguments ?? {} });
 });
 
 async function main(): Promise<void> {

@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`40` tools · MCP server version `1.39.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`35` tools · MCP server version `2.0.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-23 of the 40 tools cost nothing, so the first thing you run is free:
+21 of the 35 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -91,13 +91,11 @@ Then try the full signal-to-satellite workflow:
 
 ### Discover
 
-What is happening, where it concentrates, and what today looks like.
+What is happening, what changed, and what today looks like.
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
 | `query_signals` | Geolocated world events from global news media, AI-enriched with severity/GEOINT scores and collection recommendations. | 3 tok |
-| `query_stats` | Roll-ups over the corpus: totals plus per-category and per-day breakdown. | 1 tok |
-| `query_hotspots` | Where activity concentrates: density grid-binned into ranked cells with peak severity, categories and representative event_ids. | 1 tok |
 | `get_world_brief` | AI world brief: daily (prior UTC day, all plans) or weekly/monthly by plan. | free |
 | `query_developments` | What actually CHANGED about the events in an area, not which articles are new. | 3 tok |
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |
@@ -128,7 +126,6 @@ Turn reporting into a cited assessment you can audit afterwards.
 | `assess_signal` | AI remote-sensing deep-dive for one signal: what to observe, sensors, a collection window. | 5/15 tok |
 | `ask_analyst` | Ask the Delta Analyst an OSINT/GEOINT question; returns a structured brief. | 5–123 tok |
 | `get_analyst_job` | Status and result of an ask_analyst run. | free |
-| `query_claims` | The ledger of claims this key was given, each with its evidence class, independent source families and publishers. | free |
 | `measure_index_series` | Measure a spectral index over an area scene by scene through the Sentinel-2 archive. | 0.5 tok |
 | `detect_ships` | Count vessel-like targets in ONE Sentinel-1 SAR scene by CFAR detection — radar sees through cloud and at night. | 5 tok |
 
@@ -138,17 +135,15 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `create_standing_order` | Put an area under CONTINUOUS watch: a question plus a bbox, re-answered on a schedule, notifying only when the answer changed. | free |
+| `create_standing_order` | Put an area under CONTINUOUS watch (the app’s "Watch this area"): checked weekly, notifying only when new events cross the bar. | free |
 | `list_standing_orders` | The standing orders on this key: cadence, area, last check, last actual fire, and quiet_checks — a high quiet_checks means the watch is not earning its place. | free |
-| `delete_standing_order` | Delete a standing order, or pause/resume with active=false/true. | free |
 | `list_monitored_areas` | Places under continuous satellite measurement: metric, latest value, change, anomaly flag, coverage. | free |
 | `get_monitored_area` | One monitored area with its full measurement history. | free |
 | `create_monitored_area` | Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition (or FIRMS fire detection) is measured. | free |
 | `list_watches` | The Watchlist as one list, each entry with a state bucket. | free |
 | `get_watch` | One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments and thread, plus this account's notes. | free |
-| `get_decision_package` | Everything needed to decide what to collect next about one watch, in one object. | 5 tok |
 | `create_watch` | Add a target to the Watchlist. | free |
-| `update_watch` | Rename, pause, resume or close a watch. | free |
+| `update_watch` | Pause, resume or close a watch. | free |
 | `delete_watch` | Delete a watch and its underlying resources — bound monitored areas with their history, and standing orders. | free |
 | `add_note` | Add a note to a watch, start a thread, or reply. | free |
 | `delete_note` | Delete one note from a watch. | free |
@@ -195,24 +190,16 @@ Two credentials are accepted on the hosted endpoint:
 Keys are shown once at creation, hashed at rest, and revocable at any time from
 [/account/api](https://offnadir-delta.com/account/api).
 
-## Resources and prompts
+## Resources
 
 | Resource | Description |
 | --- | --- |
 | `brief://latest` | The most recent AI-synthesized Daily World Brief (JSON). Free. |
 | `signals://schema` | JSON Schema of the public Signal shape returned by query_signals / /api/v1/signals. |
 | `usage://current` | Remaining token balance and plan capabilities for the calling key. Free. |
-| `imagery://collections` | The satellite catalog collections searchable via search_imagery — Sentinel-1 C-band SAR, Sentinel-2 optical, and NISAR L-band SAR (provisional calibration). Free. |
 | `status://current` | How current the data is (ingestion/enrichment frontier), the Daily World Brief status, and an Operational/Delayed/Degraded roll-up. Free. |
 | `brief://{date}` | The Daily World Brief for a specific UTC date (YYYY-MM-DD). Free. |
 | `watch://{watch_id}` | A Watchlist entry with its current state, latest meaningful change, measurements, (for event watches) the full event thread, and the notes kept against it. The same body get_watch returns. Free. |
-
-| Prompt | Description |
-| --- | --- |
-| `daily-situation-briefing` | Summarize the current world situation from the Daily World Brief. |
-| `assess-top-signal` | Find the highest-severity recent signal in an area/category and run an RS assessment. |
-| `aoi-watch` | Scan an area of interest for recent escalations and recommend collection. |
-| `market-exposure-check` | Find recent events that could plausibly move a given market (oil, grain, shipping, ...) and explain each transmission channel. Informational only — not investment advice. |
 
 ## Links
 
