@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 2.1.0.
+// Generated for Off-Nadir Delta MCP 3.0.0.
 
 export const TOOLS = [
   {
@@ -118,7 +118,7 @@ export const TOOLS = [
               "equities"
             ]
           },
-          "description": "Markets exposed via a physical/supply channel."
+          "description": "Exposed markets (physical/supply channel)."
         },
         "placement": {
           "type": "string",
@@ -129,62 +129,13 @@ export const TOOLS = [
           ],
           "description": "map=a point; list=country/province only."
         },
-        "observable": {
-          "type": "string",
-          "enum": [
-            "any",
-            "yes",
-            "no"
-          ],
-          "description": "A satellite could see it."
-        },
         "linkedTo": {
           "type": "string",
-          "description": "Events sharing a connector: facility:<entity_id>, place:<place_key>, actor:<name>. Plan-gated."
+          "description": "Shares a connector: facility:<entity_id>, place:<place_key>, actor:<name>. Plan-gated."
         },
-        "sensors": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "sentinel-2",
-              "sentinel-1-sar",
-              "viirs-thermal",
-              "planet",
-              "vhr-optical",
-              "multi-sensor",
-              "none"
-            ]
-          },
-          "description": "Recommended sensor (unassessed passes)."
-        },
-        "collectionLevels": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "GSD<0.1m",
-              "GSD<0.5m",
-              "GSD<1m",
-              "GSD<10m",
-              "GSD<100m",
-              "Impossible"
-            ]
-          },
-          "description": "Resolution needed (unassessed passes)."
-        },
-        "escalationTrends": {
-          "type": "array",
-          "items": {
-            "type": "string",
-            "enum": [
-              "escalating",
-              "de-escalating",
-              "stable",
-              "new"
-            ]
-          },
-          "description": "Trend (unassessed passes)."
+        "watchId": {
+          "type": "string",
+          "description": "Events linked to this watch (list_watches id)."
         },
         "sort": {
           "type": "string",
@@ -193,21 +144,21 @@ export const TOOLS = [
             "oldest",
             "geoint"
           ],
-          "description": "Default latest. geoint: visible first, then geoint_score, stage (plan-gated; else latest (filter_clamp))."
+          "description": "Default latest. geoint (plan-gated): observable, then geoint_score."
         },
         "updatedSince": {
           "type": "string",
-          "description": "Refolded at/after (ISO); narrows the window."
+          "description": "Refolded at/after (ISO)."
         },
         "limit": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 500,
-          "description": "Max rows per page. Default 100."
+          "maximum": 50,
+          "description": "Page size (default 20). Rows are digests; full rows: full_records."
         },
         "cursor": {
           "type": "string",
-          "description": "Cursor from meta.next_cursor."
+          "description": "From meta.next_cursor."
         }
       }
     },
@@ -226,6 +177,24 @@ export const TOOLS = [
           "type": "array",
           "items": {
             "type": "object"
+          }
+        },
+        "full_records": {
+          "type": "object",
+          "description": "The same query on the REST API and the Python SDK, which return every field and larger pages.",
+          "properties": {
+            "note": {
+              "type": "string"
+            },
+            "rest": {
+              "type": "string"
+            },
+            "sdk": {
+              "type": "string"
+            },
+            "docs": {
+              "type": "string"
+            }
           }
         }
       },
@@ -405,8 +374,8 @@ export const TOOLS = [
         "limit": {
           "type": "integer",
           "minimum": 1,
-          "maximum": 100,
-          "description": "Max scenes. Default 25."
+          "maximum": 25,
+          "description": "Max scenes. Default 10."
         }
       },
       "required": [
@@ -428,6 +397,24 @@ export const TOOLS = [
           "type": "array",
           "items": {
             "type": "object"
+          }
+        },
+        "full_records": {
+          "type": "object",
+          "description": "The same query on the REST API and the Python SDK, which return every field and larger pages.",
+          "properties": {
+            "note": {
+              "type": "string"
+            },
+            "rest": {
+              "type": "string"
+            },
+            "sdk": {
+              "type": "string"
+            },
+            "docs": {
+              "type": "string"
+            }
           }
         }
       },
@@ -558,83 +545,6 @@ export const TOOLS = [
       "required": [
         "meta",
         "priority"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
-    }
-  },
-  {
-    "name": "survey_observable_events",
-    "description": "Which events a sensor can actually RESOLVE, over the FULL set. **The population is ungated by tasking readiness**, so its total sits above rank_imaging_priority and counts a different unit from query_signals clusters.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "sensor": {
-          "type": "string",
-          "enum": [
-            "sentinel-2",
-            "sentinel-1"
-          ],
-          "description": "sentinel-2 = ~10 m optical (needs daylight and clear sky); sentinel-1 = SAR."
-        },
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[west, south, east, north] WGS84. Omit for global."
-        },
-        "start_date": {
-          "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
-        },
-        "end_date": {
-          "type": "string",
-          "description": "YYYY-MM-DD, inclusive. Default today; capped at 30 days."
-        },
-        "categories": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Restrict to these Delta categories."
-        },
-        "min_geoint_score": {
-          "type": "number",
-          "description": "Drop events below this GEOINT score before surveying."
-        },
-        "top_n": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 50,
-          "description": "How many observable events to return (default 20)."
-        }
-      },
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        },
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "survey": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "meta",
-        "survey"
       ]
     },
     "annotations": {
@@ -1317,8 +1227,8 @@ export const TOOLS = [
         "limit": {
           "type": "number",
           "minimum": 1,
-          "maximum": 200,
-          "description": "Developments to return (default 50)."
+          "maximum": 50,
+          "description": "Developments to return (default 20)."
         },
         "offset": {
           "type": "number",
@@ -1406,354 +1316,6 @@ export const TOOLS = [
     }
   },
   {
-    "name": "create_standing_order",
-    "description": "Put an area under CONTINUOUS watch (the app’s \"Watch this area\"): checked weekly, notifying only when new events cross the bar. **Cost is per CHANGE, not per check.**",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[west, south, east, north] WGS84. Required — a global order would fire on everything."
-        },
-        "name": {
-          "type": "string",
-          "description": "Label for the order (default \"Standing order\")."
-        },
-        "notify_email": {
-          "type": "boolean",
-          "description": "Email on fire (default true); readable via list_standing_orders anyway."
-        }
-      },
-      "required": [
-        "bbox"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "order": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "order"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "list_layer_sets",
-    "description": "The layer sets saved on this account. The layer tree itself is not returned: it is an internal format, and opening it is the map's job.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "limit": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 100,
-          "description": "Max layer sets to return (default 50)."
-        }
-      },
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "layer_sets": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "total": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "layer_sets"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "get_layer_set",
-    "description": "One saved layer set by id. The serialized layer tree is deliberately not exposed — an internal representation, not a public contract.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "layer_set_id": {
-          "type": "string",
-          "description": "The layer set id."
-        }
-      },
-      "required": [
-        "layer_set_id"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "layer_set": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "layer_set"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "list_uploaded_layers",
-    "description": "The data this account uploaded to the map, plus the formats the uploader accepts. Uploading happens in the app; GeoJSON and GeoTIFF only.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "limit": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 100,
-          "description": "Max uploads to return (default 50)."
-        }
-      },
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "uploads": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "total": {
-          "type": "integer"
-        },
-        "accepted_formats": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "uploads"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "list_standing_orders",
-    "description": "The standing orders on this key: cadence, area, last check, last actual fire, and quiet_checks — a high quiet_checks means the watch is not earning its place.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {},
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "orders": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "limits": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "orders"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "list_monitored_areas",
-    "description": "Places under continuous satellite measurement: metric, latest value, change, anomaly flag, coverage. **coverage.window_total is null when the catalog total is UNKNOWN; null never means zero.**",
-    "inputSchema": {
-      "type": "object",
-      "properties": {},
-      "required": []
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "areas": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "limits": {
-          "type": "object"
-        },
-        "metering": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "areas"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "get_monitored_area",
-    "description": "One monitored area with its full measurement history. Anomaly flags come from a median-absolute-deviation test, not a fixed threshold. Needs a plan that includes data export.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "area_id": {
-          "type": "string",
-          "description": "From list_monitored_areas; a metric's polygon_id also resolves."
-        }
-      },
-      "required": [
-        "area_id"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "area": {
-          "type": "object"
-        },
-        "metering": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "area"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "create_monitored_area",
-    "description": "Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition (or FIRMS fire detection) is measured. For a QUANTITY at a fixed place; for events use create_standing_order.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[west, south, east, north] WGS84, under 5,000 km² — a larger box is rejected, not sampled."
-        },
-        "metric": {
-          "type": "string",
-          "description": "Plain words (ships, fires, vegetation, water, burn, snow, built_up, moisture, night_lights) or index ids (ndvi, ndwi, nbr, vv, vh …). The sensor follows."
-        },
-        "satellite": {
-          "type": "string",
-          "description": "Pick the sensor like the app does (e.g. ship detection on NISAR_L2_GCOV_PROVISIONAL_V1). Default: the metric’s first."
-        },
-        "name": {
-          "type": "string",
-          "description": "Label for the area (default \"Monitored area\")."
-        },
-        "start_date": {
-          "type": "string",
-          "description": "YYYY-MM-DD to backfill from. Default 3 months ago; longer costs more on the first check."
-        }
-      },
-      "required": [
-        "bbox",
-        "metric"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "area": {
-          "type": "object"
-        },
-        "metering": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "area"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
     "name": "list_watches",
     "description": "The Watchlist as one list, each entry with a state bucket. `updated_since` returns only watches whose CONTENT changed after that instant — what a synchronised copy should poll.",
     "inputSchema": {
@@ -1801,6 +1363,89 @@ export const TOOLS = [
       },
       "required": [
         "watches"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "list_notifications",
+    "description": "What changed across the Watchlist, newest first: one row per change a watch reported, with read state. Reading does not mark them read. A value the plan does not open is `locked`, never filled in.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "unread_only": {
+          "type": "boolean",
+          "description": "Only notifications not yet read."
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "event_development",
+            "related_event",
+            "monitoring_anomaly",
+            "site_event",
+            "new_imagery",
+            "standing_order"
+          ]
+        },
+        "watch_id": {
+          "type": "string",
+          "description": "Id from list_watches."
+        },
+        "cursor": {
+          "type": "string",
+          "description": "Cursor from meta.next_cursor."
+        },
+        "limit": {
+          "type": "integer",
+          "description": "Rows per page (1..25, default 10).",
+          "minimum": 1,
+          "maximum": 25
+        }
+      },
+      "required": []
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "meta": {
+          "type": "object"
+        },
+        "full_records": {
+          "type": "object",
+          "description": "The same query on the REST API and the Python SDK, which return every field and larger pages.",
+          "properties": {
+            "note": {
+              "type": "string"
+            },
+            "rest": {
+              "type": "string"
+            },
+            "sdk": {
+              "type": "string"
+            },
+            "docs": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "notifications"
       ]
     },
     "annotations": {
@@ -1877,7 +1522,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "AREA: [W,S,E,N] WGS84."
+          "description": "AREA: [W,S,E,N] WGS84, at most 100,000 km² (larger → 400)."
         },
         "entity_id": {
           "type": "string",
@@ -2124,45 +1769,6 @@ export const TOOLS = [
     }
   },
   {
-    "name": "delete_note",
-    "description": "Delete one note from a watch. The deletion itself stays in the account's action log.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "watch_id": {
-          "type": "string",
-          "description": "Id from list_watches."
-        },
-        "note_id": {
-          "type": "string",
-          "description": "Note id from get_watch."
-        }
-      },
-      "required": [
-        "watch_id",
-        "note_id"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "deleted": {
-          "type": "string"
-        }
-      }
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true,
-      "idempotentHint": true
-    }
-  },
-  {
     "name": "search_entities",
     "description": "Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code. Max 50.",
     "inputSchema": {
@@ -2274,415 +1880,6 @@ export const TOOLS = [
       "readOnlyHint": true,
       "openWorldHint": false,
       "destructiveHint": false
-    }
-  },
-  {
-    "name": "get_related_events",
-    "description": "The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. Merely-nearby events are not relations and are not returned. Plan-dependent: see `plan_lock`.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "event_id": {
-          "type": "string",
-          "description": "The event id (a UUID) from query_signals."
-        }
-      },
-      "required": [
-        "event_id"
-      ]
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "anchor": {
-          "type": "object"
-        },
-        "facilities": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "places": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "related": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "merged_in": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
-        },
-        "accounting": {
-          "type": "object"
-        }
-      },
-      "required": [
-        "related"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "lookup_elevation",
-    "description": "Terrain height from the Copernicus DEM GLO-30 for a point, bbox or polygon, with relief — the number that governs SAR layover and shadow. A SURFACE model; `covered: false` is no data, not 0 m. Cite the `attribution`.",
-    "inputSchema": {
-      "type": "object",
-      "properties": {
-        "lat": {
-          "type": "number",
-          "minimum": -90,
-          "maximum": 90,
-          "description": "Latitude of a single point to measure (use with lon)."
-        },
-        "lon": {
-          "type": "number",
-          "minimum": -180,
-          "maximum": 180,
-          "description": "Longitude of a single point to measure (use with lat)."
-        },
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[lon_min, lat_min, lon_max, lat_max] WGS84."
-        },
-        "polygon": {
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            },
-            "minItems": 2,
-            "maxItems": 2
-          },
-          "minItems": 3,
-          "description": "WGS84 ring [[lon, lat], …]. Statistics cover only the samples inside it."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "mode": {
-          "type": "string",
-          "description": "Which form was measured: 'point', 'bbox' or 'polygon'."
-        },
-        "elevation": {
-          "type": "object"
-        },
-        "attribution": {
-          "type": "string",
-          "description": "Required Copernicus DEM credit (licence Article 6(b))."
-        }
-      },
-      "required": [
-        "elevation"
-      ]
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "analyze_terrain",
-    "description": "Compute FROM the terrain. `sar_geometry` returns layover, shadow, foreshortening and mean LOCAL incidence — **required, not assumed, because it changes with pass direction**. `profile` returns ground along a line and a line-of-sight verdict. Cite the `attribution`.",
-    "inputSchema": {
-      "type": "object",
-      "required": [
-        "operation"
-      ],
-      "properties": {
-        "operation": {
-          "type": "string",
-          "enum": [
-            "sar_geometry",
-            "profile"
-          ],
-          "description": "'sar_geometry' = layover/shadow over an area; 'profile' = ground along a line + line-of-sight."
-        },
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "For 'sar_geometry': [lon_min, lat_min, lon_max, lat_max] WGS84."
-        },
-        "incidence_deg": {
-          "type": "number",
-          "minimum": 10,
-          "maximum": 80,
-          "description": "For 'sar_geometry'. Sentinel-1 IW spans ~29-46°."
-        },
-        "look_azimuth_deg": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 360,
-          "description": "For 'sar_geometry': bearing along ground range. Right-looking descending ≈ 270."
-        },
-        "lat": {
-          "type": "number",
-          "minimum": -90,
-          "maximum": 90,
-          "description": "For 'profile': latitude of the observer end."
-        },
-        "lon": {
-          "type": "number",
-          "minimum": -180,
-          "maximum": 180,
-          "description": "For 'profile': longitude of the observer end."
-        },
-        "to_lat": {
-          "type": "number",
-          "minimum": -90,
-          "maximum": 90,
-          "description": "For 'profile': latitude of the far end."
-        },
-        "to_lon": {
-          "type": "number",
-          "minimum": -180,
-          "maximum": 180,
-          "description": "For 'profile': longitude of the far end."
-        },
-        "observer_height_m": {
-          "type": "number",
-          "minimum": 0,
-          "description": "For 'profile': eye height above ground, default 2 m."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "operation": {
-          "type": "string"
-        },
-        "sar_geometry": {
-          "type": "object"
-        },
-        "profile": {
-          "type": "object"
-        },
-        "attribution": {
-          "type": "string",
-          "description": "Required Copernicus DEM credit (licence Article 6(b))."
-        }
-      }
-    },
-    "annotations": {
-      "readOnlyHint": true,
-      "openWorldHint": false,
-      "destructiveHint": false
-    }
-  },
-  {
-    "name": "measure_index_series",
-    "description": "Measure a spectral index over an area scene by scene through the Sentinel-2 archive. **Call `estimate_only: true` first** — free, and returns the scene count, real date span and cost. At most 24 scenes, so a longer period is a SAMPLE. Cite the `attribution`.",
-    "inputSchema": {
-      "type": "object",
-      "required": [
-        "index",
-        "start",
-        "end"
-      ],
-      "properties": {
-        "polygon": {
-          "type": "array",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "number"
-            }
-          },
-          "description": "WGS84 ring [[lon, lat], …], 3+ vertices. Statistics cover the samples inside it."
-        },
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "Alternative to polygon: [lon_min, lat_min, lon_max, lat_max] WGS84."
-        },
-        "index": {
-          "type": "string",
-          "enum": [
-            "ndvi",
-            "evi",
-            "savi",
-            "ndmi",
-            "ndwi",
-            "mndwi",
-            "ndbi",
-            "ndsi",
-            "nbr",
-            "iron-oxide",
-            "clay",
-            "ferrous"
-          ],
-          "description": "Which optical index to measure."
-        },
-        "start": {
-          "type": "string",
-          "description": "YYYY-MM-DD (UTC). Clamped forward to 2015-06-27 if earlier."
-        },
-        "end": {
-          "type": "string",
-          "description": "End date YYYY-MM-DD (UTC)."
-        },
-        "max_scenes": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 24,
-          "description": "Cap on scenes measured in this call. Server maximum 24."
-        },
-        "max_cloud_cover": {
-          "type": "number",
-          "minimum": 1,
-          "maximum": 100,
-          "description": "Scene cloud-cover ceiling in percent. Default 30."
-        },
-        "estimate_only": {
-          "type": "boolean",
-          "description": "True = free: scene count, date span and cost, without measuring."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "estimate": {
-          "type": "object"
-        },
-        "series": {
-          "type": "object"
-        },
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        },
-        "attribution": {
-          "type": "string"
-        }
-      }
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
-    }
-  },
-  {
-    "name": "detect_ships",
-    "description": "Count vessel-like targets in ONE Sentinel-1 SAR scene by CFAR detection — radar sees through cloud and at night. **Read `caveats` before reporting the number**: land mask, offshore exclusion and partial coverage change what it means.",
-    "inputSchema": {
-      "type": "object",
-      "required": [
-        "collection",
-        "item_id"
-      ],
-      "properties": {
-        "collection": {
-          "type": "string",
-          "enum": [
-            "sentinel-1-grd",
-            "sentinel-1-rtc",
-            "NISAR_L2_GCOV_PROVISIONAL_V1"
-          ],
-          "description": "Collection of the scene (Sentinel-1, or NISAR L-band — converted first, extra tokens)."
-        },
-        "item_id": {
-          "type": "string",
-          "description": "STAC item id from search_imagery."
-        },
-        "bbox": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4,
-          "description": "[lon_min, lat_min, lon_max, lat_max] WGS84, within the scene."
-        },
-        "geometry": {
-          "type": "object"
-        },
-        "algorithm_version": {
-          "type": "string",
-          "enum": [
-            "auto",
-            "v2",
-            "v3"
-          ],
-          "description": "'auto' (default) picks the recommended version for the sensor."
-        }
-      }
-    },
-    "outputSchema": {
-      "type": "object",
-      "properties": {
-        "summary": {
-          "type": "string",
-          "description": "One-line natural-language summary of the result, ready to relay to a user."
-        },
-        "count": {
-          "type": "integer",
-          "description": "Vessel-like targets detected. Read `caveats` before quoting it."
-        },
-        "ships": {
-          "type": "object"
-        },
-        "caveats": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "scene": {
-          "type": "object"
-        },
-        "processing": {
-          "type": "object"
-        },
-        "meta": {
-          "type": "object",
-          "description": "Query echo, token charge/balance (meta.tokens), and pagination where applicable."
-        }
-      }
-    },
-    "annotations": {
-      "readOnlyHint": false,
-      "openWorldHint": false,
-      "destructiveHint": true
     }
   }
 ] as const;

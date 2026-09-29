@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`35` tools · MCP server version `2.1.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`21` tools · MCP server version `3.0.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -77,7 +77,7 @@ locally from a generated catalog, so registries can introspect it without creden
 
 ### First call — free
 
-21 of the 35 tools cost nothing, so the first thing you run is free:
+11 of the 21 tools cost nothing, so the first thing you run is free:
 
 > Give me the latest Daily World Brief. Lead with the three most significant developments,
 > explain why each matters, and cite the supporting signals.
@@ -101,7 +101,6 @@ What is happening, what changed, and what today looks like.
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |
 | `search_entities` | Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code. | 1 tok |
 | `get_entity` | What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. | 1 tok |
-| `get_related_events` | The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. | 1 tok |
 
 ### Plan
 
@@ -112,10 +111,7 @@ Whether a satellite can resolve it, which one, and when it next passes.
 | `search_imagery` | Search the imagery catalog over an area and window. | 2 tok |
 | `plan_event_imagery` | The deterministic imagery plan for ONE event: checks BOTH sensors exactly once — sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a — against the event footprint and a pre/post window. | 4 tok |
 | `rank_imaging_priority` | WHERE, and with what class of satellite, observation is most worthwhile now: composite IMPORTANCE crossed with the SPEC CLASS the required resolution demands — coarse, hr (free Sentinel-class) or vhr. | 1 tok |
-| `survey_observable_events` | Which events a sensor can actually RESOLVE, over the FULL set. | 1 tok |
 | `predict_satellite_passes` | WHEN a place can next be imaged and by WHAT: 13 free-systematic and commercial-taskable families. | 2 tok |
-| `lookup_elevation` | Terrain height from the Copernicus DEM GLO-30 for a point, bbox or polygon, with relief — the number that governs SAR layover and shadow. | free |
-| `analyze_terrain` | Compute FROM the terrain. | free |
 
 ### Analyze
 
@@ -126,8 +122,6 @@ Turn reporting into a cited assessment you can audit afterwards.
 | `assess_signal` | AI remote-sensing deep-dive for one signal: what to observe, sensors, a collection window. | 5/15 tok |
 | `ask_analyst` | Ask the Delta Analyst an OSINT/GEOINT question; returns a structured brief. | 5–123 tok |
 | `get_analyst_job` | Status and result of an ask_analyst run. | free |
-| `measure_index_series` | Measure a spectral index over an area scene by scene through the Sentinel-2 archive. | 0.5 tok |
-| `detect_ships` | Count vessel-like targets in ONE Sentinel-1 SAR scene by CFAR detection — radar sees through cloud and at night. | 5 tok |
 
 ### Watch
 
@@ -135,28 +129,13 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `create_standing_order` | Put an area under CONTINUOUS watch (the app’s "Watch this area"): checked weekly, notifying only when new events cross the bar. | free |
-| `list_standing_orders` | The standing orders on this key: cadence, area, last check, last actual fire, and quiet_checks — a high quiet_checks means the watch is not earning its place. | free |
-| `list_monitored_areas` | Places under continuous satellite measurement: metric, latest value, change, anomaly flag, coverage. | free |
-| `get_monitored_area` | One monitored area with its full measurement history. | free |
-| `create_monitored_area` | Put a place under continuous satellite measurement — every new Sentinel-1/2 or VIIRS acquisition (or FIRMS fire detection) is measured. | free |
 | `list_watches` | The Watchlist as one list, each entry with a state bucket. | free |
+| `list_notifications` | What changed across the Watchlist, newest first: one row per change a watch reported, with read state. | free |
 | `get_watch` | One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments and thread, plus this account's notes. | free |
 | `create_watch` | Add a target to the Watchlist. | free |
 | `update_watch` | Pause, resume or close a watch. | free |
 | `delete_watch` | Delete a watch and its underlying resources — bound monitored areas with their history, and standing orders. | free |
 | `add_note` | Add a note to a watch, start a thread, or reply. | free |
-| `delete_note` | Delete one note from a watch. | free |
-
-### Workspace
-
-The map assets you own — saved layer sets and your own uploaded data.
-
-| Tool | What it does | Cost |
-| --- | --- | --- |
-| `list_layer_sets` | The layer sets saved on this account. | free |
-| `get_layer_set` | One saved layer set by id. | free |
-| `list_uploaded_layers` | The data this account uploaded to the map, plus the formats the uploader accepts. | free |
 
 ### Account
 
