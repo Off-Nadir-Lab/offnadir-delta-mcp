@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 2.0.0.
+// Generated for Off-Nadir Delta MCP 2.1.0.
 
 export const TOOLS = [
   {
@@ -138,6 +138,10 @@ export const TOOLS = [
           ],
           "description": "A satellite could see it."
         },
+        "linkedTo": {
+          "type": "string",
+          "description": "Events sharing a connector: facility:<entity_id>, place:<place_key>, actor:<name>. Plan-gated."
+        },
         "sensors": {
           "type": "array",
           "items": {
@@ -189,7 +193,7 @@ export const TOOLS = [
             "oldest",
             "geoint"
           ],
-          "description": "Default latest. geoint: visible first, then geoint_score, stage."
+          "description": "Default latest. geoint: visible first, then geoint_score, stage (plan-gated; else latest (filter_clamp))."
         },
         "updatedSince": {
           "type": "string",
