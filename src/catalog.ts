@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 3.0.0.
+// Generated for Off-Nadir Delta MCP 3.1.0.
 
 export const TOOLS = [
   {
@@ -1874,6 +1874,69 @@ export const TOOLS = [
       },
       "required": [
         "entity"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_related_events",
+    "description": "The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. Merely-nearby events are not relations and are not returned. Plan-dependent: see `plan_lock`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": "string",
+          "description": "The event id (a UUID) from query_signals."
+        }
+      },
+      "required": [
+        "event_id"
+      ]
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "anchor": {
+          "type": "object"
+        },
+        "facilities": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "places": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "merged_in": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "accounting": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "related"
       ]
     },
     "annotations": {
