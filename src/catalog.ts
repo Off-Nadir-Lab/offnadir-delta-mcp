@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 3.1.0.
+// Generated for Off-Nadir Delta MCP 3.2.0.
 
 export const TOOLS = [
   {
@@ -1622,6 +1622,10 @@ export const TOOLS = [
         "notify_email": {
           "type": "boolean",
           "description": "Email on changes."
+        },
+        "notify_chat": {
+          "type": "boolean",
+          "description": "Also post changes to the Slack/Discord channel connected in settings."
         },
         "imagery_alerts": {
           "type": "boolean",
