@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 4.0.0.
+// Generated for Off-Nadir Delta MCP 4.1.0.
 
 export const TOOLS = [
   {
@@ -65,10 +65,14 @@ export const TOOLS = [
               "diplomacy",
               "other",
               "thermal_anomaly",
-              "transit_anomaly"
+              "transit_anomaly",
+              "nightlight_anomaly",
+              "so2_anomaly",
+              "quake_exposure",
+              "cyclone_exposure"
             ]
           },
-          "description": "Restrict to these categories. thermal_anomaly=heat sources measured by satellite; transit_anomaly=ship transits off their recent level (measured, not reported; never a cause)."
+          "description": "Restrict to these categories. Measured or official-record events (not reporting; never a cause): thermal_anomaly=heat sources; transit_anomaly=ship transits off their recent level; nightlight_anomaly=city night lights under half their usual level; so2_anomaly=SO2 over a volcano; quake_exposure=earthquake near registered facilities; cyclone_exposure=places inside forecast cyclone wind radii."
         },
         "q": {
           "type": "string",
