@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 4.1.0.
+// Generated for Off-Nadir Delta MCP 5.0.0.
 
 export const TOOLS = [
   {
@@ -1205,8 +1205,6 @@ export const TOOLS = [
               "distinct_hosts",
               "escalation_trend",
               "geoint_score",
-              "imagery_post_status",
-              "imagery_sar_pair_status",
               "location_level",
               "means_reported",
               "member_count",
@@ -1462,7 +1460,7 @@ export const TOOLS = [
   },
   {
     "name": "get_watch",
-    "description": "One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments and thread, plus this account's notes.",
+    "description": "One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments, imagery check and thread, plus this account's notes.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1505,7 +1503,7 @@ export const TOOLS = [
   },
   {
     "name": "create_watch",
-    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale.",
+    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale. Free to create; where the plan includes the collection section, a watched event's imagery is then checked at 1 token a day (up to 14 days).",
     "inputSchema": {
       "type": "object",
       "properties": {

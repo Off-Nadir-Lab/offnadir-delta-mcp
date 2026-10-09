@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`22` tools · MCP server version `4.1.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`22` tools · MCP server version `5.0.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -132,7 +132,7 @@ Stand up continuous coverage and be told only when the answer changes. Creating 
 | --- | --- | --- |
 | `list_watches` | The Watchlist as one list, each entry with a state bucket. | free |
 | `list_notifications` | What changed across the Watchlist, newest first: one row per change a watch reported, with read state. | free |
-| `get_watch` | One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments and thread, plus this account's notes. | free |
+| `get_watch` | One watch end to end: target, state, latest change, measurements with recent series, standing-order questions, and for an event watch its stage, developments, imagery check and thread, plus this account's notes. | free |
 | `create_watch` | Add a target to the Watchlist. | free |
 | `update_watch` | Pause, resume or close a watch. | free |
 | `delete_watch` | Delete a watch and its underlying resources — bound monitored areas with their history, and standing orders. | free |
