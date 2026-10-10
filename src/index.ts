@@ -30,7 +30,7 @@ import {
 
 import { RESOURCES, RESOURCE_TEMPLATES, TOOLS } from './catalog.js';
 
-const VERSION = '5.0.0';
+const VERSION = '5.1.0';
 const REMOTE_URL = new URL(process.env.OFFNADIR_DELTA_MCP_URL ?? 'https://offnadir-delta.com/api/v1/mcp');
 
 /** Lazily-connected client to the hosted remote MCP server. */

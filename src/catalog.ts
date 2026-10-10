@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.0.0.
+// Generated for Off-Nadir Delta MCP 5.1.0.
 
 export const TOOLS = [
   {
