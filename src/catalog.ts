@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.1.0.
+// Generated for Off-Nadir Delta MCP 5.3.0.
 
 export const TOOLS = [
   {
@@ -30,7 +30,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "[minLon, minLat, maxLon, maxLat] WGS84. Omit for worldwide."
+          "description": "[minLon, minLat, maxLon, maxLat]; omit for worldwide."
         },
         "startDate": {
           "type": "string",
@@ -47,7 +47,7 @@ export const TOOLS = [
             "1h",
             "24h"
           ],
-          "description": "Last reported within. Default 24h when no date range."
+          "description": "Last reported within (default 24h)."
         },
         "categories": {
           "type": "array",
@@ -72,7 +72,7 @@ export const TOOLS = [
               "cyclone_exposure"
             ]
           },
-          "description": "Restrict to these categories. Measured or official-record events (not reporting; never a cause): thermal_anomaly=heat sources; transit_anomaly=ship transits off their recent level; nightlight_anomaly=city night lights under half their usual level; so2_anomaly=SO2 over a volcano; quake_exposure=earthquake near registered facilities; cyclone_exposure=places inside forecast cyclone wind radii."
+          "description": "Restrict to these categories. *_anomaly and *_exposure are measured or official records, not reporting, and never a cause."
         },
         "q": {
           "type": "string",
@@ -137,7 +137,60 @@ export const TOOLS = [
         },
         "linkedTo": {
           "type": "string",
-          "description": "Shares a connector: facility:<entity_id>, place:<place_key>, actor:<name>. Plan-gated."
+          "description": "facility:<entity_id> | place:<place_key> | actor:<name>."
+        },
+        "minImpact": {
+          "type": "integer",
+          "enum": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "description": "Impact level >= this."
+        },
+        "reach": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "local",
+              "regional",
+              "international"
+            ]
+          }
+        },
+        "threatVectors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "aerial",
+              "ground",
+              "maritime",
+              "cyber",
+              "economic",
+              "political"
+            ]
+          }
+        },
+        "confirmation": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "reported",
+              "claimed",
+              "disputed"
+            ]
+          }
+        },
+        "observableFromOrbit": {
+          "type": "boolean"
+        },
+        "sequencesOnly": {
+          "type": "boolean"
         },
         "watchId": {
           "type": "string",
@@ -150,7 +203,7 @@ export const TOOLS = [
             "oldest",
             "geoint"
           ],
-          "description": "Default latest. geoint (plan-gated): observable, then geoint_score."
+          "description": "Default latest; geoint is plan-gated."
         },
         "updatedSince": {
           "type": "string",
@@ -160,7 +213,7 @@ export const TOOLS = [
           "type": "integer",
           "minimum": 1,
           "maximum": 50,
-          "description": "Page size (default 20). Rows are digests; full rows: full_records."
+          "description": "Default 20. Digest rows; full rows: full_records."
         },
         "cursor": {
           "type": "string",
