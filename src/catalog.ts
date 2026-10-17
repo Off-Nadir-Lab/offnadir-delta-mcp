@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.3.0.
+// Generated for Off-Nadir Delta MCP 5.4.0.
 
 export const TOOLS = [
   {
@@ -1325,7 +1325,7 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. Plan-dependent: see `locked_by`, `plan_lock`.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them; an incident lists its parent and siblings. Plan-dependent: see `locked_by`, `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1359,6 +1359,9 @@ export const TOOLS = [
           "items": {
             "type": "object"
           }
+        },
+        "sequence": {
+          "type": "object"
         }
       },
       "required": [
