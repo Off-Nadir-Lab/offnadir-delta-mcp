@@ -14,12 +14,12 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.6.0.
+// Generated for Off-Nadir Delta MCP 5.6.2.
 
 export const TOOLS = [
   {
     "name": "query_signals",
-    "description": "Geolocated world events from global news media, AI-enriched with severity/GEOINT scores and collection recommendations.",
+    "description": "Geolocated world events from news, hazard feeds and satellite measurements, AI-enriched with severity/GEOINT scores and collection recommendations.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -263,9 +263,9 @@ export const TOOLS = [
       ]
     },
     "annotations": {
-      "readOnlyHint": false,
+      "readOnlyHint": true,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -483,9 +483,9 @@ export const TOOLS = [
       ]
     },
     "annotations": {
-      "readOnlyHint": false,
+      "readOnlyHint": true,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -538,9 +538,9 @@ export const TOOLS = [
       ]
     },
     "annotations": {
-      "readOnlyHint": false,
+      "readOnlyHint": true,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -607,9 +607,9 @@ export const TOOLS = [
       ]
     },
     "annotations": {
-      "readOnlyHint": false,
+      "readOnlyHint": true,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -705,9 +705,9 @@ export const TOOLS = [
       ]
     },
     "annotations": {
-      "readOnlyHint": false,
+      "readOnlyHint": true,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -988,7 +988,7 @@ export const TOOLS = [
     "annotations": {
       "readOnlyHint": false,
       "openWorldHint": false,
-      "destructiveHint": true,
+      "destructiveHint": false,
       "idempotentHint": true
     }
   },
@@ -1116,7 +1116,7 @@ export const TOOLS = [
     "annotations": {
       "readOnlyHint": false,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -1318,9 +1318,9 @@ export const TOOLS = [
       ]
     },
     "annotations": {
-      "readOnlyHint": false,
+      "readOnlyHint": true,
       "openWorldHint": false,
-      "destructiveHint": true
+      "destructiveHint": false
     }
   },
   {
@@ -1695,7 +1695,7 @@ export const TOOLS = [
         },
         "notify_chat": {
           "type": "boolean",
-          "description": "Also post changes to the Slack/Discord channel connected in settings."
+          "description": "Also deliver changes to the connected channel (Slack, Discord or a signed webhook)."
         },
         "imagery_alerts": {
           "type": "boolean",

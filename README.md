@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`22` tools · MCP server version `5.6.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`22` tools · MCP server version `5.6.2` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -95,7 +95,7 @@ What is happening, what changed, and what today looks like.
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `query_signals` | Geolocated world events from global news media, AI-enriched with severity/GEOINT scores and collection recommendations. | 3–5 tok |
+| `query_signals` | Geolocated world events from news, hazard feeds and satellite measurements, AI-enriched with severity/GEOINT scores and collection recommendations. | 3–5 tok |
 | `get_world_brief` | AI world brief: daily (prior UTC day, all plans) or weekly/monthly by plan. | free |
 | `query_developments` | What actually CHANGED about the events in an area, not which articles are new. | 3–5 tok |
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |
@@ -156,8 +156,7 @@ you never have to trust a number in a README. Free tools never touch the balance
 `get_analyst_job` (free — the run is charged once, on completion). Most questions finish in
 ~30–90s; a brief with satellite-imagery lookups or many sources can take 2–3 minutes.
 
-The API and the MCP server are available on **every plan, including Free** — the only gate is
-your token balance. Call `get_usage` (free) to pre-flight. Current limits and package prices:
+**API and MCP access.** Available on every plan, including Free. Calls are metered on your token balance, and what each call returns follows your plan — a call your plan does not open says which plan does. Call `get_usage` (free) to pre-flight. Current limits and package prices:
 [offnadir-delta.com/pricing](https://offnadir-delta.com/pricing).
 
 ## Authentication
