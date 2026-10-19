@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.4.0.
+// Generated for Off-Nadir Delta MCP 5.6.0.
 
 export const TOOLS = [
   {
@@ -1325,7 +1325,7 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them; an incident lists its parent and siblings. Plan-dependent: see `locked_by`, `plan_lock`.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its severity band; highest_severity_band is the most severe, never a sum); an incident lists its parent and siblings. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. Plan-dependent: see `locked_by`, `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1362,6 +1362,15 @@ export const TOOLS = [
         },
         "sequence": {
           "type": "object"
+        },
+        "measured_same_place": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "object"
+          }
         }
       },
       "required": [
@@ -1449,7 +1458,8 @@ export const TOOLS = [
             "monitoring_anomaly",
             "site_event",
             "new_imagery",
-            "standing_order"
+            "standing_order",
+            "sequence_incident"
           ]
         },
         "watch_id": {
