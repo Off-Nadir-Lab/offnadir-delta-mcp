@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.6.2.
+// Generated for Off-Nadir Delta MCP 5.7.0.
 
 export const TOOLS = [
   {
@@ -960,9 +960,10 @@ export const TOOLS = [
           "type": "string",
           "enum": [
             "not_observable",
+            "not_assessed",
             "needs_repair"
           ],
-          "description": "Present ONLY on a pre-charge rejection; `content` and `meta` are then absent."
+          "description": "Present ONLY on a pre-charge rejection; `content` and `meta` are then absent. not_observable = the event was judged to leave no satellite-visible mark; not_assessed = observability has not been assessed yet (not a verdict that it is unobservable)."
         },
         "event_id": {
           "type": "string",
