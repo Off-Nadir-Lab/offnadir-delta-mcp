@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.7.0.
+// Generated for Off-Nadir Delta MCP 5.8.0.
 
 export const TOOLS = [
   {
@@ -30,7 +30,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "[minLon, minLat, maxLon, maxLat]; omit for worldwide."
+          "description": "[minLon,minLat,maxLon,maxLat]; omit = worldwide."
         },
         "startDate": {
           "type": "string",
@@ -56,6 +56,8 @@ export const TOOLS = [
             "enum": [
               "kinetic",
               "armed_conflict",
+              "weapons_test",
+              "military_activity",
               "maritime",
               "natural_disaster",
               "infrastructure",
@@ -72,7 +74,7 @@ export const TOOLS = [
               "cyclone_exposure"
             ]
           },
-          "description": "Restrict to these categories. *_anomaly and *_exposure are measured or official records, not reporting, and never a cause."
+          "description": "Only these. *_anomaly and *_exposure: measured or official records, not reporting, never a cause."
         },
         "q": {
           "type": "string",
@@ -194,7 +196,7 @@ export const TOOLS = [
         },
         "watchId": {
           "type": "string",
-          "description": "Events linked to this watch (list_watches id)."
+          "description": "Events of this watch (list_watches id)."
         },
         "sort": {
           "type": "string",
