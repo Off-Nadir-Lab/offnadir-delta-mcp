@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.8.0.
+// Generated for Off-Nadir Delta MCP 5.9.0.
 
 export const TOOLS = [
   {
@@ -1462,7 +1462,8 @@ export const TOOLS = [
             "site_event",
             "new_imagery",
             "standing_order",
-            "sequence_incident"
+            "sequence_incident",
+            "vessel_observed"
           ]
         },
         "watch_id": {
@@ -1572,7 +1573,7 @@ export const TOOLS = [
   },
   {
     "name": "create_watch",
-    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale. Free to create; where the plan includes the collection section, a watched event's imagery is then checked at 1 token a day (up to 14 days).",
+    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale. VESSEL: vessel_key. Free to create; where the plan includes the collection section, a watched event's imagery is then checked at 1 token a day (up to 14 days).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1581,12 +1582,17 @@ export const TOOLS = [
           "enum": [
             "event",
             "area",
-            "site"
+            "site",
+            "vessel"
           ]
         },
         "event_id": {
           "type": "string",
           "description": "EVENT: signal uuid."
+        },
+        "vessel_key": {
+          "type": "string",
+          "description": "VESSEL: e.g. CN:532 (get_vessel)."
         },
         "bbox": {
           "type": "array",
@@ -2014,6 +2020,58 @@ export const TOOLS = [
       },
       "required": [
         "related"
+      ]
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": false,
+      "destructiveHint": false
+    }
+  },
+  {
+    "name": "get_vessel",
+    "description": "Where a warship was reported in the last 30 days (official releases, U.S. Navy imagery), by vessel_key or the vessels an event names. **`line` joins observed points in date order — not the route sailed.** Positions are where it was reported, not where it is now. Plan-dependent: see `plan_lock`.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "vessel_key": {
+          "type": "string",
+          "description": "Navy code and hull number, e.g. CN:532, US:CVN-72."
+        },
+        "event_id": {
+          "type": "string",
+          "description": "Or an event id: the vessels it names."
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-line natural-language summary of the result, ready to relay to a user."
+        },
+        "basis": {
+          "type": "string"
+        },
+        "vessel": {
+          "type": "object"
+        },
+        "vessels": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "plan_lock": {
+          "type": "object"
+        },
+        "rules": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "basis"
       ]
     },
     "annotations": {
