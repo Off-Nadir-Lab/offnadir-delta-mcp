@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.9.0.
+// Generated for Off-Nadir Delta MCP 5.10.0.
 
 export const TOOLS = [
   {
@@ -74,7 +74,7 @@ export const TOOLS = [
               "cyclone_exposure"
             ]
           },
-          "description": "Only these. *_anomaly and *_exposure: measured or official records, not reporting, never a cause."
+          "description": "Only these. *_anomaly/*_exposure: measured records, never a cause."
         },
         "q": {
           "type": "string",
@@ -108,7 +108,7 @@ export const TOOLS = [
             3,
             5
           ],
-          "description": "At least this many publishers."
+          "description": "Publishers >= this."
         },
         "markets": {
           "type": "array",
@@ -194,6 +194,12 @@ export const TOOLS = [
         "sequencesOnly": {
           "type": "boolean"
         },
+        "countries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "watchId": {
           "type": "string",
           "description": "Events of this watch (list_watches id)."
@@ -205,7 +211,7 @@ export const TOOLS = [
             "oldest",
             "geoint"
           ],
-          "description": "Default latest; geoint is plan-gated."
+          "description": "geoint is plan-gated."
         },
         "updatedSince": {
           "type": "string",
