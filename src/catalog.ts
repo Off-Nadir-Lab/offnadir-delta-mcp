@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.10.0.
+// Generated for Off-Nadir Delta MCP 5.11.0.
 
 export const TOOLS = [
   {
@@ -442,7 +442,7 @@ export const TOOLS = [
           "type": "integer",
           "minimum": 1,
           "maximum": 25,
-          "description": "Max scenes. Default 10."
+          "description": "Max scenes returned. Default 10. Pre/post and pair verdicts do not depend on it."
         }
       },
       "required": [
@@ -498,7 +498,7 @@ export const TOOLS = [
   },
   {
     "name": "plan_event_imagery",
-    "description": "The deterministic imagery plan for ONE event: checks BOTH sensors exactly once — sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a — against the event footprint and a pre/post window. **A VHR recommendation never invalidates what the free catalog showed.**",
+    "description": "The deterministic imagery plan for ONE event: checks sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a exactly once each — plus NISAR L-band for flood_mapping (water under tall vegetation) — against the event footprint and a pre/post window. **A VHR recommendation never invalidates what the free catalog showed.**",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1227,7 +1227,7 @@ export const TOOLS = [
   },
   {
     "name": "query_developments",
-    "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved) or `measurement` (what we can see moved). Plan-dependent values say so (`locked_by`).",
+    "description": "What actually CHANGED about the events in an area, not which articles are new. Each change is labelled `world` (the event's own state moved), `measurement` (what we can see moved) or `interpretation` (the same reports re-processed — revised rules, a re-read — not new reporting). Plan-dependent values say so (`locked_by`).",
     "inputSchema": {
       "type": "object",
       "properties": {

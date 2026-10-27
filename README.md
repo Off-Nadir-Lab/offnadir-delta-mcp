@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`23` tools · MCP server version `5.10.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`23` tools · MCP server version `5.11.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -111,7 +111,7 @@ Whether a satellite can resolve it, which one, and when it next passes.
 | Tool | What it does | Cost |
 | --- | --- | --- |
 | `search_imagery` | Search the imagery catalog over an area and window. | 2 tok |
-| `plan_event_imagery` | The deterministic imagery plan for ONE event: checks BOTH sensors exactly once — sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a — against the event footprint and a pre/post window. | 4 tok |
+| `plan_event_imagery` | The deterministic imagery plan for ONE event: checks sentinel-1-grd (SAR, the only look that survives cloud and night) and sentinel-2-l2a exactly once each — plus NISAR L-band for flood_mapping (water under tall vegetation) — against the event footprint and a pre/post window. | 4 tok |
 | `rank_imaging_priority` | WHERE, and with what class of satellite, observation is most worthwhile now: composite IMPORTANCE crossed with the SPEC CLASS the required resolution demands — coarse, hr (free Sentinel-class) or vhr. | 1 tok |
 | `predict_satellite_passes` | WHEN a place can next be imaged and by WHAT: 13 free-systematic and commercial-taskable families. | 2 tok |
 
