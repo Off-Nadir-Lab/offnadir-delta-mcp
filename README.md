@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`23` tools · MCP server version `5.11.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`23` tools · MCP server version `6.0.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -95,7 +95,7 @@ What is happening, what changed, and what today looks like.
 
 | Tool | What it does | Cost |
 | --- | --- | --- |
-| `query_signals` | Geolocated world events from news, hazard feeds and satellite measurements, AI-enriched with severity/GEOINT scores and collection recommendations. | 3–5 tok |
+| `query_signals` | Geolocated world events from news, hazard feeds and satellite measurements, graded by the rule-based Delta GEOINT score (1-5); collection recommendations. | 3–5 tok |
 | `get_world_brief` | AI world brief: daily (prior UTC day, all plans) or weekly/monthly by plan. | free |
 | `query_developments` | What actually CHANGED about the events in an area, not which articles are new. | 3–5 tok |
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |

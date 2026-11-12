@@ -14,12 +14,12 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 5.11.0.
+// Generated for Off-Nadir Delta MCP 6.0.0.
 
 export const TOOLS = [
   {
     "name": "query_signals",
-    "description": "Geolocated world events from news, hazard feeds and satellite measurements, AI-enriched with severity/GEOINT scores and collection recommendations.",
+    "description": "Geolocated world events from news, hazard feeds and satellite measurements, graded by the rule-based Delta GEOINT score (1-5); collection recommendations.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -34,11 +34,11 @@ export const TOOLS = [
         },
         "startDate": {
           "type": "string",
-          "description": "Date range start, YYYY-MM-DD (UTC). With endDate. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
+          "description": "Start, YYYY-MM-DD (UTC). With endDate. Records start 2026-09-23 (earlier: unrecorded, not quiet). Plan-bounded: meta.window_clamp."
         },
         "endDate": {
           "type": "string",
-          "description": "Date range end, YYYY-MM-DD (UTC), inclusive."
+          "description": "End, YYYY-MM-DD (UTC), inclusive."
         },
         "recency": {
           "type": "string",
@@ -71,10 +71,11 @@ export const TOOLS = [
               "nightlight_anomaly",
               "so2_anomaly",
               "quake_exposure",
-              "cyclone_exposure"
+              "cyclone_exposure",
+              "facility_heat_change"
             ]
           },
-          "description": "Only these. *_anomaly/*_exposure: measured records, never a cause."
+          "description": "Only these. *_anomaly/*_exposure/*_change: measured, never a cause."
         },
         "q": {
           "type": "string",
@@ -92,14 +93,14 @@ export const TOOLS = [
           },
           "description": "reported=country/province, localized=town, pinpointed=block/facility."
         },
-        "minSeverityBand": {
+        "minGeointLevel": {
           "type": "integer",
           "enum": [
+            3,
             4,
-            6,
-            9
+            5
           ],
-          "description": "severity_band >= this."
+          "description": "geoint_level >= this."
         },
         "minPublishers": {
           "type": "integer",
@@ -400,7 +401,7 @@ export const TOOLS = [
         },
         "startDate": {
           "type": "string",
-          "description": "Date range start, YYYY-MM-DD (UTC). With endDate; omit both for the last 7 days (max 30)."
+          "description": "Date range start, YYYY-MM-DD (UTC). With endDate; omit both for the last 7 days. Longer than 30 days: the latest 30 are searched (meta.date_range_clamped_from)."
         },
         "endDate": {
           "type": "string",
@@ -581,9 +582,11 @@ export const TOOLS = [
           },
           "description": "Restrict to these Delta categories."
         },
-        "min_geoint_score": {
-          "type": "number",
-          "description": "Drop events below this GEOINT score before ranking."
+        "min_geoint_level": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5,
+          "description": "Drop events below this Delta GEOINT score (1-5)."
         },
         "top_n": {
           "type": "number",
@@ -649,11 +652,11 @@ export const TOOLS = [
         },
         "start_date": {
           "type": "string",
-          "description": "YYYY-MM-DD (UTC), inclusive. Default today."
+          "description": "YYYY-MM-DD (UTC), from 00:00. Default now (not midnight)."
         },
         "end_date": {
           "type": "string",
-          "description": "YYYY-MM-DD (UTC), inclusive. Default start+2 days; 7-day horizon."
+          "description": "YYYY-MM-DD (UTC), inclusive. Default 48 h after the start; 7-day horizon."
         },
         "satellites": {
           "type": "array",
@@ -1248,6 +1251,10 @@ export const TOOLS = [
           "type": "string",
           "description": "Date range end (YYYY-MM-DD), inclusive."
         },
+        "since": {
+          "type": "string",
+          "description": "Only changes after this time (ISO 8601 with offset, e.g. a previous report's time). Instead of start_date."
+        },
         "categories": {
           "type": "array",
           "items": {
@@ -1264,23 +1271,17 @@ export const TOOLS = [
               "casualties_disputed",
               "casualties_injured",
               "casualties_killed",
-              "distinct_hosts",
-              "escalation_trend",
-              "geoint_score",
+              "geoint_level",
               "location_level",
               "means_reported",
               "member_count",
-              "occurred_at",
-              "point_plottable",
-              "quality_status",
-              "severity_score",
               "stage",
               "target_effect",
               "target_status",
               "targets_named"
             ]
           },
-          "description": "Restrict to these axes. An unknown value errors rather than returning nothing."
+          "description": "Restrict to these axes (the ones whose changes are recorded). Any other value errors rather than returning nothing."
         },
         "notable_only": {
           "type": "boolean",
@@ -1334,7 +1335,7 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its severity band; highest_severity_band is the most severe, never a sum); an incident lists its parent and siblings. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. Plan-dependent: see `locked_by`, `plan_lock`.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its geoint_level; highest_geoint_level is the highest, never a sum); an incident lists its parent and siblings. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. Plan-dependent: see `locked_by`, `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
