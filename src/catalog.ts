@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 6.0.0.
+// Generated for Off-Nadir Delta MCP 6.1.0.
 
 export const TOOLS = [
   {
@@ -30,7 +30,7 @@ export const TOOLS = [
           },
           "minItems": 4,
           "maxItems": 4,
-          "description": "[minLon,minLat,maxLon,maxLat]; omit = worldwide."
+          "description": "[minLon,minLat,maxLon,maxLat]; omit=worldwide."
         },
         "startDate": {
           "type": "string",
@@ -47,7 +47,7 @@ export const TOOLS = [
             "1h",
             "24h"
           ],
-          "description": "Last reported within (default 24h)."
+          "description": "Reported within (default 24h)."
         },
         "categories": {
           "type": "array",
@@ -58,6 +58,7 @@ export const TOOLS = [
               "armed_conflict",
               "weapons_test",
               "military_activity",
+              "accident",
               "maritime",
               "natural_disaster",
               "infrastructure",
@@ -127,7 +128,7 @@ export const TOOLS = [
               "equities"
             ]
           },
-          "description": "Exposed markets (physical/supply channel)."
+          "description": "Exposed markets."
         },
         "placement": {
           "type": "string",
@@ -203,7 +204,7 @@ export const TOOLS = [
         },
         "watchId": {
           "type": "string",
-          "description": "Events of this watch (list_watches id)."
+          "description": "A list_watches id."
         },
         "sort": {
           "type": "string",
@@ -218,11 +219,14 @@ export const TOOLS = [
           "type": "string",
           "description": "Refolded at/after (ISO)."
         },
+        "asOf": {
+          "type": "string"
+        },
         "limit": {
           "type": "integer",
           "minimum": 1,
           "maximum": 50,
-          "description": "Default 20. Digest rows; full rows: full_records."
+          "description": "Default 20 digest rows; full: full_records."
         },
         "cursor": {
           "type": "string",
@@ -519,6 +523,14 @@ export const TOOLS = [
         "event_date": {
           "type": "string",
           "description": "YYYY-MM-DD. The event row supplies it when known."
+        },
+        "required_detail": {
+          "type": "string",
+          "enum": [
+            "individual_structures",
+            "area_extent"
+          ],
+          "description": "Optional. individual_structures = judge each building or vehicle (needs sub-metre: VHR recommended); area_extent = how far the event reaches (the free catalog covers it). Overrides the event record for the VHR call."
         }
       },
       "required": [
@@ -1273,6 +1285,7 @@ export const TOOLS = [
               "casualties_killed",
               "geoint_level",
               "location_level",
+              "location_point",
               "means_reported",
               "member_count",
               "stage",
@@ -1580,7 +1593,7 @@ export const TOOLS = [
   },
   {
     "name": "create_watch",
-    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale. VESSEL: vessel_key. Free to create; where the plan includes the collection section, a watched event's imagery is then checked at 1 token a day (up to 14 days).",
+    "description": "Add a target to the Watchlist. EVENT: the signal's event id binds the canonical event — **never watch an article URL**. AREA: a bbox. SITE: entity_id or lat+lon, and scale. VESSEL: vessel_key. Free to create; where the plan includes the collection section, a watched event's imagery is then checked at no token cost (up to 14 days).",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1926,7 +1939,7 @@ export const TOOLS = [
   },
   {
     "name": "get_entity",
-    "description": "What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. **`link_kind: proximity` is an association, not a statement that the event happened there.**",
+    "description": "What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. **`link_kind: proximity` is an association, not a statement that the event happened there.** Plan-dependent: see `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1960,6 +1973,9 @@ export const TOOLS = [
         },
         "events_24h": {
           "type": "number"
+        },
+        "plan_lock": {
+          "type": "object"
         }
       },
       "required": [
@@ -2037,7 +2053,7 @@ export const TOOLS = [
   },
   {
     "name": "get_vessel",
-    "description": "Where a warship was reported in the last 30 days (official releases, U.S. Navy imagery), by vessel_key or the vessels an event names. **`line` joins observed points in date order — not the route sailed.** Positions are where it was reported, not where it is now. Plan-dependent: see `plan_lock`.",
+    "description": "Where a warship was reported in the last 30 days (official releases, U.S. Navy imagery), by vessel_key or the vessels an event names. **`line` joins observed points in date order — not the route sailed.** With neither: the roster — each observed ship's latest report and the ships not observed for 14+ days, counted against ships observed since the window start (not the full fleet). Positions are where it was reported, not where it is now. Plan-dependent: see `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -2048,6 +2064,10 @@ export const TOOLS = [
         "event_id": {
           "type": "string",
           "description": "Or an event id: the vessels it names."
+        },
+        "navy": {
+          "type": "string",
+          "description": "Roster only (no vessel_key / event_id): one navy, e.g. CN, RU, US."
         }
       }
     },
@@ -2069,6 +2089,9 @@ export const TOOLS = [
           "items": {
             "type": "object"
           }
+        },
+        "roster": {
+          "type": "object"
         },
         "plan_lock": {
           "type": "object"
