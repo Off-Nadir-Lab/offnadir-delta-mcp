@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 6.1.0.
+// Generated for Off-Nadir Delta MCP 6.2.0.
 
 export const TOOLS = [
   {
@@ -637,7 +637,7 @@ export const TOOLS = [
   },
   {
     "name": "predict_satellite_passes",
-    "description": "WHEN a place can next be imaged and by WHAT: 13 free-systematic and commercial-taskable families. **Every pass is a GEOMETRIC access opportunity** — no operator plan is consulted. retrieval_ok:false means timing is UNAVAILABLE, never \"no passes\".",
+    "description": "WHEN a place can next be imaged and by WHAT: 15 free-systematic and taskable families (incl. JAXA ALOS-2/4). **Every pass is a GEOMETRIC access opportunity** — no operator plan is consulted. retrieval_ok:false means timing is UNAVAILABLE, never \"no passes\". Requested families not covered are listed in meta.not_covered.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -687,10 +687,12 @@ export const TOOLS = [
               "iqps",
               "radarsat-2",
               "cosmo-skymed",
-              "nisar"
+              "nisar",
+              "alos-2",
+              "alos-4"
             ]
           },
-          "description": "Families to consider. Omit for all thirteen."
+          "description": "Families to consider. Omit for all fifteen."
         },
         "max_passes": {
           "type": "number",
@@ -1267,6 +1269,10 @@ export const TOOLS = [
           "type": "string",
           "description": "Only changes after this time (ISO 8601 with offset, e.g. a previous report's time). Instead of start_date."
         },
+        "until": {
+          "type": "string",
+          "description": "Only changes observed up to this time (ISO 8601 with offset, e.g. a handover time) — what was visible then. Instead of end_date."
+        },
         "categories": {
           "type": "array",
           "items": {
@@ -1348,7 +1354,7 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its geoint_level; highest_geoint_level is the highest, never a sum); an incident lists its parent and siblings. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. Plan-dependent: see `locked_by`, `plan_lock`.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its geoint_level; highest_geoint_level is the highest, never a sum); an incident lists its parent and siblings. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. `river_gauges` (U.S. floods): stream gauges near the point still recording level or discharge, with distance and the gauge page to read the level on — which gauges to read, not their readings. Plan-dependent: see `locked_by`, `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1394,6 +1400,9 @@ export const TOOLS = [
           "items": {
             "type": "object"
           }
+        },
+        "river_gauges": {
+          "type": "object"
         }
       },
       "required": [
