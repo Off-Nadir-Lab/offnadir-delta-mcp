@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 6.2.0.
+// Generated for Off-Nadir Delta MCP 6.3.0.
 
 export const TOOLS = [
   {
@@ -1354,7 +1354,7 @@ export const TOOLS = [
   },
   {
     "name": "get_event_thread",
-    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its geoint_level; highest_geoint_level is the highest, never a sum); an incident lists its parent and siblings. `part_of`: separately reported events recorded as one incident within a broader event (`broader`) or as the incidents within this one (`parts`) — do not add the casualties of a part to its broader event. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. `river_gauges` (U.S. floods): stream gauges near the point still recording level or discharge, with distance and the gauge page to read the level on — which gauges to read, not their readings. `declarations` (U.S. natural disasters): FEMA disaster declarations for the event's counties whose incident period overlaps the event, with the counties checked and when; state emergency declarations are not checked. `official_alerts` (U.S. and Canadian natural disasters): the national weather service's alerts for the event area as issued — id, name, state, forecast zones, the agency record — with the window checked; provincial or state agencies are not checked. `copernicus_ems` (natural disasters, any country): Copernicus EMS Rapid Mapping activations whose mapped area covers or is near the point — code (EMSR…), activation page, extent and damage products with download links; empty means none known. `outage_lists`: when the reporting names a power utility as affected (BC Hydro, Chubu Electric Power Grid), where its outage list is and the key to look it up by (municipality), with this event's place names to look up — the list itself is not read. `emergency_orders` (B.C.): evacuation orders, alerts, shelter-in-place and states of emergency that the reporting mentioned — kind, the article, the names it was about — with the provincial page that lists orders in force (EmergencyInfoBC); a mention is not a confirmation and the page is not read. Plan-dependent: see `locked_by`, `plan_lock`.",
+    "description": "One event end to end: state plus every change in order — the \"new event or update\" distinction a feed cannot make. `occurred_at_basis` distinguishes stated, absent and never measured. `sequence`: an event made of several incidents lists them (each with its geoint_level; highest_geoint_level is the highest, never a sum); an incident lists its parent and siblings. `part_of`: separately reported events recorded as one incident within a broader event (`broader`) or as the incidents within this one (`parts`) — do not add the casualties of a part to its broader event. `measured_same_place`: measurements recorded at the same place close in time (a heat source, a transit change, SO2, a quake or cyclone) — the same place, not a confirmation or a cause. `river_gauges` (U.S. floods): active stream gauges near the point, with distance and page — which to read, not readings. `declarations` (U.S. natural disasters): FEMA declarations for the event's counties overlapping the event, with the counties checked and when; state ones not checked. `official_alerts` (U.S./Canada; Japan volcanoes): national weather service alerts for the area as issued, with the window; state agencies not checked. `copernicus_ems` (natural disasters, any country): Copernicus EMS Rapid Mapping activations whose mapped area covers or is near the point — code, page, extent and damage products; empty means none known. `disaster_charter` (natural disasters): International Charter activations, same country, hazard and time — id, type, time, requester, product titles, page; by country, not area. `emergency_imagery` (a named storm in the title): NOAA NGS aerial imagery page for the storm name and year, flight dates, terms; by name, not area. `jma_quake` (Japan earthquakes): JMA EventID, origin, hypocentre, magnitude and intensity_url — the JMA information giving seismic intensity by municipality code (not copied). `road_inventory` (U.S. natural disasters): NBI bridges and HPMS roads within 5 km as FHWA recorded them (functional class, record link); not damage sites, no ER/PA call. `outage_lists`: a power utility the reporting names as affected (BC Hydro, Chubu Electric Power Grid): its outage list page and lookup key (municipality); the list is not read. `emergency_orders`: evacuation orders, shelter-in-place, emergencies, curfews, closures and water advisories the reporting mentioned — kind, in force or lifted, article, names, issuer named, `spans` per kind (report times); B.C. adds EmergencyInfoBC. A mention is not a confirmation. `jwc_listed_areas`: whether the point is in a Joint War Committee listed area, with the circular. `admin_code` (Japan): MIC local government code the place name names (by name, not point), table version. Plan-dependent: see `locked_by`, `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1416,10 +1416,28 @@ export const TOOLS = [
         "copernicus_ems": {
           "type": "object"
         },
+        "disaster_charter": {
+          "type": "object"
+        },
+        "emergency_imagery": {
+          "type": "object"
+        },
+        "jma_quake": {
+          "type": "object"
+        },
+        "road_inventory": {
+          "type": "object"
+        },
         "outage_lists": {
           "type": "object"
         },
         "emergency_orders": {
+          "type": "object"
+        },
+        "jwc_listed_areas": {
+          "type": "object"
+        },
+        "admin_code": {
           "type": "object"
         }
       },
@@ -1900,7 +1918,7 @@ export const TOOLS = [
   },
   {
     "name": "search_entities",
-    "description": "Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code, or a British Columbia municipality, regional district or First Nation (`jurisdiction` gives its official type and regional district). Max 50.",
+    "description": "Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code — a port also by its UN/LOCODE (AEJEA; `unlocodes` on the row, empty when none is recorded) — or a British Columbia municipality, regional district or First Nation (`jurisdiction` gives its official type and regional district). Max 50.",
     "inputSchema": {
       "type": "object",
       "properties": {
@@ -1969,7 +1987,7 @@ export const TOOLS = [
   },
   {
     "name": "get_entity",
-    "description": "What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. **`link_kind: proximity` is an association, not a statement that the event happened there.** Plan-dependent: see `plan_lock`.",
+    "description": "What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. **`link_kind: proximity` is an association, not a statement that the event happened there.** `jwc_listed_areas` (straits, ports, and places in a listed area; not seas): whether the place falls in the Joint War Committee Listed Areas — the current circular and each area matched, inside, outside or check_line. Plan-dependent: see `plan_lock`.",
     "inputSchema": {
       "type": "object",
       "properties": {

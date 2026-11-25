@@ -16,7 +16,7 @@ satellite can actually resolve it, and produce a collection-ready plan.
 Real-time event and geospatial intelligence for OSINT, geopolitical risk, and GEOINT work —
 source-linked, geolocated, and current, not a training snapshot.
 
-`23` tools · MCP server version `6.2.0` · [full reference](https://offnadir-delta.com/docs/mcp)
+`23` tools · MCP server version `6.3.0` · [full reference](https://offnadir-delta.com/docs/mcp)
 
 ## What it does
 
@@ -99,7 +99,7 @@ What is happening, what changed, and what today looks like.
 | `get_world_brief` | AI world brief: daily (prior UTC day, all plans) or weekly/monthly by plan. | free |
 | `query_developments` | What actually CHANGED about the events in an area, not which articles are new. | 3–5 tok |
 | `get_event_thread` | One event end to end: state plus every change in order — the "new event or update" distinction a feed cannot make. | free |
-| `search_entities` | Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code, or a British Columbia municipality, regional district or First Nation (`jurisdiction` gives its official type and regional district). | 1 tok |
+| `search_entities` | Find a named place (airport, base, plant, port, dam, strait…) in any language or by IATA/ICAO code — a port also by its UN/LOCODE (AEJEA; `unlocodes` on the row, empty when none is recorded) — or a British Columbia municipality, regional district or First Nation (`jurisdiction` gives its official type and regional district). | 1 tok |
 | `get_entity` | What has happened at one place: the registry record plus its most recent linked events, each with HOW it was linked. | 1 tok |
 | `get_related_events` | The relations recorded for one event: others at the same registry facility, naming the same place, or stored as the same campaign, each saying what is shared; plus reports merged into it. | 1 tok |
 | `get_vessel` | Where a warship was reported in the last 30 days (official releases, U.S. | free |
