@@ -14,7 +14,7 @@
  * to the remote server with the caller's OFFNADIR_DELTA_API_KEY (see index.ts).
  */
 
-// Generated for Off-Nadir Delta MCP 6.3.0.
+// Generated for Off-Nadir Delta MCP 6.4.0.
 
 export const TOOLS = [
   {
@@ -73,7 +73,8 @@ export const TOOLS = [
               "so2_anomaly",
               "quake_exposure",
               "cyclone_exposure",
-              "facility_heat_change"
+              "facility_heat_change",
+              "c_band_interference"
             ]
           },
           "description": "Only these. *_anomaly/*_exposure/*_change: measured, never a cause."
@@ -699,6 +700,39 @@ export const TOOLS = [
           "minimum": 1,
           "maximum": 100,
           "description": "Maximum passes to return, soonest first (default 40)."
+        },
+        "as_of": {
+          "type": "string",
+          "description": "ISO date-time (with zone), ≤7 days back: recompute as it stood then (meta.as_of_note)."
+        },
+        "points": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Your label for the point (e.g. an order number). Default p1, p2…"
+              },
+              "lat": {
+                "type": "number",
+                "minimum": -90,
+                "maximum": 90
+              },
+              "lon": {
+                "type": "number",
+                "minimum": -180,
+                "maximum": 180
+              }
+            },
+            "required": [
+              "lat",
+              "lon"
+            ]
+          },
+          "description": "Up to 10 points in one call, instead of lat/lon/bbox and max_passes: returns points[] with each family's FIRST opportunity per point. Costs the per-call price per point."
         }
       },
       "required": []
@@ -720,13 +754,18 @@ export const TOOLS = [
             "type": "object"
           }
         },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
         "freshness": {
           "type": "object"
         }
       },
       "required": [
-        "meta",
-        "passes"
+        "meta"
       ]
     },
     "annotations": {
@@ -1438,6 +1477,9 @@ export const TOOLS = [
           "type": "object"
         },
         "admin_code": {
+          "type": "object"
+        },
+        "reporting_scope": {
           "type": "object"
         }
       },
